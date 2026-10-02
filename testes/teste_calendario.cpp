@@ -1,4 +1,5 @@
 #include "calendario.hpp"
+#include "conteudo_de_teste.hpp"
 #include "relogio.hpp"
 #include "simulacao.hpp"
 #include "verificar.hpp"
@@ -27,7 +28,7 @@ TESTE("calendário: 1150 a 1370 tem 220 anos julianos de 365,25 dias") {
 }
 
 TESTE("simulação: um dia de jogo a cada TICKS_POR_DIA ticks") {
-    Simulacao sim;
+    Simulacao sim(Cidade(Mapa(4, 4), conteudo_de_teste()));
     for (int i = 0; i < Simulacao::TICKS_POR_DIA * 10; ++i) sim.passo();
     VERIFICAR((sim.data == Data{ 1150, 3, 11 }));
 }

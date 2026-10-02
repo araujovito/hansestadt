@@ -72,14 +72,14 @@ int main() {
     // Esc solta a ferramenta; fechar o jogo fica só com o botão da janela.
     SetExitKey(KEY_NULL);
 
-    Cidade cidade(gerar_mapa(LARGURA_MAPA, ALTURA_MAPA, SEMENTE_MAPA), conteudo);
+    Simulacao sim(Cidade(gerar_mapa(LARGURA_MAPA, ALTURA_MAPA, SEMENTE_MAPA), conteudo));
+    Cidade& cidade = sim.cidade;
     const Mapa& mapa = cidade.mapa();
     // A campanha começa na vila; a troca de fase vem com a evolução dos
     // edifícios principais.
     EstadoFerramenta ferramenta = criar_ferramentas(conteudo, Fase::Vila);
     CameraJogo camera(static_cast<float>(LARGURA_MAPA * TAMANHO_CELULA),
                       static_cast<float>(ALTURA_MAPA * TAMANHO_CELULA));
-    Simulacao sim;
     Relogio relogio(1.0 / Simulacao::TICKS_POR_SEGUNDO);
 
     while (!WindowShouldClose()) {

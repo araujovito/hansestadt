@@ -60,6 +60,8 @@ struct DefinicaoEdificio {
     // Depósito guarda qualquer item até `estoque` no total; os demais
     // guardam só o que suas receitas usam, até `estoque` de cada.
     bool deposito;
+    // Carregadores que moram no depósito e fazem todo o transporte.
+    int carregadores;
     std::optional<Requisito> requer;
     std::vector<Receita> receitas;
 

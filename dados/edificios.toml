@@ -13,6 +13,7 @@
 #   deposito        true = guarda qualquer item até `estoque` no total
 #                   (armazém); os demais guardam só o que as receitas usam,
 #                   até `estoque` de cada
+#   carregadores    quantos carregadores moram no depósito (só depósitos)
 #   campos          largura do anel de lavoura em volta (só fazendas);
 #                   as células do anel precisam ser campo livre
 #   requer          { terreno, distancia }: pelo menos uma célula desse
@@ -37,6 +38,7 @@ cor = "#96764e"
 trabalhadores = 0
 estoque = 200
 deposito = true
+carregadores = 6
 
 [[edificio]]
 id = "casa"

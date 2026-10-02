@@ -112,6 +112,11 @@ saidas = { pao = 1 }
     VERIFICAR(tem_erro_com(r, "depósito não pode ter receita"));
 }
 
+TESTE("conteúdo: só depósito tem carregadores") {
+    const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, edificio("carregadores = 3\n"));
+    VERIFICAR(tem_erro_com(r, "só depósito tem carregadores"));
+}
+
 TESTE("conteúdo: erro de sintaxe informa linha e coluna") {
     const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, "[[edificio]]\nid = \n");
     VERIFICAR(tem_erro_com(r, "linha 2"));

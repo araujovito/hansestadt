@@ -201,7 +201,7 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         const std::string ctx = "edificios.toml, '" + (*t)["id"].value_or(std::string("?")) + "'";
         conferir_chaves(*t,
                         { "id", "nome", "fase", "tamanho", "terreno", "cor", "trabalhadores", "estoque", "moradores",
-                          "campos", "deposito", "requer", "receita" },
+                          "campos", "deposito", "carregadores", "requer", "receita" },
                         ctx, erros);
 
         DefinicaoEdificio d{};
@@ -262,6 +262,8 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
             }
         }
 
+        d.carregadores = inteiro(*t, "carregadores", 0, 0, ctx, erros);
+        if (d.carregadores > 0 && !d.deposito) erros.adicionar(ctx, "só depósito tem carregadores");
         if (d.deposito && !d.receitas.empty()) erros.adicionar(ctx, "depósito não pode ter receita");
         if (d.deposito && d.estoque == 0) erros.adicionar(ctx, "depósito precisa de estoque > 0");
         if (!d.receitas.empty() && d.trabalhadores == 0) {

@@ -32,10 +32,16 @@ enum class Validacao : std::uint8_t {
     TerrenoErrado,
     Ocupado,
     LongeDoRecurso,  // faltou o terreno exigido em `requer` por perto
+    PortaBloqueada,  // a entrada cairia em água ou floresta
     JaExiste,  // estrada sobre estrada: não é erro, só não muda nada
 };
 
 const char* descrever(Validacao v);
+
+// Entrada do edifício: a célula logo abaixo do meio da borda inferior da área
+// total. Fica fora do edifício, para uma estrada poder passar por ela; é por
+// onde os carregadores entram e saem.
+Celula porta_de(const DefinicaoEdificio& def, Celula origem);
 
 // Tudo o que foi construído sobre o mapa. Não depende da raylib, para poder
 // ser testado sem janela.
@@ -59,6 +65,10 @@ public:
 
     bool tem_estrada(Celula c) const;
     IdEdificio edificio_em(Celula c) const;
+
+    Celula porta(IdEdificio id) const;
+    // Se há estrada na porta. Sem isso nenhum carregador chega ao edifício.
+    bool tem_acesso(IdEdificio id) const;
 
     Edificio& edificio(IdEdificio id) { return edificios_[id]; }
     const Edificio& edificio(IdEdificio id) const { return edificios_[id]; }
@@ -84,6 +94,10 @@ private:
     // Uma entrada por célula, na mesma ordem do mapa.
     std::vector<IdEdificio> ocupacao_;
     std::vector<std::uint8_t> estradas_;
+    // Células que são a porta de algum edifício. Basta uma marca: dois
+    // edifícios nunca dividem a porta, porque a célula logo acima dela é
+    // sempre do próprio edifício.
+    std::vector<std::uint8_t> portas_;
 };
 
 // Caminho que a ferramenta de estrada desenha ao arrastar: primeiro na

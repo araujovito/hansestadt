@@ -10,8 +10,8 @@ Cidade cidade_de_teste() {
     Mapa m(10, 10);
     for (int x = 0; x < 10; ++x) {
         m.definir_terreno(x, 0, Terreno::Agua);
+        m.definir_terreno(x, 7, Terreno::Barreiro);
         m.definir_terreno(x, 8, Terreno::Barreiro);
-        m.definir_terreno(x, 9, Terreno::Barreiro);
     }
     m.definir_terreno(5, 5, Terreno::Floresta);
     return Cidade(std::move(m), conteudo_de_teste());
@@ -40,9 +40,9 @@ TESTE("cidade: recusa sobreposição, terreno errado e borda do mapa") {
 
 TESTE("cidade: extratores só sobre o próprio recurso") {
     Cidade c = cidade_de_teste();
-    VERIFICAR(c.validar_edificio(tipo("extrator"), { 2, 8 }) == Validacao::Ok);
+    VERIFICAR(c.validar_edificio(tipo("extrator"), { 2, 7 }) == Validacao::Ok);
     VERIFICAR(c.validar_edificio(tipo("extrator"), { 2, 6 }) == Validacao::TerrenoErrado);
-    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 2, 8 }) == Validacao::TerrenoErrado);
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 2, 7 }) == Validacao::TerrenoErrado);
 }
 
 TESTE("cidade: requisito de terreno próximo, contando diagonais") {
@@ -128,3 +128,41 @@ TESTE("caminho em L: funciona para trás e com uma célula só") {
     const std::vector<Celula> unica{ { 4, 4 } };
     VERIFICAR(caminho_em_l({ 4, 4 }, { 4, 4 }) == unica);
 }
+
+TESTE("porta: abaixo do meio da borda inferior, contando os campos") {
+    Cidade c = cidade_de_teste();
+    const IdEdificio p = *c.construir_edificio(tipo("pequeno"), { 1, 1 });
+    const IdEdificio g = *c.construir_edificio(tipo("grande"), { 4, 1 });
+    VERIFICAR((c.porta(p) == Celula{ 1, 3 }));
+    VERIFICAR((c.porta(g) == Celula{ 5, 4 }));
+    const DefinicaoEdificio& faz = conteudo_de_teste().edificio(tipo("fazendinha"));
+    VERIFICAR((porta_de(faz, { 1, 1 }) == Celula{ 2, 4 }));
+}
+
+TESTE("porta: acesso só com estrada na entrada") {
+    Cidade c = cidade_de_teste();
+    const IdEdificio p = *c.construir_edificio(tipo("pequeno"), { 1, 1 });
+    VERIFICAR(!c.tem_acesso(p));
+    VERIFICAR(c.construir_estrada({ 1, 3 }));
+    VERIFICAR(c.tem_acesso(p));
+    c.demolir({ 1, 3 });
+    VERIFICAR(!c.tem_acesso(p));
+}
+
+TESTE("porta: não dá para construir em cima da entrada de outro") {
+    Cidade c = cidade_de_teste();
+    c.construir_edificio(tipo("pequeno"), { 1, 1 });  // porta em (1,3)
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 1, 3 }) == Validacao::Ocupado);
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 0, 3 }) == Validacao::Ocupado);
+    c.demolir({ 1, 1 });
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 1, 3 }) == Validacao::Ok);
+}
+
+TESTE("porta: entrada em água ou floresta bloqueia a construção") {
+    Cidade c = cidade_de_teste();
+    // Porta de um 2×2 em (5,3) cai em (5,5), a floresta.
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 5, 3 }) == Validacao::PortaBloqueada);
+    // Porta abaixo da última linha fica fora do mapa.
+    VERIFICAR(c.validar_edificio(tipo("deposito"), { 3, 9 }) == Validacao::ForaDoMapa);
+}
+

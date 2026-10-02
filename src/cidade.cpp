@@ -9,6 +9,7 @@ const char* descrever(Validacao v) {
         case Validacao::TerrenoErrado: return "terreno inadequado";
         case Validacao::Ocupado: return "lugar ocupado";
         case Validacao::LongeDoRecurso: return "longe do recurso";
+        case Validacao::PortaBloqueada: return "entrada bloqueada";
         case Validacao::JaExiste: return "já existe";
     }
     return "?";
@@ -19,7 +20,12 @@ Cidade::Cidade(Mapa mapa, const Conteudo& conteudo)
       conteudo_(&conteudo),
       ocupacao_(static_cast<std::size_t>(mapa_.largura()) * static_cast<std::size_t>(mapa_.altura()),
                 SEM_EDIFICIO),
-      estradas_(ocupacao_.size(), 0) {}
+      estradas_(ocupacao_.size(), 0),
+      portas_(ocupacao_.size(), 0) {}
+
+Celula porta_de(const DefinicaoEdificio& def, Celula origem) {
+    return { origem.x + (def.largura_total() - 1) / 2, origem.y + def.altura_total() };
+}
 
 Validacao Cidade::validar_edificio(IdTipoEdificio tipo, Celula origem) const {
     const DefinicaoEdificio& def = conteudo_->edificio(tipo);
@@ -32,8 +38,17 @@ Validacao Cidade::validar_edificio(IdTipoEdificio tipo, Celula origem) const {
             const Terreno exigido = eh_lavoura(def, dx, dy) ? Terreno::Campo : def.terreno;
             if (mapa_.terreno(c.x, c.y) != exigido) return Validacao::TerrenoErrado;
             if (ocupacao_[indice(c)] != SEM_EDIFICIO || estradas_[indice(c)]) return Validacao::Ocupado;
+            // Construir sobre a entrada de outro edifício o deixaria isolado.
+            if (portas_[indice(c)]) return Validacao::Ocupado;
         }
     }
+
+    const Celula p = porta_de(def, origem);
+    if (!mapa_.dentro(p.x, p.y)) return Validacao::ForaDoMapa;
+    if (ocupacao_[indice(p)] != SEM_EDIFICIO) return Validacao::Ocupado;
+    const Terreno tp = mapa_.terreno(p.x, p.y);
+    if (tp == Terreno::Floresta || tp == Terreno::Agua) return Validacao::PortaBloqueada;
+
     if (def.requer && !atende_requisito(*def.requer, origem, def.largura_total(), def.altura_total())) {
         return Validacao::LongeDoRecurso;
     }
@@ -64,6 +79,7 @@ std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula
             ocupacao_[indice({ origem.x + dx, origem.y + dy })] = id;
         }
     }
+    portas_[indice(porta_de(def, origem))] = 1;
     return id;
 }
 
@@ -103,7 +119,16 @@ bool Cidade::demolir(Celula c) {
             ocupacao_[indice({ e.origem.x + dx, e.origem.y + dy })] = SEM_EDIFICIO;
         }
     }
+    portas_[indice(porta_de(def, e.origem))] = 0;
     return true;
+}
+
+Celula Cidade::porta(IdEdificio id) const {
+    return porta_de(definicao(id), edificios_[id].origem);
+}
+
+bool Cidade::tem_acesso(IdEdificio id) const {
+    return edificios_[id].ativo && tem_estrada(porta(id));
 }
 
 int Cidade::espaco_para(IdEdificio id, IdItem item) const {

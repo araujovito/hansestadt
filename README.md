@@ -34,6 +34,33 @@ tijolo), diferente da pedreira dos jogos medievais mais comuns.
 | Cidade hanseática | 1300–1350 | Grande Fome (1315–17), Peste Negra (1347–51) |
 | Auge | ~1370 | Paz de Stralsund |
 
+## Economia
+
+Quatro ramos, liberados aos poucos pelas fases:
+
+| Ramo | Vila (~1150) | Mercado (~1200) | Cidade e Hansa (~1250+) |
+|---|---|---|---|
+| Construção | lenhador, toras | carvoaria, turfa | poço de argila, olaria (tijolo) |
+| Agricultura | fazenda de centeio e aveia, moinho d'água, padaria | cervejaria (cevada) | lúpulo, linho |
+| Pecuária | pocilga (porcos na floresta) | gado, ovelhas, açougue, tecelão | curtume |
+| Pesca | pescador de rio | | pescador de mar (arenque), tanoeiro, salgadeira |
+
+Duas regras de projeto:
+
+- **Campos fixos em volta da fazenda**, como em *Knights and Merchants*.
+  O jogador posiciona a fazenda, e ela ocupa a área de cultivo junto. É
+  mais simples de jogar e de programar do que campos pintados à mão, e a
+  rotação de três campos (*Dreifelderwirtschaft*) fica interna à fazenda.
+- **As estações afetam a produção**: o grão é semeado no outono (centeio)
+  e na primavera (aveia, cevada) e colhido no verão, nada cresce no
+  inverno, e a pesca rende menos no frio. É o que dá peso histórico à
+  Grande Fome de 1315–17, causada por anos seguidos de chuva que
+  arruinaram as colheitas.
+
+O tijolo fica para a fase de cidade porque, historicamente, o gótico de
+tijolo começa no Báltico a partir da década de 1160 (catedral de Lübeck,
+1173). Uma vila recém-fundada era de madeira.
+
 ## Tecnologia
 
 | Parte | Escolha | Motivo |

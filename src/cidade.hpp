@@ -20,6 +20,10 @@ struct Edificio {
     bool ativo;
     // Quantidade guardada de cada item, indexada por IdItem.
     std::vector<int> estoque;
+    // Receita em andamento (índice em DefinicaoEdificio::receitas) ou -1
+    // parado, e quanto do ciclo já correu (ver producao.hpp).
+    int receita_ativa = -1;
+    std::int64_t progresso = 0;
 };
 
 enum class Validacao : std::uint8_t {

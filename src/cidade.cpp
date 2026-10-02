@@ -56,7 +56,7 @@ std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula
     if (validar_edificio(tipo, origem) != Validacao::Ok) return std::nullopt;
 
     const auto id = static_cast<IdEdificio>(edificios_.size());
-    edificios_.push_back({ tipo, origem, true, std::vector<int>(conteudo_->itens.size(), 0) });
+    edificios_.push_back({ tipo, origem, true, std::vector<int>(conteudo_->itens.size(), 0), -1, 0 });
 
     const DefinicaoEdificio& def = conteudo_->edificio(tipo);
     for (int dy = 0; dy < def.altura_total(); ++dy) {

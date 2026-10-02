@@ -99,6 +99,42 @@ estoque = 4
 dias = 1
 entradas = { tora = 2 }
 saidas = { tabua = 1 }
+
+[[edificio]]
+id = "colheita"
+nome = "colheita"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+trabalhadores = 1
+estoque = 4
+
+[[edificio.receita]]
+dias = 1
+saidas = { pao = 1 }
+# Só julho (fator 1) e agosto (fator 0,5).
+sazonalidade = [0, 0, 0, 0, 0, 0, 1, 0.5, 0, 0, 0, 0]
+
+[[edificio]]
+id = "forno"
+nome = "forno"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+trabalhadores = 1
+estoque = 4
+
+[[edificio.receita]]
+dias = 1
+entradas = { tora = 1 }
+saidas = { pao = 1 }
+
+[[edificio.receita]]
+dias = 1
+entradas = { tabua = 1 }
+saidas = { pao = 1 }
 )";
 
 inline const Conteudo& conteudo_de_teste() {

@@ -54,3 +54,32 @@ TESTE("estoque: edifício demolido não recebe nada") {
     VERIFICAR(c.espaco_para(d, item("tora")) == 0);
     VERIFICAR(!c.adicionar(d, item("tora"), 1));
 }
+
+TESTE("reserva: item prometido não fica disponível para outro") {
+    Cidade c = cidade_vazia();
+    const IdEdificio d = *c.construir_edificio(tipo("deposito"), { 1, 1 });
+    c.adicionar(d, item("tora"), 2);
+    c.reservar_saida(d, item("tora"));
+    VERIFICAR(c.disponivel(d, item("tora")) == 1);
+    c.liberar_saida(d, item("tora"));
+    VERIFICAR(c.disponivel(d, item("tora")) == 2);
+}
+
+TESTE("reserva: item a caminho ocupa a vaga do produtor") {
+    Cidade c = cidade_vazia();
+    const IdEdificio s = *c.construir_edificio(tipo("serraria"), { 1, 1 });
+    c.adicionar(s, item("tora"), 1);
+    c.reservar_chegada(s, item("tora"));
+    c.reservar_chegada(s, item("tora"));
+    VERIFICAR(c.espaco_livre(s, item("tora")) == 1);
+    VERIFICAR(c.espaco_para(s, item("tora")) == 3);  // o estoque físico não muda
+}
+
+TESTE("reserva: no depósito, qualquer item a caminho ocupa a vaga total") {
+    Cidade c = cidade_vazia();
+    const IdEdificio d = *c.construir_edificio(tipo("deposito"), { 1, 1 });
+    c.adicionar(d, item("tora"), 7);
+    c.reservar_chegada(d, item("pao"));
+    c.reservar_chegada(d, item("tabua"));
+    VERIFICAR(c.espaco_livre(d, item("tora")) == 1);
+}

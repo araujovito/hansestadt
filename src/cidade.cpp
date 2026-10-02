@@ -71,7 +71,8 @@ std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula
     if (validar_edificio(tipo, origem) != Validacao::Ok) return std::nullopt;
 
     const auto id = static_cast<IdEdificio>(edificios_.size());
-    edificios_.push_back({ tipo, origem, true, std::vector<int>(conteudo_->itens.size(), 0), -1, 0 });
+    const std::vector<int> zeros(conteudo_->itens.size(), 0);
+    edificios_.push_back({ tipo, origem, true, zeros, zeros, zeros, -1, 0 });
 
     const DefinicaoEdificio& def = conteudo_->edificio(tipo);
     for (int dy = 0; dy < def.altura_total(); ++dy) {
@@ -143,6 +144,22 @@ int Cidade::espaco_para(IdEdificio id, IdItem item) const {
         return def.estoque - total;
     }
     return def.usa_item(item) ? def.estoque - e.estoque[item] : 0;
+}
+
+int Cidade::disponivel(IdEdificio id, IdItem item) const {
+    const Edificio& e = edificios_[id];
+    return e.ativo ? e.estoque[item] - e.reservado[item] : 0;
+}
+
+int Cidade::espaco_livre(IdEdificio id, IdItem item) const {
+    const Edificio& e = edificios_[id];
+    if (!e.ativo) return 0;
+    if (conteudo_->edificio(e.tipo).deposito) {
+        int chegando = 0;
+        for (int q : e.a_caminho) chegando += q;
+        return espaco_para(id, item) - chegando;
+    }
+    return espaco_para(id, item) - e.a_caminho[item];
 }
 
 bool Cidade::adicionar(IdEdificio id, IdItem item, int quantidade) {

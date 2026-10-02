@@ -20,6 +20,11 @@ struct Edificio {
     bool ativo;
     // Quantidade guardada de cada item, indexada por IdItem.
     std::vector<int> estoque;
+    // Reservas do transporte, também por IdItem: itens do estoque já
+    // prometidos a um carregador que vem buscar, e itens que um carregador
+    // está trazendo e ainda não chegaram.
+    std::vector<int> reservado;
+    std::vector<int> a_caminho;
     // Receita em andamento (índice em DefinicaoEdificio::receitas) ou -1
     // parado, e quanto do ciclo já correu (ver producao.hpp).
     int receita_ativa = -1;
@@ -79,6 +84,15 @@ public:
 
     // Quanto do item ainda cabe no edifício (0 se ele não guarda esse item).
     int espaco_para(IdEdificio id, IdItem item) const;
+    // Para planejar transporte: o que pode ser prometido a um carregador
+    // (estoque menos o já reservado) e quanto ainda cabe descontando o que
+    // está a caminho.
+    int disponivel(IdEdificio id, IdItem item) const;
+    int espaco_livre(IdEdificio id, IdItem item) const;
+    void reservar_saida(IdEdificio id, IdItem item) { ++edificios_[id].reservado[item]; }
+    void liberar_saida(IdEdificio id, IdItem item) { --edificios_[id].reservado[item]; }
+    void reservar_chegada(IdEdificio id, IdItem item) { ++edificios_[id].a_caminho[item]; }
+    void liberar_chegada(IdEdificio id, IdItem item) { --edificios_[id].a_caminho[item]; }
     // Falham sem mudar nada se não houver espaço ou quantidade suficiente.
     bool adicionar(IdEdificio id, IdItem item, int quantidade);
     bool retirar(IdEdificio id, IdItem item, int quantidade);

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <string>
 
 #include "raylib.h"
@@ -5,6 +6,7 @@
 #include "calendario.hpp"
 #include "camera.hpp"
 #include "cidade.hpp"
+#include "conteudo.hpp"
 #include "desenho.hpp"
 #include "ferramentas.hpp"
 #include "mapa.hpp"
@@ -47,17 +49,34 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     if (!dica.empty()) DrawText(dica.c_str(), 680, 12, 16, Color{ 255, 220, 160, 255 });
 }
 
+// Rodando da raiz do projeto (make run), os dados estão em ./dados; rodando
+// o binário direto, ficam dois níveis acima dele (build/<modo>/).
+std::string pasta_de_dados() {
+    if (DirectoryExists("dados")) return "dados";
+    return std::string(GetApplicationDirectory()) + "../../dados";
+}
+
 }  // namespace
 
 int main() {
+    const ResultadoCarga carga = carregar_conteudo(pasta_de_dados());
+    if (!carga.conteudo) {
+        std::fprintf(stderr, "erro ao carregar o conteúdo do jogo:\n");
+        for (const std::string& erro : carga.erros) std::fprintf(stderr, "  %s\n", erro.c_str());
+        return 1;
+    }
+    const Conteudo& conteudo = *carga.conteudo;
+
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(1280, 720, "Hansestadt");
     // Esc solta a ferramenta; fechar o jogo fica só com o botão da janela.
     SetExitKey(KEY_NULL);
 
-    Cidade cidade(gerar_mapa(LARGURA_MAPA, ALTURA_MAPA, SEMENTE_MAPA));
+    Cidade cidade(gerar_mapa(LARGURA_MAPA, ALTURA_MAPA, SEMENTE_MAPA), conteudo);
     const Mapa& mapa = cidade.mapa();
-    EstadoFerramenta ferramenta;
+    // A campanha começa na vila; a troca de fase vem com a evolução dos
+    // edifícios principais.
+    EstadoFerramenta ferramenta = criar_ferramentas(conteudo, Fase::Vila);
     CameraJogo camera(static_cast<float>(LARGURA_MAPA * TAMANHO_CELULA),
                       static_cast<float>(ALTURA_MAPA * TAMANHO_CELULA));
     Simulacao sim;

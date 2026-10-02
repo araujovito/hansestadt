@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "cidade.hpp"
 
@@ -12,12 +13,22 @@ enum class Ferramenta : std::uint8_t {
     Demolir,
 };
 
+struct Botao {
+    std::string rotulo;
+    Ferramenta ferramenta;
+    IdTipoEdificio tipo;  // só vale para Ferramenta::Edificio
+};
+
 struct EstadoFerramenta {
     Ferramenta ativa = Ferramenta::Nenhuma;
-    TipoEdificio tipo = TipoEdificio::Armazem;
+    IdTipoEdificio tipo = 0;
     // Célula onde o arraste da estrada começou, enquanto o botão está apertado.
     std::optional<Celula> inicio_estrada;
+    std::vector<Botao> botoes;
 };
+
+// Monta a barra com estrada, os edifícios liberados até `fase` e demolir.
+EstadoFerramenta criar_ferramentas(const Conteudo& conteudo, Fase fase);
 
 // Atalhos de teclado: R estrada, X demolir, Esc solta a ferramenta.
 void ler_atalhos(EstadoFerramenta& estado);

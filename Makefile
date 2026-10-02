@@ -28,7 +28,7 @@ BINARIO := $(SAIDA)/hansestadt
 # Testes: só a lógica do jogo, sem raylib nem janela, sempre com sanitizers.
 # Estes arquivos não podem incluir raylib.h; é isso que mantém a simulação
 # testável.
-LOGICA        := calendario cidade edificios mapa ruido simulacao
+LOGICA        := calendario cidade conteudo mapa ruido simulacao
 TESTE_FLAGS   := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -Itestes -isystem $(TOMLPP) -O1 -g \
                  -fsanitize=address,undefined -fno-omit-frame-pointer
 TESTE_FONTES  := $(wildcard testes/*.cpp) $(LOGICA:%=src/%.cpp)

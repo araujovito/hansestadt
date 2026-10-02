@@ -53,20 +53,6 @@ void desenhar_detalhe(Terreno t, int x, int y, float px, float py) {
     }
 }
 
-Color cor_do_edificio(TipoEdificio t) {
-    switch (t) {
-        case TipoEdificio::Armazem: return { 150, 118, 78, 255 };
-        case TipoEdificio::Casa: return { 214, 190, 150, 255 };  // enxaimel caiado
-        case TipoEdificio::Lenhador: return { 122, 88, 52, 255 };
-        case TipoEdificio::Carvoaria: return { 72, 62, 56, 255 };
-        case TipoEdificio::PocoDeArgila: return { 186, 116, 76, 255 };
-        case TipoEdificio::CortadorDeTurfa: return { 112, 96, 62, 255 };
-        case TipoEdificio::Olaria: return { 168, 72, 52, 255 };  // tijolo
-        case TipoEdificio::Quantidade: break;
-    }
-    return MAGENTA;
-}
-
 Color escurecer(Color c, float f) {
     return { static_cast<unsigned char>(static_cast<float>(c.r) * f),
              static_cast<unsigned char>(static_cast<float>(c.g) * f),
@@ -102,13 +88,12 @@ void desenhar_estrada(const Cidade& cidade, int x, int y) {
     if (cidade.tem_estrada({ x, y + 1 })) DrawRectangleV({ px + borda, py + borda + miolo }, { miolo, borda }, terra);
 }
 
-void desenhar_edificio(const Edificio& e, float zoom) {
-    const DefinicaoEdificio& def = definicao(e.tipo);
+void desenhar_edificio(const Edificio& e, const DefinicaoEdificio& def, float zoom) {
     const Rectangle r{ static_cast<float>(e.origem.x * TAMANHO_CELULA) + 2.0f,
                        static_cast<float>(e.origem.y * TAMANHO_CELULA) + 2.0f,
                        static_cast<float>(def.largura * TAMANHO_CELULA) - 4.0f,
                        static_cast<float>(def.altura * TAMANHO_CELULA) - 4.0f };
-    const Color cor = cor_do_edificio(e.tipo);
+    const Color cor = GetColor(def.cor);
     DrawRectangleRec(r, cor);
     // Cumeeira: uma linha no meio sugere o telhado de duas águas visto de cima.
     DrawLineEx({ r.x + 4.0f, r.y + r.height / 2.0f }, { r.x + r.width - 4.0f, r.y + r.height / 2.0f }, 2.0f,
@@ -117,8 +102,8 @@ void desenhar_edificio(const Edificio& e, float zoom) {
 
     if (zoom >= 0.8f) {
         constexpr int tamanho = 10;
-        const int largura = MeasureText(def.nome, tamanho);
-        DrawText(def.nome, static_cast<int>(r.x + (r.width - static_cast<float>(largura)) / 2.0f),
+        const int largura = MeasureText(def.nome.c_str(), tamanho);
+        DrawText(def.nome.c_str(), static_cast<int>(r.x + (r.width - static_cast<float>(largura)) / 2.0f),
                  static_cast<int>(r.y + 4.0f), tamanho, Color{ 255, 250, 235, 230 });
     }
 }
@@ -135,12 +120,12 @@ void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom) {
 
     for (const Edificio& e : cidade.edificios()) {
         if (!e.ativo) continue;
-        const DefinicaoEdificio& def = definicao(e.tipo);
+        const DefinicaoEdificio& def = cidade.conteudo().edificio(e.tipo);
         const Rectangle r{ static_cast<float>(e.origem.x * TAMANHO_CELULA),
                            static_cast<float>(e.origem.y * TAMANHO_CELULA),
                            static_cast<float>(def.largura * TAMANHO_CELULA),
                            static_cast<float>(def.altura * TAMANHO_CELULA) };
-        if (CheckCollisionRecs(r, visivel)) desenhar_edificio(e, zoom);
+        if (CheckCollisionRecs(r, visivel)) desenhar_edificio(e, def, zoom);
     }
 }
 

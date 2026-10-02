@@ -5,7 +5,7 @@
 #include <optional>
 #include <vector>
 
-#include "edificios.hpp"
+#include "conteudo.hpp"
 #include "mapa.hpp"
 
 // Índice no vetor de edifícios. Não é reaproveitado depois de uma demolição:
@@ -15,7 +15,7 @@ using IdEdificio = std::uint32_t;
 inline constexpr IdEdificio SEM_EDIFICIO = std::numeric_limits<IdEdificio>::max();
 
 struct Edificio {
-    TipoEdificio tipo;
+    IdTipoEdificio tipo;
     Celula origem;  // canto superior esquerdo
     bool ativo;
 };
@@ -34,13 +34,15 @@ const char* descrever(Validacao v);
 // ser testado sem janela.
 class Cidade {
 public:
-    explicit Cidade(Mapa mapa);
+    // O conteúdo não é copiado: precisa existir enquanto a cidade existir.
+    Cidade(Mapa mapa, const Conteudo& conteudo);
 
     const Mapa& mapa() const { return mapa_; }
+    const Conteudo& conteudo() const { return *conteudo_; }
     const std::vector<Edificio>& edificios() const { return edificios_; }
 
-    Validacao validar_edificio(TipoEdificio tipo, Celula origem) const;
-    std::optional<IdEdificio> construir_edificio(TipoEdificio tipo, Celula origem);
+    Validacao validar_edificio(IdTipoEdificio tipo, Celula origem) const;
+    std::optional<IdEdificio> construir_edificio(IdTipoEdificio tipo, Celula origem);
 
     Validacao validar_estrada(Celula c) const;
     bool construir_estrada(Celula c);
@@ -58,6 +60,7 @@ private:
     }
 
     Mapa mapa_;
+    const Conteudo* conteudo_;
     std::vector<Edificio> edificios_;
     // Uma entrada por célula, na mesma ordem do mapa.
     std::vector<IdEdificio> ocupacao_;

@@ -1,0 +1,53 @@
+#pragma once
+
+#include <cstdio>
+
+#include "conteudo.hpp"
+
+// Conteúdo mínimo para testes de regra, independente de dados/*.toml: uma
+// mudança de balanceamento no jogo não pode quebrar um teste de construção.
+inline constexpr const char* ITENS_DE_TESTE = R"(
+[[item]]
+id = "tora"
+nome = "tora"
+tipo = "insumo"
+)";
+
+inline constexpr const char* EDIFICIOS_DE_TESTE = R"(
+[[edificio]]
+id = "grande"
+nome = "grande"
+fase = "vila"
+tamanho = [3, 3]
+terreno = "campo"
+cor = "#808080"
+
+[[edificio]]
+id = "pequeno"
+nome = "pequeno"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#808080"
+
+[[edificio]]
+id = "extrator"
+nome = "extrator"
+fase = "cidade"
+tamanho = [2, 2]
+terreno = "barreiro"
+cor = "#808080"
+)";
+
+inline const Conteudo& conteudo_de_teste() {
+    static const Conteudo conteudo = [] {
+        ResultadoCarga r = carregar_conteudo_de_texto(ITENS_DE_TESTE, EDIFICIOS_DE_TESTE);
+        for (const auto& e : r.erros) std::printf("conteúdo de teste inválido: %s\n", e.c_str());
+        return std::move(*r.conteudo);
+    }();
+    return conteudo;
+}
+
+inline IdTipoEdificio tipo(const char* id) {
+    return *conteudo_de_teste().buscar_edificio(id);
+}

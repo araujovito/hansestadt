@@ -1,4 +1,5 @@
 #include "cidade.hpp"
+#include "conteudo_de_teste.hpp"
 #include "verificar.hpp"
 
 namespace {
@@ -13,14 +14,14 @@ Cidade cidade_de_teste() {
         m.definir_terreno(x, 9, Terreno::Barreiro);
     }
     m.definir_terreno(5, 5, Terreno::Floresta);
-    return Cidade(std::move(m));
+    return Cidade(std::move(m), conteudo_de_teste());
 }
 
 }  // namespace
 
 TESTE("cidade: constrói em campo livre e ocupa todas as células") {
     Cidade c = cidade_de_teste();
-    const auto id = c.construir_edificio(TipoEdificio::Armazem, { 1, 1 });
+    const auto id = c.construir_edificio(tipo("grande"), { 1, 1 });
     VERIFICAR(id.has_value());
     VERIFICAR(c.edificio_em({ 1, 1 }) == *id);
     VERIFICAR(c.edificio_em({ 3, 3 }) == *id);
@@ -29,24 +30,24 @@ TESTE("cidade: constrói em campo livre e ocupa todas as células") {
 
 TESTE("cidade: recusa sobreposição, terreno errado e borda do mapa") {
     Cidade c = cidade_de_teste();
-    c.construir_edificio(TipoEdificio::Armazem, { 1, 1 });
-    VERIFICAR(c.validar_edificio(TipoEdificio::Casa, { 3, 3 }) == Validacao::Ocupado);
-    VERIFICAR(c.validar_edificio(TipoEdificio::Casa, { 0, 0 }) == Validacao::TerrenoErrado);  // água
-    VERIFICAR(c.validar_edificio(TipoEdificio::Casa, { 4, 4 }) == Validacao::TerrenoErrado);  // floresta em (5,5)
-    VERIFICAR(c.validar_edificio(TipoEdificio::Casa, { 9, 2 }) == Validacao::ForaDoMapa);
-    VERIFICAR(!c.construir_edificio(TipoEdificio::Casa, { 3, 3 }).has_value());
+    c.construir_edificio(tipo("grande"), { 1, 1 });
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 3, 3 }) == Validacao::Ocupado);
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 0, 0 }) == Validacao::TerrenoErrado);  // água
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 4, 4 }) == Validacao::TerrenoErrado);  // floresta em (5,5)
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 9, 2 }) == Validacao::ForaDoMapa);
+    VERIFICAR(!c.construir_edificio(tipo("pequeno"), { 3, 3 }).has_value());
 }
 
 TESTE("cidade: extratores só sobre o próprio recurso") {
     Cidade c = cidade_de_teste();
-    VERIFICAR(c.validar_edificio(TipoEdificio::PocoDeArgila, { 2, 8 }) == Validacao::Ok);
-    VERIFICAR(c.validar_edificio(TipoEdificio::PocoDeArgila, { 2, 6 }) == Validacao::TerrenoErrado);
-    VERIFICAR(c.validar_edificio(TipoEdificio::Olaria, { 2, 8 }) == Validacao::TerrenoErrado);
+    VERIFICAR(c.validar_edificio(tipo("extrator"), { 2, 8 }) == Validacao::Ok);
+    VERIFICAR(c.validar_edificio(tipo("extrator"), { 2, 6 }) == Validacao::TerrenoErrado);
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 2, 8 }) == Validacao::TerrenoErrado);
 }
 
 TESTE("cidade: estrada em campo e argila, não em água, floresta ou edifício") {
     Cidade c = cidade_de_teste();
-    c.construir_edificio(TipoEdificio::Casa, { 1, 1 });
+    c.construir_edificio(tipo("pequeno"), { 1, 1 });
     VERIFICAR(c.validar_estrada({ 4, 2 }) == Validacao::Ok);
     VERIFICAR(c.validar_estrada({ 4, 8 }) == Validacao::Ok);
     VERIFICAR(c.validar_estrada({ 4, 0 }) == Validacao::TerrenoErrado);
@@ -54,16 +55,16 @@ TESTE("cidade: estrada em campo e argila, não em água, floresta ou edifício")
     VERIFICAR(c.validar_estrada({ 1, 1 }) == Validacao::Ocupado);
     VERIFICAR(c.construir_estrada({ 4, 2 }));
     VERIFICAR(c.validar_estrada({ 4, 2 }) == Validacao::JaExiste);
-    VERIFICAR(c.validar_edificio(TipoEdificio::Casa, { 4, 2 }) == Validacao::Ocupado);
+    VERIFICAR(c.validar_edificio(tipo("pequeno"), { 4, 2 }) == Validacao::Ocupado);
 }
 
 TESTE("cidade: demolir libera as células e não reaproveita o id") {
     Cidade c = cidade_de_teste();
-    const auto primeiro = c.construir_edificio(TipoEdificio::Casa, { 1, 1 });
+    const auto primeiro = c.construir_edificio(tipo("pequeno"), { 1, 1 });
     VERIFICAR(c.demolir({ 2, 2 }));
     VERIFICAR(c.edificio_em({ 1, 1 }) == SEM_EDIFICIO);
     VERIFICAR(!c.edificios()[*primeiro].ativo);
-    const auto segundo = c.construir_edificio(TipoEdificio::Casa, { 1, 1 });
+    const auto segundo = c.construir_edificio(tipo("pequeno"), { 1, 1 });
     VERIFICAR(segundo.has_value() && *segundo != *primeiro);
     VERIFICAR(!c.demolir({ 6, 6 }));  // nada ali
 }

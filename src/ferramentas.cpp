@@ -1,43 +1,32 @@
 #include "ferramentas.hpp"
 
-#include <array>
-
 #include "desenho.hpp"
 #include "raylib.h"
 
 namespace {
 
 constexpr float ALTURA_BARRA = 48.0f;
-constexpr float LARGURA_BOTAO = 132.0f;
 constexpr float MARGEM = 6.0f;
-
-struct Botao {
-    const char* rotulo;
-    Ferramenta ferramenta;
-    TipoEdificio tipo;
-};
-
-constexpr std::array BOTOES = {
-    Botao{ "estrada (R)", Ferramenta::Estrada, TipoEdificio::Armazem },
-    Botao{ "armazém", Ferramenta::Edificio, TipoEdificio::Armazem },
-    Botao{ "casa", Ferramenta::Edificio, TipoEdificio::Casa },
-    Botao{ "lenhador", Ferramenta::Edificio, TipoEdificio::Lenhador },
-    Botao{ "carvoaria", Ferramenta::Edificio, TipoEdificio::Carvoaria },
-    Botao{ "poço de argila", Ferramenta::Edificio, TipoEdificio::PocoDeArgila },
-    Botao{ "turfa", Ferramenta::Edificio, TipoEdificio::CortadorDeTurfa },
-    Botao{ "olaria", Ferramenta::Edificio, TipoEdificio::Olaria },
-    Botao{ "demolir (X)", Ferramenta::Demolir, TipoEdificio::Armazem },
-};
+constexpr float FOLGA_TEXTO = 24.0f;
+constexpr int TAMANHO_TEXTO = 16;
 
 Rectangle area_da_barra() {
     const auto h = static_cast<float>(GetScreenHeight());
     return { 0.0f, h - ALTURA_BARRA, static_cast<float>(GetScreenWidth()), ALTURA_BARRA };
 }
 
-Rectangle area_do_botao(std::size_t i) {
+// Os botões têm a largura do próprio rótulo, porque os nomes vêm do
+// conteúdo e variam de "casa" a "moinho d'água".
+std::vector<Rectangle> areas_dos_botoes(const std::vector<Botao>& botoes) {
     const Rectangle barra = area_da_barra();
-    return { MARGEM + static_cast<float>(i) * (LARGURA_BOTAO + MARGEM), barra.y + MARGEM,
-             LARGURA_BOTAO, ALTURA_BARRA - 2.0f * MARGEM };
+    std::vector<Rectangle> areas;
+    float x = MARGEM;
+    for (const Botao& b : botoes) {
+        const float largura = static_cast<float>(MeasureText(b.rotulo.c_str(), TAMANHO_TEXTO)) + FOLGA_TEXTO;
+        areas.push_back({ x, barra.y + MARGEM, largura, ALTURA_BARRA - 2.0f * MARGEM });
+        x += largura + MARGEM;
+    }
+    return areas;
 }
 
 bool selecionado(const EstadoFerramenta& estado, const Botao& b) {
@@ -47,8 +36,7 @@ bool selecionado(const EstadoFerramenta& estado, const Botao& b) {
 
 // Com o cursor no centro do edifício, e não no canto, a prévia fica onde o
 // jogador está olhando.
-Celula origem_centrada(TipoEdificio tipo, Celula cursor) {
-    const DefinicaoEdificio& def = definicao(tipo);
+Celula origem_centrada(const DefinicaoEdificio& def, Celula cursor) {
     return { cursor.x - (def.largura - 1) / 2, cursor.y - (def.altura - 1) / 2 };
 }
 
@@ -66,6 +54,19 @@ bool estrada_aceitavel(Validacao v) {
 
 }  // namespace
 
+EstadoFerramenta criar_ferramentas(const Conteudo& conteudo, Fase fase) {
+    EstadoFerramenta estado;
+    estado.botoes.push_back({ "estrada (R)", Ferramenta::Estrada, 0 });
+    for (std::size_t i = 0; i < conteudo.edificios.size(); ++i) {
+        const DefinicaoEdificio& def = conteudo.edificios[i];
+        if (def.fase <= fase) {
+            estado.botoes.push_back({ def.nome, Ferramenta::Edificio, static_cast<IdTipoEdificio>(i) });
+        }
+    }
+    estado.botoes.push_back({ "demolir (X)", Ferramenta::Demolir, 0 });
+    return estado;
+}
+
 void ler_atalhos(EstadoFerramenta& estado) {
     if (IsKeyPressed(KEY_R)) estado.ativa = Ferramenta::Estrada;
     if (IsKeyPressed(KEY_X)) estado.ativa = Ferramenta::Demolir;
@@ -78,10 +79,11 @@ bool atualizar_barra(EstadoFerramenta& estado) {
     if (!CheckCollisionPointRec(mouse, area_da_barra())) return false;
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        for (std::size_t i = 0; i < BOTOES.size(); ++i) {
-            if (CheckCollisionPointRec(mouse, area_do_botao(i))) {
-                estado.ativa = BOTOES[i].ferramenta;
-                estado.tipo = BOTOES[i].tipo;
+        const std::vector<Rectangle> areas = areas_dos_botoes(estado.botoes);
+        for (std::size_t i = 0; i < areas.size(); ++i) {
+            if (CheckCollisionPointRec(mouse, areas[i])) {
+                estado.ativa = estado.botoes[i].ferramenta;
+                estado.tipo = estado.botoes[i].tipo;
                 estado.inicio_estrada.reset();
             }
         }
@@ -106,7 +108,8 @@ void aplicar_ferramenta(EstadoFerramenta& estado, Cidade& cidade, Celula cursor)
             break;
         case Ferramenta::Edificio:
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                cidade.construir_edificio(estado.tipo, origem_centrada(estado.tipo, cursor));
+                const DefinicaoEdificio& def = cidade.conteudo().edificio(estado.tipo);
+                cidade.construir_edificio(estado.tipo, origem_centrada(def, cursor));
             }
             break;
         case Ferramenta::Demolir:
@@ -129,8 +132,8 @@ void desenhar_previa(const EstadoFerramenta& estado, const Cidade& cidade, Celul
             break;
         }
         case Ferramenta::Edificio: {
-            const DefinicaoEdificio& def = definicao(estado.tipo);
-            const Celula origem = origem_centrada(estado.tipo, cursor);
+            const DefinicaoEdificio& def = cidade.conteudo().edificio(estado.tipo);
+            const Celula origem = origem_centrada(def, cursor);
             const bool ok = cidade.validar_edificio(estado.tipo, origem) == Validacao::Ok;
             const Rectangle r = retangulo_mundo(origem, def.largura, def.altura);
             DrawRectangleRec(r, ok ? PREVIA_OK : PREVIA_ERRO);
@@ -141,7 +144,7 @@ void desenhar_previa(const EstadoFerramenta& estado, const Cidade& cidade, Celul
             const IdEdificio id = cidade.edificio_em(cursor);
             if (id != SEM_EDIFICIO) {
                 const Edificio& e = cidade.edificios()[id];
-                const DefinicaoEdificio& def = definicao(e.tipo);
+                const DefinicaoEdificio& def = cidade.conteudo().edificio(e.tipo);
                 DrawRectangleRec(retangulo_mundo(e.origem, def.largura, def.altura), PREVIA_ERRO);
             } else if (cidade.tem_estrada(cursor)) {
                 DrawRectangleRec(retangulo_mundo(cursor, 1, 1), PREVIA_ERRO);
@@ -154,28 +157,27 @@ void desenhar_previa(const EstadoFerramenta& estado, const Cidade& cidade, Celul
 void desenhar_barra(const EstadoFerramenta& estado) {
     DrawRectangleRec(area_da_barra(), Color{ 30, 24, 18, 230 });
     const Vector2 mouse = GetMousePosition();
-    for (std::size_t i = 0; i < BOTOES.size(); ++i) {
-        const Rectangle r = area_do_botao(i);
-        const bool ativo = selecionado(estado, BOTOES[i]);
+    const std::vector<Rectangle> areas = areas_dos_botoes(estado.botoes);
+    for (std::size_t i = 0; i < areas.size(); ++i) {
+        const Rectangle r = areas[i];
+        const bool ativo = selecionado(estado, estado.botoes[i]);
         const bool sob_mouse = CheckCollisionPointRec(mouse, r);
         const Color fundo = ativo ? Color{ 150, 110, 60, 255 }
                           : sob_mouse ? Color{ 80, 64, 48, 255 }
                                       : Color{ 58, 48, 38, 255 };
         DrawRectangleRec(r, fundo);
-        const int largura_texto = MeasureText(BOTOES[i].rotulo, 16);
-        DrawText(BOTOES[i].rotulo, static_cast<int>(r.x + (r.width - static_cast<float>(largura_texto)) / 2.0f),
-                 static_cast<int>(r.y + 10.0f), 16, RAYWHITE);
+        DrawText(estado.botoes[i].rotulo.c_str(), static_cast<int>(r.x + FOLGA_TEXTO / 2.0f),
+                 static_cast<int>(r.y + 10.0f), TAMANHO_TEXTO, RAYWHITE);
     }
 }
 
 std::string dica_da_ferramenta(const EstadoFerramenta& estado, const Cidade& cidade, Celula cursor) {
     if (estado.ativa != Ferramenta::Edificio) return {};
-    const DefinicaoEdificio& def = definicao(estado.tipo);
-    const Validacao v = cidade.validar_edificio(estado.tipo, origem_centrada(estado.tipo, cursor));
-    std::string dica = std::string(def.nome) + " (" + std::to_string(def.largura) + "x" +
-                       std::to_string(def.altura) + ")";
+    const DefinicaoEdificio& def = cidade.conteudo().edificio(estado.tipo);
+    const Validacao v = cidade.validar_edificio(estado.tipo, origem_centrada(def, cursor));
+    std::string dica = def.nome + " (" + std::to_string(def.largura) + "x" + std::to_string(def.altura) + ")";
     if (v == Validacao::TerrenoErrado) {
-        dica += ": precisa de " + std::string(nome_do_terreno(def.terreno_exigido));
+        dica += ": precisa de " + std::string(nome_do_terreno(def.terreno));
     } else if (v != Validacao::Ok) {
         dica += std::string(": ") + descrever(v);
     }

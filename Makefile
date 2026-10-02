@@ -2,9 +2,11 @@
 # projeto pode estar numa pasta com espaço no nome.
 RAYLIB  := vendor/raylib/src
 LIBRAY  := $(RAYLIB)/libraylib.a
+TOMLPP  := vendor/tomlplusplus
+TOMLHPP := $(TOMLPP)/toml.hpp
 
 CXX      ?= g++
-CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -isystem $(RAYLIB)
+CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -isystem $(RAYLIB) -isystem $(TOMLPP)
 LDLIBS   := $(LIBRAY) -lGL -lm -lpthread -ldl -lrt -lX11
 
 FONTES := $(wildcard src/*.cpp)
@@ -27,7 +29,7 @@ BINARIO := $(SAIDA)/hansestadt
 # Estes arquivos não podem incluir raylib.h; é isso que mantém a simulação
 # testável.
 LOGICA        := calendario cidade edificios mapa ruido simulacao
-TESTE_FLAGS   := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -Itestes -O1 -g \
+TESTE_FLAGS   := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -Itestes -isystem $(TOMLPP) -O1 -g \
                  -fsanitize=address,undefined -fno-omit-frame-pointer
 TESTE_FONTES  := $(wildcard testes/*.cpp) $(LOGICA:%=src/%.cpp)
 TESTE_BINARIO := build/testes/testes
@@ -39,11 +41,14 @@ all: $(BINARIO)
 $(LIBRAY):
 	./scripts/baixar-raylib.sh
 
+$(TOMLHPP):
+	./scripts/baixar-tomlplusplus.sh
+
 $(BINARIO): $(OBJETOS) $(LIBRAY)
 	$(CXX) $(LDFLAGS) $(OBJETOS) $(LDLIBS) -o $@
 
 # -MMD gera os .d com as dependências de cabeçalho de cada .cpp
-$(SAIDA)/%.o: src/%.cpp | $(LIBRAY)
+$(SAIDA)/%.o: src/%.cpp | $(LIBRAY) $(TOMLHPP)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
@@ -53,7 +58,7 @@ run: $(BINARIO)
 debug:
 	$(MAKE) MODO=debug run
 
-$(TESTE_BINARIO): $(TESTE_FONTES) $(wildcard src/*.hpp testes/*.hpp)
+$(TESTE_BINARIO): $(TESTE_FONTES) $(wildcard src/*.hpp testes/*.hpp) | $(TOMLHPP)
 	@mkdir -p $(dir $@)
 	$(CXX) $(TESTE_FLAGS) $(TESTE_FONTES) -o $@
 

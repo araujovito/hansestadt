@@ -66,7 +66,7 @@ tijolo começa no Báltico a partir da década de 1160 (catedral de Lübeck,
 | Parte | Escolha | Motivo |
 |---|---|---|
 | Simulação e visual | C++20 + [raylib](https://www.raylib.com/) 5.5 | O custo do jogo está na simulação (milhares de carregadores, pedidos e rotas por tick), não no visual 2D em grade; C++ dá controle de memória sem coletor de lixo, e a raylib cobre janela, sprites e entrada sem trazer um motor inteiro |
-| Conteúdo (edifícios, receitas, eventos) | TOML | Balancear sem recompilar, com o histórico de ajustes visível no git |
+| Conteúdo (edifícios, receitas, eventos) | TOML, lido com [toml++](https://github.com/marzer/tomlplusplus) 3.4 | Balancear sem recompilar, com o histórico de ajustes visível no git |
 | Scripts de eventos | Lua (planejado) | Regras históricas fora do código C++ |
 | Ferramentas | Python | Simular e plotar a economia fora do jogo |
 
@@ -79,6 +79,20 @@ listas de edifícios e itens.
 Regras para conter o risco de memória do C++: nada de `new`/`delete` direto,
 entidades referenciadas por índice/ID em vez de ponteiro, e build de
 depuração com AddressSanitizer e UBSan.
+
+## Conteúdo
+
+Itens e edifícios ficam em [`dados/itens.toml`](dados/itens.toml) e
+[`dados/edificios.toml`](dados/edificios.toml), com o formato documentado
+no cabeçalho do arquivo. Cada edifício declara tamanho, terreno, fase em
+que é liberado, trabalhadores, estoque, receitas (entradas, saídas,
+duração em dias) e um fator de produção para cada mês. Regras de
+posicionamento também são dados: `requer` (terreno próximo, como água
+para o moinho) e `campos` (o anel de lavoura da fazenda).
+
+O jogo valida os arquivos ao abrir e lista todos os erros encontrados
+(item inexistente, chave escrita errada, sazonalidade sem 12 meses) em
+vez de abrir com conteúdo pela metade.
 
 ## Calendário
 
@@ -98,7 +112,7 @@ sudo apt install g++ make curl libx11-dev libgl1-mesa-dev libxrandr-dev \
 ```
 
 ```sh
-make run          # baixa e compila a raylib na primeira vez, depois roda
+make run          # baixa raylib e toml++ na primeira vez, depois roda
 make debug        # build com AddressSanitizer e UBSan
 make test         # testes da lógica, sem janela
 ```

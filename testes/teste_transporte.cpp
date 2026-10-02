@@ -178,3 +178,74 @@ TESTE("pedidos: mesma partida, mesmo resultado") {
     };
     VERIFICAR(jogar() == jogar());
 }
+
+namespace {
+
+// Roda até o primeiro carregador estar no estado pedido (ou desistir). Os
+// carregadores só existem depois do primeiro passo.
+void ate(Vila& v, Tarefa tarefa) {
+    for (int i = 0; i < VIAGEM * 2; ++i) {
+        v.t.passo(v.c);
+        if (v.t.carregadores()[0].tarefa == tarefa) return;
+    }
+}
+
+int a_caminho_total(const Cidade& c, IdEdificio id) {
+    int total = 0;
+    for (int q : c.edificio(id).a_caminho) total += q;
+    return total;
+}
+
+}  // namespace
+
+TESTE("demolição: origem demolida antes da coleta libera a vaga do destino") {
+    Vila v;
+    // Um forno à direita pede a tábua pronta da serraria. Os carregadores
+    // saem do depósito da esquerda e passam 8 células indo buscar.
+    const IdEdificio forno = *v.c.construir_edificio(tipo("forno"), { 12, 1 });  // porta (12,2)
+    estrada(v.c, { 9, 2 }, { 12, 2 });
+    v.c.adicionar(v.serraria, item("tabua"), 1);
+    ate(v, Tarefa::Buscar);
+    VERIFICAR(v.t.carregadores()[0].tarefa == Tarefa::Buscar);
+    VERIFICAR(v.t.carregadores()[0].destino == forno);
+    v.c.demolir({ 9, 1 });  // a serraria, origem
+    rodar(v.t, v.c, 1);
+    VERIFICAR(v.t.carregadores()[0].tarefa == Tarefa::Nenhuma);
+    VERIFICAR(a_caminho_total(v.c, forno) == 0);
+    VERIFICAR(v.t.perdidos() == 0);
+}
+
+TESTE("demolição: destino demolido com a carga na mão, leva ao depósito") {
+    Vila v;
+    v.c.adicionar(v.deposito, item("tora"), 1);
+    ate(v, Tarefa::Entregar);
+    VERIFICAR(v.t.carregadores()[0].carregando);
+    v.c.demolir({ 9, 1 });  // serraria
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 1);
+    VERIFICAR(v.t.perdidos() == 0);
+    VERIFICAR(a_caminho_total(v.c, v.deposito) == 0);
+}
+
+TESTE("demolição: destino lotado na chegada, leva ao depósito") {
+    Vila v;
+    v.c.adicionar(v.deposito, item("tora"), 1);
+    ate(v, Tarefa::Entregar);
+    v.c.adicionar(v.serraria, item("tora"), 4);  // lota por fora do transporte
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(v.serraria).estoque[item("tora")] == 4);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 1);
+    VERIFICAR(v.t.perdidos() == 0);
+}
+
+TESTE("demolição: sem depósito alcançável, a carga se perde e as reservas somem") {
+    Vila v;
+    v.c.adicionar(v.deposito, item("tora"), 1);
+    ate(v, Tarefa::Entregar);
+    v.c.demolir({ 9, 1 });  // serraria
+    v.c.demolir({ 1, 1 });  // e o único depósito
+    rodar(v.t, v.c, 2);
+    VERIFICAR(v.t.carregadores()[0].tarefa == Tarefa::Nenhuma);
+    VERIFICAR(!v.t.carregadores()[0].carregando);
+    VERIFICAR(v.t.perdidos() == 1);
+}

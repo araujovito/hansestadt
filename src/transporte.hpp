@@ -80,6 +80,11 @@ private:
     // Desiste da tarefa: libera as reservas e, se estava carregando, o item
     // se perde.
     void cancelar(Cidade& cidade, Carregador& c);
+    // O destino sumiu ou lotou com a carga na mão: leva ao depósito mais
+    // perto com vaga. Sem nenhum alcançável, a carga se perde.
+    void redirecionar(Cidade& cidade, Carregador& c);
+    // Reage a origem ou destino demolidos antes de dar o próximo passo.
+    void conferir_tarefa(Cidade& cidade, Carregador& c);
 
     std::vector<Carregador> carregadores_;
     // Por IdEdificio: se os carregadores daquele depósito já foram criados.

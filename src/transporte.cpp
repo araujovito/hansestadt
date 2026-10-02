@@ -174,6 +174,31 @@ void Transporte::cancelar(Cidade& cidade, Carregador& c) {
     c.tarefa = Tarefa::Nenhuma;
 }
 
+void Transporte::redirecionar(Cidade& cidade, Carregador& c) {
+    cidade.liberar_chegada(c.destino, c.item);
+    const IdEdificio deposito = deposito_mais_proximo(cidade, c.item, c.posicao);
+    if (deposito == SEM_EDIFICIO || deposito == c.destino) {
+        ++perdidos_;
+        c.carregando = false;
+        c.tarefa = Tarefa::Nenhuma;
+        return;
+    }
+    cidade.reservar_chegada(deposito, c.item);
+    c.destino = deposito;
+    enviar(cidade, c, cidade.porta(deposito));
+    if (!c.andando()) chegou(cidade, c);
+}
+
+void Transporte::conferir_tarefa(Cidade& cidade, Carregador& c) {
+    if (c.tarefa == Tarefa::Buscar && !cidade.edificio(c.origem).ativo) {
+        cancelar(cidade, c);  // ainda não pegou nada: não há o que perder
+        c.rota.clear();
+        c.passo = 0;
+    } else if (c.tarefa == Tarefa::Entregar && !cidade.edificio(c.destino).ativo) {
+        redirecionar(cidade, c);
+    }
+}
+
 void Transporte::chegou(Cidade& cidade, Carregador& c) {
     c.rota.clear();
     c.passo = 0;
@@ -186,20 +211,25 @@ void Transporte::chegou(Cidade& cidade, Carregador& c) {
             if (cidade.retirar(c.origem, c.item, 1)) {
                 c.carregando = true;
                 c.tarefa = Tarefa::Entregar;
-                enviar(cidade, c, cidade.porta(c.destino));
-                if (!c.andando()) chegou(cidade, c);
+                if (!cidade.edificio(c.destino).ativo || !enviar(cidade, c, cidade.porta(c.destino))) {
+                    redirecionar(cidade, c);
+                } else if (!c.andando()) {
+                    chegou(cidade, c);
+                }
             } else {
                 cidade.liberar_chegada(c.destino, c.item);
                 c.tarefa = Tarefa::Nenhuma;
             }
             break;
         case Tarefa::Entregar:
-            cidade.liberar_chegada(c.destino, c.item);
-            if (cidade.adicionar(c.destino, c.item, 1)) {
-                ++entregas_;
-            } else {
-                ++perdidos_;
+            if (!cidade.adicionar(c.destino, c.item, 1)) {
+                // Lotou por outro caminho (produção, entrega manual):
+                // procura vaga num depósito.
+                redirecionar(cidade, c);
+                break;
             }
+            cidade.liberar_chegada(c.destino, c.item);
+            ++entregas_;
             c.carregando = false;
             c.tarefa = Tarefa::Nenhuma;
             break;
@@ -219,7 +249,8 @@ void Transporte::mover(Cidade& cidade, Carregador& c) {
         if (!enviar(cidade, c, alvo)) {
             c.rota.clear();
             c.passo = 0;
-            cancelar(cidade, c);
+            if (c.tarefa == Tarefa::Entregar) redirecionar(cidade, c);
+            else cancelar(cidade, c);
         }
         return;
     }
@@ -231,6 +262,7 @@ void Transporte::passo(Cidade& cidade) {
     criar_carregadores(cidade);
     if (tick_++ % PLANEJAR_A_CADA == 0) planejar(cidade);
     for (Carregador& c : carregadores_) {
+        conferir_tarefa(cidade, c);
         if (!cidade.edificio(c.casa).ativo) mudar_de_casa(cidade, c);
         // Livre e longe de casa: volta.
         if (c.livre() && !c.andando() && !(c.posicao == cidade.porta(c.casa))) {

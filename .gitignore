@@ -1,0 +1,7 @@
+# Dependências baixadas e compiladas localmente (ver README)
+vendor/
+
+# Artefatos de build
+build/
+*.o
+*.a

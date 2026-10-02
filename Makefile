@@ -23,7 +23,16 @@ SAIDA   := build/$(MODO)
 OBJETOS := $(FONTES:src/%.cpp=$(SAIDA)/%.o)
 BINARIO := $(SAIDA)/hansestadt
 
-.PHONY: all run debug clean
+# Testes: só a lógica do jogo, sem raylib nem janela, sempre com sanitizers.
+# Estes arquivos não podem incluir raylib.h; é isso que mantém a simulação
+# testável.
+LOGICA        := calendario cidade edificios mapa ruido simulacao
+TESTE_FLAGS   := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -Itestes -O1 -g \
+                 -fsanitize=address,undefined -fno-omit-frame-pointer
+TESTE_FONTES  := $(wildcard testes/*.cpp) $(LOGICA:%=src/%.cpp)
+TESTE_BINARIO := build/testes/testes
+
+.PHONY: all run debug test clean
 
 all: $(BINARIO)
 
@@ -43,6 +52,13 @@ run: $(BINARIO)
 
 debug:
 	$(MAKE) MODO=debug run
+
+$(TESTE_BINARIO): $(TESTE_FONTES) $(wildcard src/*.hpp testes/*.hpp)
+	@mkdir -p $(dir $@)
+	$(CXX) $(TESTE_FLAGS) $(TESTE_FONTES) -o $@
+
+test: $(TESTE_BINARIO)
+	./$(TESTE_BINARIO)
 
 clean:
 	rm -rf build

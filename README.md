@@ -5,7 +5,8 @@ Hanseática, entre a fundação de uma vila na colonização do leste (~1150) e 
 auge da Hansa (~1370). Não há adversários: a dificuldade vem da economia, do
 clima e dos acontecimentos históricos.
 
-> Status: concepção. Ainda não há código jogável.
+> Status: protótipo. Dá para construir a vila, e os edifícios produzem
+> e trocam mercadorias por carregadores; ainda não há moradores nem eventos.
 
 ## Ideia central
 
@@ -94,6 +95,27 @@ O jogo valida os arquivos ao abrir e lista todos os erros encontrados
 (item inexistente, chave escrita errada, sazonalidade sem 12 meses) em
 vez de abrir com conteúdo pela metade.
 
+## Como a economia funciona
+
+1. **Produção** (`src/producao.cpp`). Um edifício começa a primeira
+   receita que tem entradas no estoque, espaço para as saídas e fator
+   maior que zero no mês. O ritmo do ciclo é multiplicado pelo fator do
+   mês: a fazenda só colhe em julho e agosto, e o moinho perde força com
+   o rio congelado.
+2. **Rotas** (`src/rotas.cpp`). Carregadores andam só por estrada. O
+   caminho é o A* mais curto entre as portas, guardado em cache até a
+   próxima mudança nas estradas. Cada edifício tem uma porta (a célula
+   abaixo do meio da borda inferior), e sem estrada nela ele fica isolado.
+3. **Transporte** (`src/transporte.cpp`). Os carregadores moram no
+   armazém. A cada 10 ticks, cada vaga na entrada de um produtor pede um
+   item à origem mais próxima, e depois o que sobra nas saídas vai para o
+   depósito. Item e vaga são reservados na hora da atribuição. Se a
+   origem é demolida, o carregador desiste. Se o destino some ou lota, a
+   carga vai para o depósito.
+
+Tudo roda em ticks fixos e em ordem de id. A mesma partida dá o mesmo
+resultado em qualquer velocidade, e há um teste que confere isso.
+
 ## Calendário
 
 Modelo **híbrido**. Dentro de uma fase o ano corre e os eventos disparam nas
@@ -127,5 +149,5 @@ Controles:
 | Estrada | `R`, depois clicar e arrastar; constrói ao soltar |
 | Edifício | botão na barra inferior, depois clicar no mapa |
 | Demolir | `X`, depois clicar ou arrastar |
-| Ver produção e estoque | clicar num edifício (sem ferramenta ativa) |
+| Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
 | Soltar a ferramenta / fechar o painel | `Esc` |

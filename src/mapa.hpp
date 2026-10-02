@@ -13,6 +13,13 @@ enum class Terreno : std::uint8_t {
 
 const char* nome_do_terreno(Terreno t);
 
+struct Celula {
+    int x;
+    int y;
+
+    bool operator==(const Celula&) const = default;
+};
+
 // Grade do mapa guardada num vetor contíguo, linha a linha. Células são
 // endereçadas por (x, y); nenhuma outra estrutura guarda ponteiros para elas.
 class Mapa {

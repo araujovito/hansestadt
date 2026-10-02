@@ -56,7 +56,7 @@ std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula
     if (validar_edificio(tipo, origem) != Validacao::Ok) return std::nullopt;
 
     const auto id = static_cast<IdEdificio>(edificios_.size());
-    edificios_.push_back({ tipo, origem, true });
+    edificios_.push_back({ tipo, origem, true, std::vector<int>(conteudo_->itens.size(), 0) });
 
     const DefinicaoEdificio& def = conteudo_->edificio(tipo);
     for (int dy = 0; dy < def.altura_total(); ++dy) {
@@ -103,6 +103,31 @@ bool Cidade::demolir(Celula c) {
             ocupacao_[indice({ e.origem.x + dx, e.origem.y + dy })] = SEM_EDIFICIO;
         }
     }
+    return true;
+}
+
+int Cidade::espaco_para(IdEdificio id, IdItem item) const {
+    const Edificio& e = edificios_[id];
+    if (!e.ativo) return 0;
+    const DefinicaoEdificio& def = conteudo_->edificio(e.tipo);
+    if (def.deposito) {
+        int total = 0;
+        for (int q : e.estoque) total += q;
+        return def.estoque - total;
+    }
+    return def.usa_item(item) ? def.estoque - e.estoque[item] : 0;
+}
+
+bool Cidade::adicionar(IdEdificio id, IdItem item, int quantidade) {
+    if (espaco_para(id, item) < quantidade) return false;
+    edificios_[id].estoque[item] += quantidade;
+    return true;
+}
+
+bool Cidade::retirar(IdEdificio id, IdItem item, int quantidade) {
+    Edificio& e = edificios_[id];
+    if (!e.ativo || e.estoque[item] < quantidade) return false;
+    e.estoque[item] -= quantidade;
     return true;
 }
 

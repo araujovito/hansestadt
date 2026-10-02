@@ -18,6 +18,8 @@ struct Edificio {
     IdTipoEdificio tipo;
     Celula origem;  // canto superior esquerdo
     bool ativo;
+    // Quantidade guardada de cada item, indexada por IdItem.
+    std::vector<int> estoque;
 };
 
 enum class Validacao : std::uint8_t {
@@ -53,6 +55,16 @@ public:
 
     bool tem_estrada(Celula c) const;
     IdEdificio edificio_em(Celula c) const;
+
+    Edificio& edificio(IdEdificio id) { return edificios_[id]; }
+    const Edificio& edificio(IdEdificio id) const { return edificios_[id]; }
+    const DefinicaoEdificio& definicao(IdEdificio id) const { return conteudo_->edificio(edificios_[id].tipo); }
+
+    // Quanto do item ainda cabe no edifício (0 se ele não guarda esse item).
+    int espaco_para(IdEdificio id, IdItem item) const;
+    // Falham sem mudar nada se não houver espaço ou quantidade suficiente.
+    bool adicionar(IdEdificio id, IdItem item, int quantidade);
+    bool retirar(IdEdificio id, IdItem item, int quantidade);
 
 private:
     bool atende_requisito(const Requisito& r, Celula origem, int largura, int altura) const;

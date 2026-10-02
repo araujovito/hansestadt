@@ -11,6 +11,16 @@ inline constexpr const char* ITENS_DE_TESTE = R"(
 id = "tora"
 nome = "tora"
 tipo = "insumo"
+
+[[item]]
+id = "tabua"
+nome = "tábua"
+tipo = "insumo"
+
+[[item]]
+id = "pao"
+nome = "pão"
+tipo = "comida"
 )";
 
 inline constexpr const char* EDIFICIOS_DE_TESTE = R"(
@@ -64,6 +74,31 @@ tamanho = [1, 1]
 terreno = "campo"
 cor = "#808080"
 campos = 1
+
+[[edificio]]
+id = "deposito"
+nome = "depósito"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+estoque = 10
+deposito = true
+
+[[edificio]]
+id = "serraria"
+nome = "serraria"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+trabalhadores = 1
+estoque = 4
+
+[[edificio.receita]]
+dias = 1
+entradas = { tora = 2 }
+saidas = { tabua = 1 }
 )";
 
 inline const Conteudo& conteudo_de_teste() {
@@ -77,4 +112,8 @@ inline const Conteudo& conteudo_de_teste() {
 
 inline IdTipoEdificio tipo(const char* id) {
     return *conteudo_de_teste().buscar_edificio(id);
+}
+
+inline IdItem item(const char* id) {
+    return *conteudo_de_teste().buscar_item(id);
 }

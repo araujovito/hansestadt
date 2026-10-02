@@ -75,4 +75,4 @@ make run          # baixa e compila a raylib na primeira vez, depois roda
 make debug        # build com AddressSanitizer e UBSan
 ```
 
-Controles: `Espaço` pausa, `1` `2` `3` mudam a velocidade (1×, 2×, 4×).
+Controles: `WASD`/setas ou botão do meio/direito arrastando movem a câmera, a roda dá zoom; `Espaço` pausa, `1` `2` `3` mudam a velocidade (1×, 2×, 4×).

@@ -53,19 +53,105 @@ void desenhar_detalhe(Terreno t, int x, int y, float px, float py) {
     }
 }
 
+Color cor_do_edificio(TipoEdificio t) {
+    switch (t) {
+        case TipoEdificio::Armazem: return { 150, 118, 78, 255 };
+        case TipoEdificio::Casa: return { 214, 190, 150, 255 };  // enxaimel caiado
+        case TipoEdificio::Lenhador: return { 122, 88, 52, 255 };
+        case TipoEdificio::Carvoaria: return { 72, 62, 56, 255 };
+        case TipoEdificio::PocoDeArgila: return { 186, 116, 76, 255 };
+        case TipoEdificio::CortadorDeTurfa: return { 112, 96, 62, 255 };
+        case TipoEdificio::Olaria: return { 168, 72, 52, 255 };  // tijolo
+        case TipoEdificio::Quantidade: break;
+    }
+    return MAGENTA;
+}
+
+Color escurecer(Color c, float f) {
+    return { static_cast<unsigned char>(static_cast<float>(c.r) * f),
+             static_cast<unsigned char>(static_cast<float>(c.g) * f),
+             static_cast<unsigned char>(static_cast<float>(c.b) * f), c.a };
+}
+
+struct Intervalo {
+    int x0, y0, x1, y1;
+};
+
+Intervalo celulas_visiveis(const Mapa& mapa, Rectangle visivel) {
+    return {
+        std::max(0, static_cast<int>(std::floor(visivel.x / TAMANHO_CELULA))),
+        std::max(0, static_cast<int>(std::floor(visivel.y / TAMANHO_CELULA))),
+        std::min(mapa.largura() - 1, static_cast<int>((visivel.x + visivel.width) / TAMANHO_CELULA)),
+        std::min(mapa.altura() - 1, static_cast<int>((visivel.y + visivel.height) / TAMANHO_CELULA)),
+    };
+}
+
+void desenhar_estrada(const Cidade& cidade, int x, int y) {
+    constexpr Color terra{ 176, 150, 104, 255 };
+    constexpr float borda = 7.0f;
+    constexpr float miolo = TAMANHO_CELULA - 2.0f * borda;
+    const float px = static_cast<float>(x * TAMANHO_CELULA);
+    const float py = static_cast<float>(y * TAMANHO_CELULA);
+
+    DrawRectangleV({ px + borda, py + borda }, { miolo, miolo }, terra);
+    // Prolonga o miolo até cada vizinho com estrada, para os trechos se
+    // ligarem em vez de virarem quadrados soltos.
+    if (cidade.tem_estrada({ x - 1, y })) DrawRectangleV({ px, py + borda }, { borda, miolo }, terra);
+    if (cidade.tem_estrada({ x + 1, y })) DrawRectangleV({ px + borda + miolo, py + borda }, { borda, miolo }, terra);
+    if (cidade.tem_estrada({ x, y - 1 })) DrawRectangleV({ px + borda, py }, { miolo, borda }, terra);
+    if (cidade.tem_estrada({ x, y + 1 })) DrawRectangleV({ px + borda, py + borda + miolo }, { miolo, borda }, terra);
+}
+
+void desenhar_edificio(const Edificio& e, float zoom) {
+    const DefinicaoEdificio& def = definicao(e.tipo);
+    const Rectangle r{ static_cast<float>(e.origem.x * TAMANHO_CELULA) + 2.0f,
+                       static_cast<float>(e.origem.y * TAMANHO_CELULA) + 2.0f,
+                       static_cast<float>(def.largura * TAMANHO_CELULA) - 4.0f,
+                       static_cast<float>(def.altura * TAMANHO_CELULA) - 4.0f };
+    const Color cor = cor_do_edificio(e.tipo);
+    DrawRectangleRec(r, cor);
+    // Cumeeira: uma linha no meio sugere o telhado de duas águas visto de cima.
+    DrawLineEx({ r.x + 4.0f, r.y + r.height / 2.0f }, { r.x + r.width - 4.0f, r.y + r.height / 2.0f }, 2.0f,
+               escurecer(cor, 0.7f));
+    DrawRectangleLinesEx(r, 2.0f, escurecer(cor, 0.55f));
+
+    if (zoom >= 0.8f) {
+        constexpr int tamanho = 10;
+        const int largura = MeasureText(def.nome, tamanho);
+        DrawText(def.nome, static_cast<int>(r.x + (r.width - static_cast<float>(largura)) / 2.0f),
+                 static_cast<int>(r.y + 4.0f), tamanho, Color{ 255, 250, 235, 230 });
+    }
+}
+
 }  // namespace
 
+void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom) {
+    const Intervalo v = celulas_visiveis(cidade.mapa(), visivel);
+    for (int y = v.y0; y <= v.y1; ++y) {
+        for (int x = v.x0; x <= v.x1; ++x) {
+            if (cidade.tem_estrada({ x, y })) desenhar_estrada(cidade, x, y);
+        }
+    }
+
+    for (const Edificio& e : cidade.edificios()) {
+        if (!e.ativo) continue;
+        const DefinicaoEdificio& def = definicao(e.tipo);
+        const Rectangle r{ static_cast<float>(e.origem.x * TAMANHO_CELULA),
+                           static_cast<float>(e.origem.y * TAMANHO_CELULA),
+                           static_cast<float>(def.largura * TAMANHO_CELULA),
+                           static_cast<float>(def.altura * TAMANHO_CELULA) };
+        if (CheckCollisionRecs(r, visivel)) desenhar_edificio(e, zoom);
+    }
+}
+
 void desenhar_mapa(const Mapa& mapa, Rectangle visivel, float zoom) {
-    const int x0 = std::max(0, static_cast<int>(std::floor(visivel.x / TAMANHO_CELULA)));
-    const int y0 = std::max(0, static_cast<int>(std::floor(visivel.y / TAMANHO_CELULA)));
-    const int x1 = std::min(mapa.largura() - 1, static_cast<int>((visivel.x + visivel.width) / TAMANHO_CELULA));
-    const int y1 = std::min(mapa.altura() - 1, static_cast<int>((visivel.y + visivel.height) / TAMANHO_CELULA));
+    const Intervalo v = celulas_visiveis(mapa, visivel);
 
     // Abaixo deste zoom os detalhes viram ruído visual e só custam desenho.
     const bool com_detalhes = zoom >= 0.6f;
 
-    for (int y = y0; y <= y1; ++y) {
-        for (int x = x0; x <= x1; ++x) {
+    for (int y = v.y0; y <= v.y1; ++y) {
+        for (int x = v.x0; x <= v.x1; ++x) {
             const Terreno t = mapa.terreno(x, y);
             const float px = static_cast<float>(x * TAMANHO_CELULA);
             const float py = static_cast<float>(y * TAMANHO_CELULA);

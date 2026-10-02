@@ -38,9 +38,11 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     const char* ritmo = relogio.pausado() ? "PAUSADO"
                                           : TextFormat("%dx", relogio.velocidade());
     DrawText(ritmo, 340, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
-    DrawText(TextFormat("tick %llu  |  %d fps",
-                        static_cast<unsigned long long>(sim.tick), GetFPS()),
-             GetScreenWidth() - 260, 12, 16, LIGHTGRAY);
+    int ocupados = 0;
+    for (const Carregador& c : sim.transporte.carregadores()) ocupados += c.livre() ? 0 : 1;
+    DrawText(TextFormat("carregadores %d/%d  |  %d fps", ocupados,
+                        static_cast<int>(sim.transporte.carregadores().size()), GetFPS()),
+             GetScreenWidth() - 300, 12, 16, LIGHTGRAY);
 
     if (mapa.dentro(sob_cursor.x, sob_cursor.y)) {
         DrawText(TextFormat("(%d, %d) %s", sob_cursor.x, sob_cursor.y,
@@ -104,6 +106,7 @@ int main() {
         BeginMode2D(camera.camera2d());
         desenhar_mapa(mapa, camera.area_visivel(), camera.camera2d().zoom);
         desenhar_cidade(cidade, camera.area_visivel(), camera.camera2d().zoom, sim.data.mes);
+        desenhar_carregadores(cidade, sim.transporte, camera.area_visivel());
         if (!mouse_na_barra) {
             desenhar_previa(ferramenta, cidade, sob_cursor);
             if (mapa.dentro(sob_cursor.x, sob_cursor.y)) destacar_celula(sob_cursor);

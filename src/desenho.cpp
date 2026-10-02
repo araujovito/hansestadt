@@ -185,6 +185,34 @@ void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom, int me
     }
 }
 
+void desenhar_carregadores(const Cidade& cidade, const Transporte& transporte, Rectangle visivel) {
+    constexpr float meia = TAMANHO_CELULA / 2.0f;
+    for (const Carregador& c : transporte.carregadores()) {
+        Vector2 p{ static_cast<float>(c.posicao.x * TAMANHO_CELULA) + meia,
+                   static_cast<float>(c.posicao.y * TAMANHO_CELULA) + meia };
+        if (c.andando()) {
+            const Celula prox = c.rota[c.passo];
+            const float f = static_cast<float>(c.ticks_na_celula) / Transporte::TICKS_POR_CELULA;
+            p.x += (static_cast<float>(prox.x - c.posicao.x) * TAMANHO_CELULA) * f;
+            p.y += (static_cast<float>(prox.y - c.posicao.y) * TAMANHO_CELULA) * f;
+        }
+        if (!CheckCollisionPointRec(p, visivel)) continue;
+
+        // Parado em casa fica escondido dentro do depósito.
+        if (c.livre() && !c.andando()) continue;
+
+        DrawCircleV(p, 6.0f, Color{ 222, 200, 160, 255 });
+        DrawCircleLinesV(p, 6.0f, Color{ 70, 52, 34, 255 });
+        if (c.carregando) {
+            // Comida em laranja, insumo em marrom: dá para ver de longe o
+            // que está circulando na vila.
+            const bool comida = cidade.conteudo().itens[c.item].tipo == TipoItem::Comida;
+            DrawRectangleV({ p.x - 4.0f, p.y - 13.0f }, { 8.0f, 7.0f },
+                           comida ? Color{ 230, 150, 60, 255 } : Color{ 130, 90, 50, 255 });
+        }
+    }
+}
+
 void desenhar_mapa(const Mapa& mapa, Rectangle visivel, float zoom) {
     const Intervalo v = celulas_visiveis(mapa, visivel);
 

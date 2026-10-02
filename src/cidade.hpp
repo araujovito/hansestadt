@@ -65,6 +65,9 @@ public:
 
     bool tem_estrada(Celula c) const;
     IdEdificio edificio_em(Celula c) const;
+    // Muda a cada estrada construída ou demolida; quem guarda rotas compara
+    // com o valor da época para saber se elas ainda valem.
+    std::uint64_t versao_estradas() const { return versao_estradas_; }
 
     Celula porta(IdEdificio id) const;
     // Se há estrada na porta. Sem isso nenhum carregador chega ao edifício.
@@ -98,6 +101,7 @@ private:
     // edifícios nunca dividem a porta, porque a célula logo acima dela é
     // sempre do próprio edifício.
     std::vector<std::uint8_t> portas_;
+    std::uint64_t versao_estradas_ = 0;
 };
 
 // Caminho que a ferramenta de estrada desenha ao arrastar: primeiro na

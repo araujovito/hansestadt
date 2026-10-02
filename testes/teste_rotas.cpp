@@ -83,3 +83,46 @@ TESTE("rota: cada passo é vizinho do anterior") {
     }
     VERIFICAR(vizinhos);
 }
+
+TESTE("cache: a mesma viagem só é buscada uma vez") {
+    Cidade c = campo_aberto();
+    estrada(c, { 1, 1 }, { 5, 1 });
+    CacheDeRotas cache;
+    for (int i = 0; i < 10; ++i) VERIFICAR(cache.rota(c, { 1, 1 }, { 5, 1 }).has_value());
+    VERIFICAR(cache.buscas_feitas() == 1);
+    cache.rota(c, { 5, 1 }, { 1, 1 });  // sentido contrário é outra viagem
+    VERIFICAR(cache.buscas_feitas() == 2);
+}
+
+TESTE("cache: guarda também a ausência de rota") {
+    Cidade c = campo_aberto();
+    estrada(c, { 1, 1 }, { 2, 1 });
+    estrada(c, { 5, 1 }, { 6, 1 });
+    CacheDeRotas cache;
+    VERIFICAR(!cache.rota(c, { 1, 1 }, { 6, 1 }).has_value());
+    VERIFICAR(!cache.rota(c, { 1, 1 }, { 6, 1 }).has_value());
+    VERIFICAR(cache.buscas_feitas() == 1);
+}
+
+TESTE("cache: estrada nova ou demolida invalida as rotas") {
+    Cidade c = campo_aberto();
+    estrada(c, { 1, 1 }, { 2, 1 });
+    estrada(c, { 4, 1 }, { 5, 1 });
+    CacheDeRotas cache;
+    VERIFICAR(!cache.rota(c, { 1, 1 }, { 5, 1 }).has_value());
+    c.construir_estrada({ 3, 1 });
+    VERIFICAR(cache.rota(c, { 1, 1 }, { 5, 1 }).has_value());
+    c.demolir({ 3, 1 });
+    VERIFICAR(!cache.rota(c, { 1, 1 }, { 5, 1 }).has_value());
+    VERIFICAR(cache.buscas_feitas() == 3);
+}
+
+TESTE("cache: construir edifício não invalida as rotas") {
+    Cidade c = campo_aberto();
+    estrada(c, { 1, 1 }, { 5, 1 });
+    CacheDeRotas cache;
+    cache.rota(c, { 1, 1 }, { 5, 1 });
+    c.construir_edificio(tipo("pequeno"), { 1, 3 });
+    cache.rota(c, { 1, 1 }, { 5, 1 });
+    VERIFICAR(cache.buscas_feitas() == 1);
+}

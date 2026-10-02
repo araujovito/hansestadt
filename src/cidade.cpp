@@ -97,6 +97,7 @@ Validacao Cidade::validar_estrada(Celula c) const {
 bool Cidade::construir_estrada(Celula c) {
     if (validar_estrada(c) != Validacao::Ok) return false;
     estradas_[indice(c)] = 1;
+    ++versao_estradas_;
     return true;
 }
 
@@ -105,6 +106,7 @@ bool Cidade::demolir(Celula c) {
 
     if (estradas_[indice(c)]) {
         estradas_[indice(c)] = 0;
+        ++versao_estradas_;
         return true;
     }
 

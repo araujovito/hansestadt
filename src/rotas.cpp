@@ -71,3 +71,19 @@ std::optional<std::vector<Celula>> buscar_rota(const Cidade& cidade, Celula de, 
     std::reverse(rota.begin(), rota.end());
     return rota;
 }
+
+const std::optional<std::vector<Celula>>& CacheDeRotas::rota(const Cidade& cidade, Celula de, Celula para) {
+    if (versao_ != cidade.versao_estradas() || rotas_.size() >= MAXIMO) {
+        rotas_.clear();
+        versao_ = cidade.versao_estradas();
+    }
+    const auto largura = static_cast<std::uint64_t>(cidade.mapa().largura());
+    const std::uint64_t chave = (static_cast<std::uint64_t>(de.y) * largura + static_cast<std::uint64_t>(de.x)) << 32 |
+                                (static_cast<std::uint64_t>(para.y) * largura + static_cast<std::uint64_t>(para.x));
+    auto it = rotas_.find(chave);
+    if (it == rotas_.end()) {
+        ++buscas_;
+        it = rotas_.emplace(chave, buscar_rota(cidade, de, para)).first;
+    }
+    return it->second;
+}

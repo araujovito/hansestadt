@@ -33,27 +33,59 @@ struct Carregador {
     bool livre() const { return tarefa == Tarefa::Nenhuma; }
 };
 
+// Quem leva o quê para onde.
+//
+// A cada PLANEJAR_A_CADA ticks o transporte distribui pedidos:
+// 1. Demandas: cada vaga livre na entrada de um produtor (descontado o que
+//    já está a caminho) pede um item. A origem é o edifício de rota mais
+//    curta que tem o item disponível, seja produtor (na saída) ou depósito.
+// 2. Sobras: o que está na saída de um produtor e ninguém pediu vai para o
+//    depósito de rota mais curta com vaga.
+// Cada pedido leva um item e vai para o carregador livre mais perto da
+// origem. Item e vaga são reservados na hora, para não serem prometidos
+// duas vezes. Só entram edifícios com estrada na porta.
 class Transporte {
 public:
     static constexpr int TICKS_POR_CELULA = 3;
+    // Planejar a cada tick gastaria buscas à toa: estoques mudam devagar.
+    static constexpr int PLANEJAR_A_CADA = 10;
 
-    // Um tick do transporte: cria os carregadores de depósitos novos, muda
-    // a casa de quem perdeu o depósito e move todo mundo.
+    // Um tick do transporte: cria os carregadores de depósitos novos,
+    // distribui pedidos, muda a casa de quem perdeu o depósito e move todo
+    // mundo.
     void passo(Cidade& cidade);
 
     const std::vector<Carregador>& carregadores() const { return carregadores_; }
     CacheDeRotas& rotas() { return rotas_; }
+    std::uint64_t entregas() const { return entregas_; }
+    std::uint64_t perdidos() const { return perdidos_; }
 
 private:
+    void planejar(Cidade& cidade);
+    bool atender_demandas(Cidade& cidade);
+    bool escoar_sobras(Cidade& cidade);
+    IdEdificio origem_mais_proxima(const Cidade& cidade, IdItem item, IdEdificio destino);
+    IdEdificio deposito_mais_proximo(const Cidade& cidade, IdItem item, Celula de);
+    Carregador* carregador_mais_proximo(const Cidade& cidade, Celula alvo);
+    void atribuir(Cidade& cidade, Carregador& c, IdEdificio origem, IdEdificio destino, IdItem item);
+    // Comprimento da rota entre duas células, ou nullopt se não há.
+    std::optional<std::size_t> distancia(const Cidade& cidade, Celula de, Celula para);
+
     void criar_carregadores(const Cidade& cidade);
     void mudar_de_casa(const Cidade& cidade, Carregador& c);
     // Põe o carregador a caminho de `alvo`. Falso se não há rota.
     bool enviar(const Cidade& cidade, Carregador& c, Celula alvo);
     void mover(Cidade& cidade, Carregador& c);
     void chegou(Cidade& cidade, Carregador& c);
+    // Desiste da tarefa: libera as reservas e, se estava carregando, o item
+    // se perde.
+    void cancelar(Cidade& cidade, Carregador& c);
 
     std::vector<Carregador> carregadores_;
     // Por IdEdificio: se os carregadores daquele depósito já foram criados.
     std::vector<std::uint8_t> ja_criou_;
     CacheDeRotas rotas_;
+    std::uint64_t tick_ = 0;
+    std::uint64_t entregas_ = 0;
+    std::uint64_t perdidos_ = 0;
 };

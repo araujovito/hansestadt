@@ -1,4 +1,5 @@
 #include "conteudo_de_teste.hpp"
+#include "producao.hpp"
 #include "transporte.hpp"
 #include "verificar.hpp"
 
@@ -73,4 +74,107 @@ TESTE("carregadores: estrada cortada no caminho, recalculam por outro lado") {
     c.demolir({ 5, 2 });                             // corta à frente
     rodar(t, c, 40 * Transporte::TICKS_POR_CELULA);
     VERIFICAR(t.carregadores()[0].posicao == c.porta(b));
+}
+
+namespace {
+
+// Depósito à esquerda e serraria à direita, ligados pela linha 2.
+struct Vila {
+    Cidade c = campo_aberto();
+    IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 1, 1 });  // porta (1,2)
+    IdEdificio serraria = *c.construir_edificio(tipo("serraria"), { 9, 1 });  // porta (9,2)
+    Transporte t;
+    Vila() { estrada(c, { 1, 2 }, { 9, 2 }); }
+};
+
+// Tempo de sobra para planejar, ir e voltar pela estrada de 8 células.
+constexpr int VIAGEM = Transporte::PLANEJAR_A_CADA + 2 * 9 * Transporte::TICKS_POR_CELULA;
+
+}  // namespace
+
+TESTE("pedidos: a sobra do produtor vai para o depósito") {
+    Vila v;
+    v.c.adicionar(v.serraria, item("tabua"), 2);
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(v.serraria).estoque[item("tabua")] == 0);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tabua")] == 2);
+    VERIFICAR(v.t.entregas() == 2);
+}
+
+TESTE("pedidos: o depósito abastece a entrada do produtor") {
+    Vila v;
+    v.c.adicionar(v.deposito, item("tora"), 3);
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(v.serraria).estoque[item("tora")] == 3);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 0);
+}
+
+TESTE("pedidos: não leva mais do que cabe na entrada") {
+    Vila v;
+    v.c.adicionar(v.deposito, item("tora"), 9);
+    rodar(v.t, v.c, VIAGEM * 3);
+    VERIFICAR(v.c.edificio(v.serraria).estoque[item("tora")] == 4);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 5);
+}
+
+TESTE("pedidos: produtor sem estrada na porta não recebe nem envia") {
+    Vila v;
+    v.c.demolir({ 9, 2 });  // porta da serraria
+    v.c.adicionar(v.deposito, item("tora"), 2);
+    v.c.adicionar(v.serraria, item("tabua"), 1);
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(v.serraria).estoque[item("tora")] == 0);
+    VERIFICAR(v.c.edificio(v.serraria).estoque[item("tabua")] == 1);
+}
+
+TESTE("pedidos: busca na origem mais perto") {
+    Vila v;
+    // Segundo depósito colado na serraria: porta (7,2), já na estrada.
+    const IdEdificio perto = *v.c.construir_edificio(tipo("deposito"), { 7, 1 });
+    v.c.adicionar(v.serraria, item("tora"), 2);  // só cabem mais 2
+    v.c.adicionar(v.deposito, item("tora"), 2);
+    v.c.adicionar(perto, item("tora"), 2);
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(perto).estoque[item("tora")] == 0);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 2);
+}
+
+TESTE("pedidos: um item só é prometido a um destino") {
+    Vila v;
+    const IdEdificio outra = *v.c.construir_edificio(tipo("serraria"), { 5, 3 });  // porta (5,5)
+    estrada(v.c, { 5, 2 }, { 5, 5 });
+    v.c.adicionar(v.deposito, item("tora"), 1);
+    rodar(v.t, v.c, VIAGEM * 2);
+    const int total = v.c.edificio(v.serraria).estoque[item("tora")] + v.c.edificio(outra).estoque[item("tora")];
+    VERIFICAR(total == 1);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 0);
+    VERIFICAR(v.c.edificio(v.deposito).reservado[item("tora")] == 0);
+}
+
+TESTE("pedidos: a cadeia anda sozinha (depósito, serraria, depósito)") {
+    Vila v;
+    v.c.adicionar(v.deposito, item("tora"), 4);
+    // Produção e transporte juntos, como na simulação.
+    for (int i = 0; i < VIAGEM * 6; ++i) {
+        avancar_producao(v.c, 3, 10);
+        v.t.passo(v.c);
+    }
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tabua")] == 2);
+}
+
+TESTE("pedidos: mesma partida, mesmo resultado") {
+    auto jogar = [] {
+        Vila v;
+        v.c.adicionar(v.deposito, item("tora"), 6);
+        v.c.adicionar(v.serraria, item("tabua"), 3);
+        rodar(v.t, v.c, 137);
+        std::vector<int> estado;
+        for (const Carregador& k : v.t.carregadores()) {
+            estado.push_back(k.posicao.x);
+            estado.push_back(static_cast<int>(k.tarefa));
+        }
+        for (int q : v.c.edificio(v.serraria).estoque) estado.push_back(q);
+        return estado;
+    };
+    VERIFICAR(jogar() == jogar());
 }

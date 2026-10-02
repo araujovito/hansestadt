@@ -18,6 +18,16 @@ const char* nome_da_fase(Fase f) {
     return "?";
 }
 
+bool DefinicaoEdificio::usa_item(IdItem item) const {
+    for (const Receita& r : receitas) {
+        for (const Quantidade& q : r.entradas)
+            if (q.item == item) return true;
+        for (const Quantidade& q : r.saidas)
+            if (q.item == item) return true;
+    }
+    return false;
+}
+
 std::optional<IdTipoEdificio> Conteudo::buscar_edificio(std::string_view id) const {
     for (std::size_t i = 0; i < edificios.size(); ++i) {
         if (edificios[i].id == id) return static_cast<IdTipoEdificio>(i);
@@ -191,7 +201,7 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         const std::string ctx = "edificios.toml, '" + (*t)["id"].value_or(std::string("?")) + "'";
         conferir_chaves(*t,
                         { "id", "nome", "fase", "tamanho", "terreno", "cor", "trabalhadores", "estoque", "moradores",
-                          "campos", "requer", "receita" },
+                          "campos", "deposito", "requer", "receita" },
                         ctx, erros);
 
         DefinicaoEdificio d{};
@@ -229,6 +239,11 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         d.estoque = inteiro(*t, "estoque", 0, 0, ctx, erros);
         d.moradores = inteiro(*t, "moradores", 0, 0, ctx, erros);
         d.campos = inteiro(*t, "campos", 0, 0, ctx, erros);
+        if (t->contains("deposito")) {
+            auto deposito = (*t)["deposito"].value<bool>();
+            if (!deposito) erros.adicionar(ctx, "'deposito' precisa ser true ou false");
+            d.deposito = deposito.value_or(false);
+        }
 
         if (const toml::table* requer = (*t)["requer"].as_table()) {
             conferir_chaves(*requer, { "terreno", "distancia" }, ctx + ", requer", erros);
@@ -247,6 +262,8 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
             }
         }
 
+        if (d.deposito && !d.receitas.empty()) erros.adicionar(ctx, "depósito não pode ter receita");
+        if (d.deposito && d.estoque == 0) erros.adicionar(ctx, "depósito precisa de estoque > 0");
         if (!d.receitas.empty() && d.trabalhadores == 0) {
             erros.adicionar(ctx, "edifício com receita precisa de trabalhadores");
         }

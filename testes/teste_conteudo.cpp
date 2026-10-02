@@ -101,6 +101,17 @@ sazonalidade = [1, 1, 1]
     VERIFICAR(tem_erro_com(r, "12 valores"));
 }
 
+TESTE("conteúdo: depósito não pode ter receita") {
+    const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, edificio(R"(
+estoque = 10
+deposito = true
+[[edificio.receita]]
+dias = 3
+saidas = { pao = 1 }
+)"));
+    VERIFICAR(tem_erro_com(r, "depósito não pode ter receita"));
+}
+
 TESTE("conteúdo: erro de sintaxe informa linha e coluna") {
     const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, "[[edificio]]\nid = \n");
     VERIFICAR(tem_erro_com(r, "linha 2"));

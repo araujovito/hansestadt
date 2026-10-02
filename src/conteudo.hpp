@@ -57,8 +57,13 @@ struct DefinicaoEdificio {
     int estoque;
     int moradores;
     int campos;  // largura do anel de lavoura em volta
+    // Depósito guarda qualquer item até `estoque` no total; os demais
+    // guardam só o que suas receitas usam, até `estoque` de cada.
+    bool deposito;
     std::optional<Requisito> requer;
     std::vector<Receita> receitas;
+
+    bool usa_item(IdItem item) const;
 
     // Área ocupada no mapa, incluindo os campos. A origem de um edifício
     // construído é o canto dessa área; o núcleo começa `campos` células

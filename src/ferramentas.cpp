@@ -153,6 +153,10 @@ void desenhar_previa(const EstadoFerramenta& estado, const Cidade& cidade, Celul
             const Color borda = ok ? Color{ 200, 255, 200, 220 } : Color{ 255, 170, 160, 220 };
             DrawRectangleRec(r, ok ? PREVIA_OK : PREVIA_ERRO);
             DrawRectangleLinesEx(r, 2.0f, borda);
+            // A porta aparece na prévia para o jogador alinhar com a estrada.
+            const Celula porta = porta_de(def, origem);
+            DrawRectangleLinesEx(retangulo_mundo(porta, 1, 1), 2.0f,
+                                 cidade.tem_estrada(porta) ? Color{ 255, 230, 140, 255 } : borda);
             if (def.campos > 0) {
                 // Contorno do núcleo, para separar a casa da lavoura na prévia.
                 DrawRectangleLinesEx(retangulo_mundo({ origem.x + def.campos, origem.y + def.campos },
@@ -206,6 +210,8 @@ std::string dica_da_ferramenta(const EstadoFerramenta& estado, const Cidade& cid
                 (r.distancia == 1 ? " encostada" : " a até " + std::to_string(r.distancia) + " células");
     } else if (v != Validacao::Ok) {
         dica += std::string(": ") + descrever(v);
+    } else if (!cidade.tem_estrada(porta_de(def, origem_centrada(def, cursor)))) {
+        dica += ": falta estrada na entrada";
     }
     return dica;
 }

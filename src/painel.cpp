@@ -63,6 +63,11 @@ void desenhar_painel_edificio(const Cidade& cidade, IdEdificio id, int mes, int 
     DrawText(def.nome.c_str(), x, y, 22, CLARO);
     y += 30;
 
+    if (!cidade.tem_acesso(id)) {
+        DrawText("sem estrada na entrada", x, y, TEXTO, Color{ 235, 130, 110, 255 });
+        y += LINHA;
+    }
+
     const Situacao s = situacao(cidade, id, mes);
     if (s != Situacao::SemReceita) {
         DrawText(descrever(s), x, y, TEXTO, cor_da_situacao(s));

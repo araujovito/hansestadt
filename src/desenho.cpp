@@ -120,7 +120,25 @@ void desenhar_lavoura(const Edificio& e, const DefinicaoEdificio& def, int mes) 
     }
 }
 
-void desenhar_edificio(const Edificio& e, const DefinicaoEdificio& def, float zoom, int mes) {
+// Porta: um vão escuro na borda inferior, na coluna da célula de entrada.
+void desenhar_porta(Celula porta) {
+    const float x = static_cast<float>(porta.x * TAMANHO_CELULA) + TAMANHO_CELULA / 2.0f - 5.0f;
+    const float y = static_cast<float>(porta.y * TAMANHO_CELULA) - 7.0f;
+    DrawRectangleV({ x, y }, { 10.0f, 7.0f }, Color{ 50, 36, 24, 255 });
+}
+
+// Sem estrada na porta, nenhum carregador chega: o alerta fica no canto do
+// edifício até o jogador ligar a estrada.
+void desenhar_alerta_sem_acesso(const Rectangle& nucleo) {
+    const Vector2 centro{ nucleo.x + nucleo.width - 6.0f, nucleo.y + 6.0f };
+    DrawCircleV(centro, 9.0f, Color{ 200, 50, 40, 255 });
+    DrawCircleLinesV(centro, 9.0f, Color{ 255, 230, 220, 255 });
+    DrawText("!", static_cast<int>(centro.x) - 2, static_cast<int>(centro.y) - 8, 16, RAYWHITE);
+}
+
+void desenhar_edificio(const Cidade& cidade, IdEdificio id, float zoom, int mes) {
+    const Edificio& e = cidade.edificio(id);
+    const DefinicaoEdificio& def = cidade.definicao(id);
     if (def.campos > 0) desenhar_lavoura(e, def, mes);
     const Celula nucleo{ e.origem.x + def.campos, e.origem.y + def.campos };
     const Rectangle r{ static_cast<float>(nucleo.x * TAMANHO_CELULA) + 2.0f,
@@ -133,6 +151,9 @@ void desenhar_edificio(const Edificio& e, const DefinicaoEdificio& def, float zo
     DrawLineEx({ r.x + 4.0f, r.y + r.height / 2.0f }, { r.x + r.width - 4.0f, r.y + r.height / 2.0f }, 2.0f,
                escurecer(cor, 0.7f));
     DrawRectangleLinesEx(r, 2.0f, escurecer(cor, 0.55f));
+
+    desenhar_porta(cidade.porta(id));
+    if (!cidade.tem_acesso(id)) desenhar_alerta_sem_acesso(r);
 
     if (zoom >= 0.8f) {
         constexpr int tamanho = 10;
@@ -152,14 +173,15 @@ void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom, int me
         }
     }
 
-    for (const Edificio& e : cidade.edificios()) {
+    for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
+        const Edificio& e = cidade.edificio(id);
         if (!e.ativo) continue;
-        const DefinicaoEdificio& def = cidade.conteudo().edificio(e.tipo);
+        const DefinicaoEdificio& def = cidade.definicao(id);
         const Rectangle r{ static_cast<float>(e.origem.x * TAMANHO_CELULA),
                            static_cast<float>(e.origem.y * TAMANHO_CELULA),
                            static_cast<float>(def.largura_total() * TAMANHO_CELULA),
                            static_cast<float>(def.altura_total() * TAMANHO_CELULA) };
-        if (CheckCollisionRecs(r, visivel)) desenhar_edificio(e, def, zoom, mes);
+        if (CheckCollisionRecs(r, visivel)) desenhar_edificio(cidade, id, zoom, mes);
     }
 }
 

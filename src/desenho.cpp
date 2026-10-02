@@ -88,9 +88,43 @@ void desenhar_estrada(const Cidade& cidade, int x, int y) {
     if (cidade.tem_estrada({ x, y + 1 })) DrawRectangleV({ px + borda, py + borda + miolo }, { miolo, borda }, terra);
 }
 
-void desenhar_edificio(const Edificio& e, const DefinicaoEdificio& def, float zoom) {
-    const Rectangle r{ static_cast<float>(e.origem.x * TAMANHO_CELULA) + 2.0f,
-                       static_cast<float>(e.origem.y * TAMANHO_CELULA) + 2.0f,
+// Cor da lavoura de centeio de inverno ao longo do ano: semeado no outono,
+// brota antes do frio, cresce na primavera, amadurece dourado e é colhido
+// em julho-agosto, deixando o restolho até a lavra de setembro.
+Color cor_da_lavoura(int mes) {
+    switch (mes) {
+        case 1: case 2: return { 118, 116, 72, 255 };              // brotos sob o frio
+        case 3: case 4: return { 112, 150, 64, 255 };              // verde novo
+        case 5: case 6: return { 150, 162, 70, 255 };              // espigando
+        case 7: return { 214, 178, 82, 255 };                      // maduro
+        case 8: return { 196, 170, 110, 255 };                     // colheita, restolho
+        case 9: return { 128, 98, 66, 255 };                       // lavrado e semeado
+        default: return { 120, 112, 68, 255 };                     // outubro-dezembro: brotando
+    }
+}
+
+void desenhar_lavoura(const Edificio& e, const DefinicaoEdificio& def, int mes) {
+    const Color cor = cor_da_lavoura(mes);
+    const Color sulco = escurecer(cor, 0.82f);
+    for (int dy = 0; dy < def.altura_total(); ++dy) {
+        for (int dx = 0; dx < def.largura_total(); ++dx) {
+            if (!eh_lavoura(def, dx, dy)) continue;
+            const float px = static_cast<float>((e.origem.x + dx) * TAMANHO_CELULA);
+            const float py = static_cast<float>((e.origem.y + dy) * TAMANHO_CELULA);
+            DrawRectangleV({ px, py }, { TAMANHO_CELULA, TAMANHO_CELULA }, cor);
+            for (int i = 1; i < 4; ++i) {
+                const float y = py + static_cast<float>(i * TAMANHO_CELULA) / 4.0f;
+                DrawLineEx({ px + 2.0f, y }, { px + TAMANHO_CELULA - 2.0f, y }, 1.5f, sulco);
+            }
+        }
+    }
+}
+
+void desenhar_edificio(const Edificio& e, const DefinicaoEdificio& def, float zoom, int mes) {
+    if (def.campos > 0) desenhar_lavoura(e, def, mes);
+    const Celula nucleo{ e.origem.x + def.campos, e.origem.y + def.campos };
+    const Rectangle r{ static_cast<float>(nucleo.x * TAMANHO_CELULA) + 2.0f,
+                       static_cast<float>(nucleo.y * TAMANHO_CELULA) + 2.0f,
                        static_cast<float>(def.largura * TAMANHO_CELULA) - 4.0f,
                        static_cast<float>(def.altura * TAMANHO_CELULA) - 4.0f };
     const Color cor = GetColor(def.cor);
@@ -110,7 +144,7 @@ void desenhar_edificio(const Edificio& e, const DefinicaoEdificio& def, float zo
 
 }  // namespace
 
-void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom) {
+void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom, int mes) {
     const Intervalo v = celulas_visiveis(cidade.mapa(), visivel);
     for (int y = v.y0; y <= v.y1; ++y) {
         for (int x = v.x0; x <= v.x1; ++x) {
@@ -123,9 +157,9 @@ void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom) {
         const DefinicaoEdificio& def = cidade.conteudo().edificio(e.tipo);
         const Rectangle r{ static_cast<float>(e.origem.x * TAMANHO_CELULA),
                            static_cast<float>(e.origem.y * TAMANHO_CELULA),
-                           static_cast<float>(def.largura * TAMANHO_CELULA),
-                           static_cast<float>(def.altura * TAMANHO_CELULA) };
-        if (CheckCollisionRecs(r, visivel)) desenhar_edificio(e, def, zoom);
+                           static_cast<float>(def.largura_total() * TAMANHO_CELULA),
+                           static_cast<float>(def.altura_total() * TAMANHO_CELULA) };
+        if (CheckCollisionRecs(r, visivel)) desenhar_edificio(e, def, zoom, mes);
     }
 }
 

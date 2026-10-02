@@ -23,15 +23,18 @@ Cidade::Cidade(Mapa mapa, const Conteudo& conteudo)
 
 Validacao Cidade::validar_edificio(IdTipoEdificio tipo, Celula origem) const {
     const DefinicaoEdificio& def = conteudo_->edificio(tipo);
-    for (int dy = 0; dy < def.altura; ++dy) {
-        for (int dx = 0; dx < def.largura; ++dx) {
+    for (int dy = 0; dy < def.altura_total(); ++dy) {
+        for (int dx = 0; dx < def.largura_total(); ++dx) {
             const Celula c{ origem.x + dx, origem.y + dy };
             if (!mapa_.dentro(c.x, c.y)) return Validacao::ForaDoMapa;
-            if (mapa_.terreno(c.x, c.y) != def.terreno) return Validacao::TerrenoErrado;
+            // O anel de lavoura precisa de campo aberto; o núcleo, do terreno
+            // do edifício (que também é campo, no caso da fazenda).
+            const Terreno exigido = eh_lavoura(def, dx, dy) ? Terreno::Campo : def.terreno;
+            if (mapa_.terreno(c.x, c.y) != exigido) return Validacao::TerrenoErrado;
             if (ocupacao_[indice(c)] != SEM_EDIFICIO || estradas_[indice(c)]) return Validacao::Ocupado;
         }
     }
-    if (def.requer && !atende_requisito(*def.requer, origem, def.largura, def.altura)) {
+    if (def.requer && !atende_requisito(*def.requer, origem, def.largura_total(), def.altura_total())) {
         return Validacao::LongeDoRecurso;
     }
     return Validacao::Ok;
@@ -56,8 +59,8 @@ std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula
     edificios_.push_back({ tipo, origem, true });
 
     const DefinicaoEdificio& def = conteudo_->edificio(tipo);
-    for (int dy = 0; dy < def.altura; ++dy) {
-        for (int dx = 0; dx < def.largura; ++dx) {
+    for (int dy = 0; dy < def.altura_total(); ++dy) {
+        for (int dx = 0; dx < def.largura_total(); ++dx) {
             ocupacao_[indice({ origem.x + dx, origem.y + dy })] = id;
         }
     }
@@ -95,8 +98,8 @@ bool Cidade::demolir(Celula c) {
     Edificio& e = edificios_[id];
     e.ativo = false;
     const DefinicaoEdificio& def = conteudo_->edificio(e.tipo);
-    for (int dy = 0; dy < def.altura; ++dy) {
-        for (int dx = 0; dx < def.largura; ++dx) {
+    for (int dy = 0; dy < def.altura_total(); ++dy) {
+        for (int dx = 0; dx < def.largura_total(); ++dx) {
             ocupacao_[indice({ e.origem.x + dx, e.origem.y + dy })] = SEM_EDIFICIO;
         }
     }

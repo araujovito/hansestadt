@@ -55,6 +55,15 @@ tamanho = [1, 1]
 terreno = "campo"
 cor = "#808080"
 requer = { terreno = "floresta", distancia = 2 }
+
+[[edificio]]
+id = "fazendinha"
+nome = "fazendinha"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+campos = 1
 )";
 
 inline const Conteudo& conteudo_de_teste() {

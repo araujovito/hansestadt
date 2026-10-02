@@ -37,7 +37,7 @@ bool selecionado(const EstadoFerramenta& estado, const Botao& b) {
 // Com o cursor no centro do edifício, e não no canto, a prévia fica onde o
 // jogador está olhando.
 Celula origem_centrada(const DefinicaoEdificio& def, Celula cursor) {
-    return { cursor.x - (def.largura - 1) / 2, cursor.y - (def.altura - 1) / 2 };
+    return { cursor.x - (def.largura_total() - 1) / 2, cursor.y - (def.altura_total() - 1) / 2 };
 }
 
 Rectangle retangulo_mundo(Celula origem, int largura, int altura) {
@@ -135,9 +135,16 @@ void desenhar_previa(const EstadoFerramenta& estado, const Cidade& cidade, Celul
             const DefinicaoEdificio& def = cidade.conteudo().edificio(estado.tipo);
             const Celula origem = origem_centrada(def, cursor);
             const bool ok = cidade.validar_edificio(estado.tipo, origem) == Validacao::Ok;
-            const Rectangle r = retangulo_mundo(origem, def.largura, def.altura);
+            const Rectangle r = retangulo_mundo(origem, def.largura_total(), def.altura_total());
+            const Color borda = ok ? Color{ 200, 255, 200, 220 } : Color{ 255, 170, 160, 220 };
             DrawRectangleRec(r, ok ? PREVIA_OK : PREVIA_ERRO);
-            DrawRectangleLinesEx(r, 2.0f, ok ? Color{ 200, 255, 200, 220 } : Color{ 255, 170, 160, 220 });
+            DrawRectangleLinesEx(r, 2.0f, borda);
+            if (def.campos > 0) {
+                // Contorno do núcleo, para separar a casa da lavoura na prévia.
+                DrawRectangleLinesEx(retangulo_mundo({ origem.x + def.campos, origem.y + def.campos },
+                                                     def.largura, def.altura),
+                                     2.0f, borda);
+            }
             break;
         }
         case Ferramenta::Demolir: {
@@ -145,7 +152,7 @@ void desenhar_previa(const EstadoFerramenta& estado, const Cidade& cidade, Celul
             if (id != SEM_EDIFICIO) {
                 const Edificio& e = cidade.edificios()[id];
                 const DefinicaoEdificio& def = cidade.conteudo().edificio(e.tipo);
-                DrawRectangleRec(retangulo_mundo(e.origem, def.largura, def.altura), PREVIA_ERRO);
+                DrawRectangleRec(retangulo_mundo(e.origem, def.largura_total(), def.altura_total()), PREVIA_ERRO);
             } else if (cidade.tem_estrada(cursor)) {
                 DrawRectangleRec(retangulo_mundo(cursor, 1, 1), PREVIA_ERRO);
             }
@@ -175,7 +182,8 @@ std::string dica_da_ferramenta(const EstadoFerramenta& estado, const Cidade& cid
     if (estado.ativa != Ferramenta::Edificio) return {};
     const DefinicaoEdificio& def = cidade.conteudo().edificio(estado.tipo);
     const Validacao v = cidade.validar_edificio(estado.tipo, origem_centrada(def, cursor));
-    std::string dica = def.nome + " (" + std::to_string(def.largura) + "x" + std::to_string(def.altura) + ")";
+    std::string dica = def.nome + " (" + std::to_string(def.largura_total()) + "x" +
+                       std::to_string(def.altura_total()) + (def.campos > 0 ? " com campos" : "") + ")";
     if (v == Validacao::TerrenoErrado) {
         dica += ": precisa de " + std::string(nome_do_terreno(def.terreno));
     } else if (v == Validacao::LongeDoRecurso) {

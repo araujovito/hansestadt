@@ -60,10 +60,18 @@ struct DefinicaoEdificio {
     std::optional<Requisito> requer;
     std::vector<Receita> receitas;
 
-    // Área ocupada no mapa, incluindo os campos.
+    // Área ocupada no mapa, incluindo os campos. A origem de um edifício
+    // construído é o canto dessa área; o núcleo começa `campos` células
+    // para dentro.
     int largura_total() const { return largura + 2 * campos; }
     int altura_total() const { return altura + 2 * campos; }
 };
+
+// Se a célula (dx, dy), relativa à origem da área total, é lavoura e não o
+// edifício em si.
+inline bool eh_lavoura(const DefinicaoEdificio& d, int dx, int dy) {
+    return dx < d.campos || dy < d.campos || dx >= d.campos + d.largura || dy >= d.campos + d.altura;
+}
 
 struct Conteudo {
     std::vector<DefinicaoItem> itens;

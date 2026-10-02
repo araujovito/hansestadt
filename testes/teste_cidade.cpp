@@ -55,6 +55,36 @@ TESTE("cidade: requisito de terreno próximo, contando diagonais") {
     VERIFICAR(c.validar_edificio(tipo("perto_mata"), { 2, 2 }) == Validacao::LongeDoRecurso);
 }
 
+TESTE("cidade: fazenda ocupa o núcleo e o anel de lavoura") {
+    Cidade c = cidade_de_teste();
+    // 1×1 com campos = 1 ocupa 3×3 a partir da origem.
+    const auto id = c.construir_edificio(tipo("fazendinha"), { 1, 1 });
+    VERIFICAR(id.has_value());
+    VERIFICAR(c.edificio_em({ 1, 1 }) == *id);
+    VERIFICAR(c.edificio_em({ 3, 3 }) == *id);
+    VERIFICAR(c.edificio_em({ 4, 4 }) == SEM_EDIFICIO);
+    VERIFICAR(c.validar_estrada({ 3, 2 }) == Validacao::Ocupado);
+    VERIFICAR(c.demolir({ 3, 3 }));  // clicar na lavoura demole a fazenda
+    VERIFICAR(c.edificio_em({ 2, 2 }) == SEM_EDIFICIO);
+}
+
+TESTE("cidade: lavoura precisa de campo livre") {
+    Cidade c = cidade_de_teste();
+    // Origem na linha 0 põe a lavoura sobre a água.
+    VERIFICAR(c.validar_edificio(tipo("fazendinha"), { 1, 0 }) == Validacao::TerrenoErrado);
+    // Lavoura sobre a floresta em (5,5).
+    VERIFICAR(c.validar_edificio(tipo("fazendinha"), { 3, 3 }) == Validacao::TerrenoErrado);
+    c.construir_estrada({ 6, 2 });
+    VERIFICAR(c.validar_edificio(tipo("fazendinha"), { 6, 1 }) == Validacao::Ocupado);
+}
+
+TESTE("conteúdo: só o anel é lavoura") {
+    const DefinicaoEdificio& d = conteudo_de_teste().edificio(tipo("fazendinha"));
+    VERIFICAR(d.largura_total() == 3 && d.altura_total() == 3);
+    VERIFICAR(eh_lavoura(d, 0, 0) && eh_lavoura(d, 2, 1) && eh_lavoura(d, 1, 2));
+    VERIFICAR(!eh_lavoura(d, 1, 1));
+}
+
 TESTE("cidade: estrada em campo e argila, não em água, floresta ou edifício") {
     Cidade c = cidade_de_teste();
     c.construir_edificio(tipo("pequeno"), { 1, 1 });

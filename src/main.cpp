@@ -98,7 +98,7 @@ int main() {
 
         BeginMode2D(camera.camera2d());
         desenhar_mapa(mapa, camera.area_visivel(), camera.camera2d().zoom);
-        desenhar_cidade(cidade, camera.area_visivel(), camera.camera2d().zoom);
+        desenhar_cidade(cidade, camera.area_visivel(), camera.camera2d().zoom, sim.data.mes);
         if (!mouse_na_barra) {
             desenhar_previa(ferramenta, cidade, sob_cursor);
             if (mapa.dentro(sob_cursor.x, sob_cursor.y)) destacar_celula(sob_cursor);

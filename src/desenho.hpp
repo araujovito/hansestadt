@@ -10,8 +10,8 @@ inline constexpr int TAMANHO_CELULA = 32;
 
 // Desenha só as células dentro de `visivel` (coordenadas de mundo).
 void desenhar_mapa(const Mapa& mapa, Rectangle visivel, float zoom);
-// Estradas e edifícios, por cima do terreno.
-void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom);
+// Estradas e edifícios, por cima do terreno. O mês muda a cor das lavouras.
+void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom, int mes);
 void destacar_celula(Celula c);
 
 // Célula sob um ponto do mundo. Pode estar fora do mapa; conferir com

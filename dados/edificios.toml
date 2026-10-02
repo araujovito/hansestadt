@@ -1,0 +1,226 @@
+# Catálogo de edifícios. Todos os números são provisórios: vão ser
+# ajustados quando a produção estiver rodando e der para medir.
+#
+# Campos:
+#   id, nome        identificador interno e nome exibido
+#   fase            vila | mercado | cidade | hansa | auge (quando é liberado)
+#   tamanho         [largura, altura] em células, sem contar os campos
+#   terreno         terreno exigido em todas as células do edifício
+#   cor             cor provisória até existirem sprites
+#   trabalhadores   quantos moradores o edifício emprega
+#   estoque         capacidade de cada item de entrada e de saída
+#   moradores       quantos moram ali (só casas)
+#   campos          largura do anel de lavoura em volta (só fazendas);
+#                   as células do anel precisam ser campo livre
+#   requer          { terreno, distancia }: pelo menos uma célula desse
+#                   terreno a até `distancia` células da borda do edifício
+#
+# [[edificio.receita]]: o que o edifício transforma. Mais de uma receita
+# significa alternativas (a olaria aceita carvão ou turfa).
+#   dias            duração de um ciclo, em dias de jogo
+#   entradas/saidas { item = quantidade }
+#   sazonalidade    fator de produção por mês, de janeiro a dezembro
+#                   (omitido = 1 o ano todo; 0 = parado)
+
+# ---------------------------------------------------------------- vila
+
+[[edificio]]
+id = "armazem"
+nome = "armazém"
+fase = "vila"
+tamanho = [3, 3]
+terreno = "campo"
+cor = "#96764e"
+trabalhadores = 0
+estoque = 200
+
+[[edificio]]
+id = "casa"
+nome = "casa"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#d6be96"   # enxaimel caiado
+trabalhadores = 0
+estoque = 0
+moradores = 4
+
+[[edificio]]
+id = "lenhador"
+nome = "lenhador"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#7a5834"
+trabalhadores = 1
+estoque = 6
+requer = { terreno = "floresta", distancia = 3 }
+
+[[edificio.receita]]
+dias = 4
+saidas = { tora = 1 }
+# Corte no inverno: a seiva está baixa, a madeira seca melhor, e é quando
+# o trabalho do campo não ocupa os braços.
+sazonalidade = [1.2, 1.2, 1.0, 0.8, 0.6, 0.6, 0.6, 0.6, 0.8, 1.0, 1.2, 1.2]
+
+[[edificio]]
+id = "fazenda"
+nome = "fazenda"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#b8925a"
+trabalhadores = 2
+estoque = 12
+campos = 1
+
+[[edificio.receita]]
+dias = 2
+saidas = { centeio = 1 }
+# Centeio de inverno, o grão da planície do norte: semeado em
+# setembro-outubro e colhido em julho-agosto. Fora da colheita a fazenda
+# trabalha, mas não entrega grão.
+sazonalidade = [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
+
+[[edificio]]
+id = "moinho"
+nome = "moinho d'água"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#a08c6e"
+trabalhadores = 1
+estoque = 8
+# Moinho de roda d'água; o de vento só se espalha pelo norte a partir do
+# fim do século XII.
+requer = { terreno = "agua", distancia = 1 }
+
+[[edificio.receita]]
+dias = 2
+entradas = { centeio = 1 }
+saidas = { farinha = 1 }
+# O rio congela ou baixa no auge do inverno.
+sazonalidade = [0.5, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.7]
+
+[[edificio]]
+id = "padaria"
+nome = "padaria"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#c88c50"
+trabalhadores = 1
+estoque = 8
+
+[[edificio.receita]]
+dias = 3
+entradas = { farinha = 1 }
+saidas = { pao = 2 }
+
+[[edificio]]
+id = "pescador"
+nome = "pescador"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#6e8ca0"
+trabalhadores = 1
+estoque = 6
+requer = { terreno = "agua", distancia = 1 }
+
+[[edificio.receita]]
+dias = 3
+saidas = { peixe = 1 }
+# Pesca de rio rende pouco com o frio e o gelo.
+sazonalidade = [0.3, 0.3, 0.6, 1, 1, 1, 1, 1, 1, 0.8, 0.5, 0.3]
+
+[[edificio]]
+id = "pocilga"
+nome = "pocilga"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#8c6e5a"
+trabalhadores = 1
+estoque = 6
+# Os porcos engordavam soltos na floresta, comendo bolota (Waldweide).
+requer = { terreno = "floresta", distancia = 3 }
+
+[[edificio.receita]]
+dias = 8
+saidas = { carne = 1 }
+# Abate no fim do outono, depois da engorda com a bolota e antes de faltar
+# comida para os animais no inverno.
+sazonalidade = [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.5, 1, 2, 2]
+
+# ------------------------------------------------------------- mercado
+
+[[edificio]]
+id = "carvoaria"
+nome = "carvoaria"
+fase = "mercado"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#483e38"
+trabalhadores = 1
+estoque = 8
+
+[[edificio.receita]]
+dias = 6
+entradas = { tora = 2 }
+saidas = { carvao = 1 }
+
+[[edificio]]
+id = "cortador_turfa"
+nome = "cortador de turfa"
+fase = "mercado"
+tamanho = [2, 2]
+terreno = "turfa"
+cor = "#70603e"
+trabalhadores = 1
+estoque = 8
+
+[[edificio.receita]]
+dias = 4
+saidas = { turfa = 1 }
+# Cortada na primavera e seca no verão; brejo encharcado ou congelado no
+# inverno.
+sazonalidade = [0, 0, 0.5, 1, 1, 1, 1, 0.5, 0, 0, 0, 0]
+
+# -------------------------------------------------------------- cidade
+
+[[edificio]]
+id = "poco_argila"
+nome = "poço de argila"
+fase = "cidade"
+tamanho = [2, 2]
+terreno = "barreiro"
+cor = "#ba744c"
+trabalhadores = 1
+estoque = 8
+
+[[edificio.receita]]
+dias = 3
+saidas = { argila = 1 }
+# Argila congelada não se cava.
+sazonalidade = [0.2, 0.2, 0.6, 1, 1, 1, 1, 1, 1, 1, 0.6, 0.2]
+
+[[edificio]]
+id = "olaria"
+nome = "olaria"
+fase = "cidade"
+tamanho = [3, 2]
+terreno = "campo"
+cor = "#a84834"   # tijolo
+trabalhadores = 2
+estoque = 12
+
+[[edificio.receita]]
+dias = 8
+entradas = { argila = 2, carvao = 1 }
+saidas = { tijolo = 4 }
+
+[[edificio.receita]]
+dias = 8
+entradas = { argila = 2, turfa = 2 }
+saidas = { tijolo = 4 }

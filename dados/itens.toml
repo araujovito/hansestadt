@@ -1,0 +1,55 @@
+# Mercadorias que existem no jogo. Os ids são usados nas receitas de
+# edificios.toml; o carregador recusa receita com item desconhecido.
+#
+# tipo: "material" (construção e produção) ou "comida" (consumida pelos
+# moradores).
+
+[[item]]
+id = "tora"
+nome = "tora"
+tipo = "material"
+
+[[item]]
+id = "centeio"
+nome = "centeio"
+tipo = "material"
+
+[[item]]
+id = "farinha"
+nome = "farinha"
+tipo = "material"
+
+[[item]]
+id = "pao"
+nome = "pão"
+tipo = "comida"
+
+[[item]]
+id = "peixe"
+nome = "peixe"
+tipo = "comida"
+
+[[item]]
+id = "carne"
+nome = "carne"
+tipo = "comida"
+
+[[item]]
+id = "carvao"
+nome = "carvão"
+tipo = "material"
+
+[[item]]
+id = "turfa"
+nome = "turfa"
+tipo = "material"
+
+[[item]]
+id = "argila"
+nome = "argila"
+tipo = "material"
+
+[[item]]
+id = "tijolo"
+nome = "tijolo"
+tipo = "material"

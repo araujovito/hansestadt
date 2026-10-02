@@ -62,6 +62,25 @@ O tijolo fica para a fase de cidade porque, historicamente, o gótico de
 tijolo começa no Báltico a partir da década de 1160 (catedral de Lübeck,
 1173). Uma vila recém-fundada era de madeira.
 
+## População (planejado)
+
+Decisões tomadas para o primeiro marco jogável:
+
+- **A vila começa com 3 casais.** É uma fundação pequena de propósito: a
+  população cresce por **nascimentos**, e cada nova boca pesa no estoque
+  de comida antes de virar mão de obra.
+- **O jogador escolhe onde fundar a vila**, posicionando o primeiro
+  armazém. Escolher o lugar (perto do rio, da argila, da floresta) é a
+  primeira decisão estratégica da Ostsiedlung.
+- **A fome mata.** Sem comida, moradores morrem. É o que dá peso ao
+  inverno e, mais adiante, à Grande Fome de 1315–17.
+- **O balanceamento é feito com uma ferramenta em Python** que simula anos
+  inteiros sem janela e plota produção e consumo por mês. Os números do
+  TOML são ajustados por ela, não no chute.
+- **Estamentos ficam para depois.** A divisão da sociedade medieval
+  (camponeses, artesãos, mercadores, clero) muda as necessidades e a
+  economia, e entra como um passo próprio depois do primeiro marco.
+
 ## Tecnologia
 
 | Parte | Escolha | Motivo |

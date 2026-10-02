@@ -178,6 +178,10 @@ std::string dica_da_ferramenta(const EstadoFerramenta& estado, const Cidade& cid
     std::string dica = def.nome + " (" + std::to_string(def.largura) + "x" + std::to_string(def.altura) + ")";
     if (v == Validacao::TerrenoErrado) {
         dica += ": precisa de " + std::string(nome_do_terreno(def.terreno));
+    } else if (v == Validacao::LongeDoRecurso) {
+        const Requisito& r = *def.requer;
+        dica += ": precisa de " + std::string(nome_do_terreno(r.terreno)) +
+                (r.distancia == 1 ? " encostada" : " a até " + std::to_string(r.distancia) + " células");
     } else if (v != Validacao::Ok) {
         dica += std::string(": ") + descrever(v);
     }

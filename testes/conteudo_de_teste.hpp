@@ -37,6 +37,24 @@ fase = "cidade"
 tamanho = [2, 2]
 terreno = "barreiro"
 cor = "#808080"
+
+[[edificio]]
+id = "beira_rio"
+nome = "beira-rio"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#808080"
+requer = { terreno = "agua", distancia = 1 }
+
+[[edificio]]
+id = "perto_mata"
+nome = "perto da mata"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+requer = { terreno = "floresta", distancia = 2 }
 )";
 
 inline const Conteudo& conteudo_de_teste() {

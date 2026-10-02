@@ -8,6 +8,7 @@ const char* descrever(Validacao v) {
         case Validacao::ForaDoMapa: return "fora do mapa";
         case Validacao::TerrenoErrado: return "terreno inadequado";
         case Validacao::Ocupado: return "lugar ocupado";
+        case Validacao::LongeDoRecurso: return "longe do recurso";
         case Validacao::JaExiste: return "já existe";
     }
     return "?";
@@ -30,7 +31,22 @@ Validacao Cidade::validar_edificio(IdTipoEdificio tipo, Celula origem) const {
             if (ocupacao_[indice(c)] != SEM_EDIFICIO || estradas_[indice(c)]) return Validacao::Ocupado;
         }
     }
+    if (def.requer && !atende_requisito(*def.requer, origem, def.largura, def.altura)) {
+        return Validacao::LongeDoRecurso;
+    }
     return Validacao::Ok;
+}
+
+// Procura o terreno num retângulo que é o edifício expandido de `distancia`
+// células em cada direção, diagonais incluídas. O próprio edifício nunca
+// atende, porque já foi validado como outro terreno.
+bool Cidade::atende_requisito(const Requisito& r, Celula origem, int largura, int altura) const {
+    for (int y = origem.y - r.distancia; y < origem.y + altura + r.distancia; ++y) {
+        for (int x = origem.x - r.distancia; x < origem.x + largura + r.distancia; ++x) {
+            if (mapa_.dentro(x, y) && mapa_.terreno(x, y) == r.terreno) return true;
+        }
+    }
+    return false;
 }
 
 std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula origem) {

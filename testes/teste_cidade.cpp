@@ -45,6 +45,16 @@ TESTE("cidade: extratores só sobre o próprio recurso") {
     VERIFICAR(c.validar_edificio(tipo("pequeno"), { 2, 8 }) == Validacao::TerrenoErrado);
 }
 
+TESTE("cidade: requisito de terreno próximo, contando diagonais") {
+    Cidade c = cidade_de_teste();
+    // Água na linha 0: encostado em (1,1), a duas células em (1,2).
+    VERIFICAR(c.validar_edificio(tipo("beira_rio"), { 1, 1 }) == Validacao::Ok);
+    VERIFICAR(c.validar_edificio(tipo("beira_rio"), { 1, 2 }) == Validacao::LongeDoRecurso);
+    // Floresta em (5,5): (3,3) fica a duas células na diagonal, (2,2) a três.
+    VERIFICAR(c.validar_edificio(tipo("perto_mata"), { 3, 3 }) == Validacao::Ok);
+    VERIFICAR(c.validar_edificio(tipo("perto_mata"), { 2, 2 }) == Validacao::LongeDoRecurso);
+}
+
 TESTE("cidade: estrada em campo e argila, não em água, floresta ou edifício") {
     Cidade c = cidade_de_teste();
     c.construir_edificio(tipo("pequeno"), { 1, 1 });

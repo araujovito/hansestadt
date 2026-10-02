@@ -25,6 +25,7 @@ enum class Validacao : std::uint8_t {
     ForaDoMapa,
     TerrenoErrado,
     Ocupado,
+    LongeDoRecurso,  // faltou o terreno exigido em `requer` por perto
     JaExiste,  // estrada sobre estrada: não é erro, só não muda nada
 };
 
@@ -54,6 +55,8 @@ public:
     IdEdificio edificio_em(Celula c) const;
 
 private:
+    bool atende_requisito(const Requisito& r, Celula origem, int largura, int altura) const;
+
     std::size_t indice(Celula c) const {
         return static_cast<std::size_t>(c.y) * static_cast<std::size_t>(mapa_.largura()) +
                static_cast<std::size_t>(c.x);

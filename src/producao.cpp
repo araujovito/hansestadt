@@ -61,3 +61,35 @@ void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia) {
         e.progresso = 0;
     }
 }
+
+const char* descrever(Situacao s) {
+    switch (s) {
+        case Situacao::SemReceita: return "";
+        case Situacao::Produzindo: return "produzindo";
+        case Situacao::Pausado: return "pausado pela estação";
+        case Situacao::ForaDeEstacao: return "fora de estação";
+        case Situacao::FaltaEntrada: return "falta matéria-prima";
+        case Situacao::SaidaCheia: return "estoque de saída cheio";
+    }
+    return "?";
+}
+
+Situacao situacao(const Cidade& cidade, IdEdificio id, int mes) {
+    const DefinicaoEdificio& def = cidade.definicao(id);
+    if (def.receitas.empty()) return Situacao::SemReceita;
+
+    const Edificio& e = cidade.edificio(id);
+    if (e.receita_ativa >= 0) {
+        const Receita& r = def.receitas[static_cast<std::size_t>(e.receita_ativa)];
+        return fator_do_mes(r, mes) > 0 ? Situacao::Produzindo : Situacao::Pausado;
+    }
+
+    for (const Receita& r : def.receitas) {
+        if (fator_do_mes(r, mes) == 0) continue;
+        for (const Quantidade& q : r.saidas) {
+            if (cidade.espaco_para(id, q.item) < q.quantidade) return Situacao::SaidaCheia;
+        }
+        return Situacao::FaltaEntrada;
+    }
+    return Situacao::ForaDeEstacao;
+}

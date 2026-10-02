@@ -81,3 +81,21 @@ TESTE("produção: edifício demolido para de produzir") {
     rodar(c, TICKS_POR_DIA * 3, 7);
     VERIFICAR(c.edificio(f).estoque[item("pao")] == 0);
 }
+
+TESTE("situação: explica por que o edifício está parado") {
+    Cidade c(Mapa(8, 8), conteudo_de_teste());
+    const IdEdificio s = *c.construir_edificio(tipo("serraria"), { 1, 1 });
+    const IdEdificio f = *c.construir_edificio(tipo("colheita"), { 3, 3 });
+    const IdEdificio d = *c.construir_edificio(tipo("deposito"), { 5, 5 });
+
+    VERIFICAR(situacao(c, d, 3) == Situacao::SemReceita);
+    VERIFICAR(situacao(c, s, 3) == Situacao::FaltaEntrada);
+    VERIFICAR(situacao(c, f, 3) == Situacao::ForaDeEstacao);
+
+    c.adicionar(s, item("tabua"), 4);
+    VERIFICAR(situacao(c, s, 3) == Situacao::SaidaCheia);
+
+    rodar(c, 1, 7);
+    VERIFICAR(situacao(c, f, 7) == Situacao::Produzindo);
+    VERIFICAR(situacao(c, f, 9) == Situacao::Pausado);
+}

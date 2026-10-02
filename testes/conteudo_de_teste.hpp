@@ -84,6 +84,7 @@ terreno = "campo"
 cor = "#808080"
 estoque = 10
 deposito = true
+carregadores = 2
 
 [[edificio]]
 id = "serraria"

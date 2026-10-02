@@ -10,6 +10,7 @@
 #include "desenho.hpp"
 #include "ferramentas.hpp"
 #include "mapa.hpp"
+#include "painel.hpp"
 #include "relogio.hpp"
 #include "simulacao.hpp"
 
@@ -85,7 +86,11 @@ int main() {
     while (!WindowShouldClose()) {
         ler_comandos(relogio);
         ler_atalhos(ferramenta);
-        const bool mouse_na_barra = atualizar_barra(ferramenta);
+        const bool painel_aberto = ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo;
+        // Clique sobre a barra ou o painel não pode atravessar para o mapa.
+        const bool mouse_na_barra = atualizar_barra(ferramenta) ||
+                                    (painel_aberto && CheckCollisionPointRec(GetMousePosition(),
+                                                                             area_do_painel_edificio()));
         camera.atualizar(GetFrameTime());
         const Celula sob_cursor = celula_em(camera.mouse_no_mundo());
         if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
@@ -108,6 +113,9 @@ int main() {
         desenhar_painel(sim, relogio, mapa, sob_cursor,
                         mouse_na_barra ? std::string{} : dica_da_ferramenta(ferramenta, cidade, sob_cursor));
         desenhar_barra(ferramenta);
+        if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
+            desenhar_painel_edificio(cidade, *ferramenta.selecionado, sim.data.mes, Simulacao::TICKS_POR_DIA);
+        }
         EndDrawing();
     }
 

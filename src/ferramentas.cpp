@@ -70,7 +70,10 @@ EstadoFerramenta criar_ferramentas(const Conteudo& conteudo, Fase fase) {
 void ler_atalhos(EstadoFerramenta& estado) {
     if (IsKeyPressed(KEY_R)) estado.ativa = Ferramenta::Estrada;
     if (IsKeyPressed(KEY_X)) estado.ativa = Ferramenta::Demolir;
-    if (IsKeyPressed(KEY_ESCAPE)) estado.ativa = Ferramenta::Nenhuma;
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        if (estado.ativa == Ferramenta::Nenhuma) estado.selecionado.reset();
+        estado.ativa = Ferramenta::Nenhuma;
+    }
     if (estado.ativa != Ferramenta::Estrada) estado.inicio_estrada.reset();
 }
 
@@ -94,6 +97,11 @@ bool atualizar_barra(EstadoFerramenta& estado) {
 void aplicar_ferramenta(EstadoFerramenta& estado, Cidade& cidade, Celula cursor) {
     switch (estado.ativa) {
         case Ferramenta::Nenhuma:
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                const IdEdificio id = cidade.edificio_em(cursor);
+                if (id == SEM_EDIFICIO) estado.selecionado.reset();
+                else estado.selecionado = id;
+            }
             break;
         case Ferramenta::Estrada:
             // A estrada só é construída ao soltar o botão, para o jogador
@@ -120,6 +128,12 @@ void aplicar_ferramenta(EstadoFerramenta& estado, Cidade& cidade, Celula cursor)
 }
 
 void desenhar_previa(const EstadoFerramenta& estado, const Cidade& cidade, Celula cursor) {
+    if (estado.selecionado && cidade.edificio(*estado.selecionado).ativo) {
+        const Edificio& e = cidade.edificio(*estado.selecionado);
+        const DefinicaoEdificio& def = cidade.definicao(*estado.selecionado);
+        DrawRectangleLinesEx(retangulo_mundo(e.origem, def.largura_total(), def.altura_total()), 3.0f,
+                             Color{ 255, 230, 140, 255 });
+    }
     switch (estado.ativa) {
         case Ferramenta::Nenhuma:
             break;

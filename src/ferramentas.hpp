@@ -25,12 +25,15 @@ struct EstadoFerramenta {
     // Célula onde o arraste da estrada começou, enquanto o botão está apertado.
     std::optional<Celula> inicio_estrada;
     std::vector<Botao> botoes;
+    // Edifício cujo painel está aberto (clique sem ferramenta ativa).
+    std::optional<IdEdificio> selecionado;
 };
 
 // Monta a barra com estrada, os edifícios liberados até `fase` e demolir.
 EstadoFerramenta criar_ferramentas(const Conteudo& conteudo, Fase fase);
 
-// Atalhos de teclado: R estrada, X demolir, Esc solta a ferramenta.
+// Atalhos de teclado: R estrada, X demolir, Esc solta a ferramenta (ou, sem
+// ferramenta, fecha o painel do edifício).
 void ler_atalhos(EstadoFerramenta& estado);
 
 // Trata cliques na barra inferior. Devolve true se o mouse está sobre ela,

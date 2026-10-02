@@ -127,4 +127,5 @@ Controles:
 | Estrada | `R`, depois clicar e arrastar; constrói ao soltar |
 | Edifício | botão na barra inferior, depois clicar no mapa |
 | Demolir | `X`, depois clicar ou arrastar |
-| Soltar a ferramenta | `Esc` |
+| Ver produção e estoque | clicar num edifício (sem ferramenta ativa) |
+| Soltar a ferramenta / fechar o painel | `Esc` |

@@ -5,6 +5,9 @@ Hanseática, entre a fundação de uma vila na colonização do leste (~1150) e 
 auge da Hansa (~1370). Não há adversários: a dificuldade vem da economia, do
 clima e dos acontecimentos históricos.
 
+> Decisões de implementação, coisas descartadas, pendências e histórico
+> ficam em [`contexto.md`](contexto.md).
+
 > Status: protótipo. Dá para construir a vila, e os edifícios produzem
 > e trocam mercadorias por carregadores; ainda não há moradores nem eventos.
 

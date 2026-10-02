@@ -73,6 +73,17 @@ sudo apt install g++ make curl libx11-dev libgl1-mesa-dev libxrandr-dev \
 ```sh
 make run          # baixa e compila a raylib na primeira vez, depois roda
 make debug        # build com AddressSanitizer e UBSan
+make test         # testes da lógica, sem janela
 ```
 
-Controles: `WASD`/setas ou botão do meio/direito arrastando movem a câmera, a roda dá zoom; `Espaço` pausa, `1` `2` `3` mudam a velocidade (1×, 2×, 4×).
+Controles:
+
+| Ação | Comando |
+|---|---|
+| Mover a câmera | `WASD`, setas, ou arrastar com o botão do meio/direito |
+| Zoom | roda do mouse (em direção ao cursor) |
+| Pausar / velocidade | `Espaço` / `1` `2` `3` (1×, 2×, 4×) |
+| Estrada | `R`, depois clicar e arrastar; constrói ao soltar |
+| Edifício | botão na barra inferior, depois clicar no mapa |
+| Demolir | `X`, depois clicar ou arrastar |
+| Soltar a ferramenta | `Esc` |

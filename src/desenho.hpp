@@ -4,17 +4,19 @@
 
 #include "cidade.hpp"
 #include "mapa.hpp"
-#include "transporte.hpp"
 
 // Tamanho de uma célula em pixels de mundo (zoom 1).
 inline constexpr int TAMANHO_CELULA = 32;
 
-// Desenha só as células dentro de `visivel` (coordenadas de mundo).
-void desenhar_mapa(const Mapa& mapa, Rectangle visivel, float zoom);
-// Estradas e edifícios, por cima do terreno. O mês muda a cor das lavouras.
-void desenhar_cidade(const Cidade& cidade, Rectangle visivel, float zoom, int mes);
-// Carregadores, interpolados entre a célula atual e a próxima da rota.
-void desenhar_carregadores(const Cidade& cidade, const Transporte& transporte, Rectangle visivel);
+// Marcas de jogo por cima da arte (chamar dentro de BeginMode2D). O mundo em
+// si é desenhado pela Arte e pelo CenarioEmPedacos.
+
+// Círculo vermelho com "!" no canto dos edifícios sem estrada na porta: sem
+// ela nenhum carregador chega, e o aviso fica até o jogador ligar a estrada.
+void desenhar_avisos_sem_acesso(const Cidade& cidade, Rectangle visivel);
+// Nome do edifício sob o cursor, numa etiqueta acima dele. Cada edifício tem
+// silhueta própria; o nome só aparece quando o jogador aponta.
+void desenhar_nome_sob_cursor(const Cidade& cidade, Celula cursor, float zoom);
 void destacar_celula(Celula c);
 
 // Célula sob um ponto do mundo. Pode estar fora do mapa; conferir com

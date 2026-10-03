@@ -336,9 +336,11 @@ int main() {
         cenario.desenhar(camera.area_visivel(), camera.camera2d().zoom);
         arte.desenhar_edificios(cidade, sim.fase, sim.data.mes, camera.area_visivel());
         arte.desenhar_carregadores(cidade, sim.transporte, camera.area_visivel());
+        desenhar_avisos_sem_acesso(cidade, camera.area_visivel());
         if (!mouse_na_barra) {
             desenhar_previa(ferramenta, cidade, sob_cursor);
             if (mapa.dentro(sob_cursor.x, sob_cursor.y)) destacar_celula(sob_cursor);
+            if (ferramenta.ativa == Ferramenta::Nenhuma) desenhar_nome_sob_cursor(cidade, sob_cursor, camera.camera2d().zoom);
         }
         EndMode2D();
 

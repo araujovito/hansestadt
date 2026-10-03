@@ -100,8 +100,12 @@ do README e do contexto e um ou mais commits pequenos.
    - Explicar por que uma construção, produção ou entrega está bloqueada.
 
 10. **Arte e áudio**
-    - Sprites, animações, música e sons ambientais.
-    - Avaliar primeiro o pacote Medieval RTS da Kenney (CC0).
+    - Em andamento na `claude/interface`: o mundo já é desenhado em pixel art
+      (Kenney Tiny Town e Tiny Farm, CC0, mais peças próprias), com os 29
+      edifícios, estações e o cenário guardado em pedaços. O Medieval RTS foi
+      avaliado e descartado (ver contexto.md, Visual).
+    - Falta: animações (água, fumaça, roda d'água, caminhada), prévia de
+      construção no estilo novo, música e sons ambientais.
 
 11. **Estamentos sociais**
     - Camponeses, artesãos, mercadores e clero.

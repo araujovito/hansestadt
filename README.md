@@ -147,6 +147,7 @@ de outras cadeias; serve para achar discrepâncias, não substitui a simulação
 | Conteúdo (edifícios, receitas, eventos) | TOML, lido com [toml++](https://github.com/marzer/tomlplusplus) 3.4 | Balancear sem recompilar, com o histórico de ajustes visível no git |
 | Scripts de eventos | Lua (avaliar depois) | Só adicionar se um evento exigir regras que o TOML não expresse |
 | Ferramentas | Python | Simular e plotar a economia fora do jogo |
+| Arte | Pixel art de 16×16: [Tiny Town](https://kenney.nl/assets/tiny-town) e [Tiny Farm](https://kenney.nl/assets/tiny-farm) da Kenney (CC0) e peças próprias | Estilo de vila aconchegante e legível; as peças que a Kenney não tem (água, turfa, tijolo, palha, gótico de tijolo, roda d'água, porto) são desenhadas por script na mesma paleta |
 
 Os eventos estão em `dados/eventos.toml`: cada `[[evento]]` tem `id`,
 `nome`, `descricao`, datas julianas inclusivas (`[ano, mês, dia]`) e
@@ -181,6 +182,20 @@ listas de edifícios e itens.
 Regras para conter o risco de memória do C++: nada de `new`/`delete` direto,
 entidades referenciadas por índice/ID em vez de ponteiro, e build de
 depuração com AddressSanitizer e UBSan.
+
+## Arte
+
+O mundo é desenhado em pixel art, com um tamanho de pixel só para chão,
+edifícios e pessoas. Os pacotes da Kenney são baixados pelo `make`
+(`scripts/baixar-kenney.sh`, com checksum, em `vendor/kenney`); as peças
+próprias ficam em `dados/arte/pecas.png`, geradas por
+`ferramentas/gerar_pecas.py`.
+
+Cada edifício tem silhueta própria. As casas acompanham a época da cidade
+(palha na vila, telha no mercado, tijolo da cidade em diante); igreja e
+casa do conselho mudam com o nível; moinho, porto e pesca de arenque se
+viram para o lado da água. As lavouras seguem o mês, e o outono e a neve do
+inverno mudam o mapa inteiro.
 
 ## Conteúdo
 
@@ -291,6 +306,7 @@ Controles:
 | Estrada | `R`, depois clicar e arrastar; constrói ao soltar |
 | Edifício | botão na barra inferior, depois clicar no mapa |
 | Demolir | `X`, depois clicar ou arrastar |
+| Ver o nome de um edifício | apontar com o mouse (sem ferramenta ativa) |
 | Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
 | Evoluir a instituição selecionada (provisório) | `U` |
 | Relatório de emprego, comida, produção e transporte | `V` ou o botão `Relatório` no canto de cima (o jogo continua andando) |

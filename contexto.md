@@ -106,6 +106,36 @@ as de implementação, que o README não explica.
   Uma assinatura do estado final (população, cargas perdidas, soma dos
   estoques, entregas) confere que uma otimização não mudou o resultado.
 
+### Visual
+- **Estilo pixel art de vila aconchegante** (pedido do Vitor: "algo como
+  Stardew Valley", não um jogo de console). Avaliados em protótipo fora do
+  repositório: o Medieval RTS da Kenney (vetorial, só 11 dos 29 edifícios,
+  sem tijolo) e os Tiny Town e Tiny Farm (pixel art de 16×16, edifícios
+  montados por partes). Ficaram os Tiny, em doze rodadas comparadas com o
+  exemplo da própria Kenney.
+- **Pacotes da Kenney baixados por script**, como as bibliotecas (decisão do
+  Vitor); **peças próprias no repositório** (`dados/arte/pecas.png`), geradas
+  por `ferramentas/gerar_pecas.py`: o script é determinístico e quem só
+  compila não precisa de Python nem de Pillow.
+- **Um tamanho de pixel só.** A primeira versão desenhava o chão ampliado 2× e
+  as casas em 1×, e ficava com cara de jogo de 8 bits; a célula do jogo passou
+  a ter 2×2 peças de 16 px, tudo em 1×.
+- **Uma textura só, com 1 px de folga repetida em volta de cada peça**, e
+  sombras como peça esticada em vez de elipse; a raylib desenha os retângulos
+  (neve) com um pixel branco da mesma folha. No protótipo, elipses e trocas de
+  textura quebravam o agrupamento e custavam metade do quadro.
+- **Cenário parado guardado em pedaços de 16×16 células**, refeitos quando
+  muda a assinatura (terreno, estrada e ocupação das células e de uma faixa de
+  três em volta, mais a estação). A assinatura é calculada a cada quadro a
+  partir da cidade, sem pedir aviso à simulação. Desenhado peça por peça, o
+  mapa inteiro custava 36 ms por quadro; com os pedaços, 1,3 ms.
+- **Edifícios e pessoas desenhados a cada quadro**, por cima dos pedaços:
+  mudam com frequência (nível, lavoura do mês) e passam da borda dos pedaços.
+- **As casas seguem a fase atual da cidade** (todas viram tijolo quando a
+  cidade chega à fase Cidade), não a época em que foram construídas: o jogo
+  não guarda quando cada casa foi erguida. Decisão de Claude ao portar o
+  visual; pode ser revista.
+
 ### Conteúdo
 - **TOML lido com toml++**: um cabeçalho só, TOML 1.0 completo, erros com
   linha e coluna. Só `conteudo.cpp` o inclui (são 18 mil linhas).
@@ -134,6 +164,15 @@ as de implementação, que o README não explica.
 | Tipo de item `material` | Colidia com o tipo global `Material` da raylib; virou `insumo`. |
 
 ## Problemas conhecidos e limitações
+
+- **O visual ainda não se mexe**: água, fumaça, roda d'água e a caminhada dos
+  carregadores são desenhadas paradas (as duas fases da água já existem).
+  Animar a água exige refazer os pedaços ou desenhá-la fora deles.
+- **Montar os pedaços na primeira vez leva de 7 a 40 ms** (ao abrir a partida
+  ou ao afastar a câmera pela primeira vez): um engasgo único. Os pedaços do
+  mapa 128×128 ocupam cerca de 75 MB da placa de vídeo; um mapa maior
+  precisaria descartar os pedaços fora da tela.
+- **A prévia de construção ainda é o retângulo antigo**, por cima da arte nova.
 
 - **Os 6 moradores iniciais ainda não nascem nem envelhecem**; nesta etapa
   apenas procuram vagas nas casas.
@@ -201,6 +240,10 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Visual em pixel art no jogo** (`b48f711`..`6480cf2`): arte da Kenney por
+  script, peças próprias por script, assinatura e cache do cenário em pedaços,
+  edifícios e pessoas por cima. Quadro de 0,5 a 1,3 ms, contra 0,7 a 3,0 ms
+  do desenho antigo em retângulos. 141 testes.
 - **Integração local dos ramos**: `integracao/plano-de-acao` agora inclui os
   commits atuais de `codex/simulacao` e `claude/interface` (merges
   `ce7996b` e `fcdf3fc`). Os ramos de trabalho continuam separados; portanto,

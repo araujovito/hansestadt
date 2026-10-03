@@ -110,6 +110,16 @@ TESTE("pedidos: o depósito abastece a entrada do produtor") {
     VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 0);
 }
 
+TESTE("pedidos: casa pede comida para a despensa") {
+    Vila v;
+    const IdEdificio casa = *v.c.construir_edificio(tipo("casa"), { 5, 4 });  // porta (5,6)
+    estrada(v.c, { 5, 6 }, { 7, 2 });
+    v.c.adicionar(v.deposito, item("pao"), 3);
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(casa).estoque[item("pao")] == 3);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("pao")] == 0);
+}
+
 TESTE("pedidos: não leva mais do que cabe na entrada") {
     Vila v;
     v.c.adicionar(v.deposito, item("tora"), 9);

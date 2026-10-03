@@ -7,6 +7,7 @@
 struct Morador {
     IdEdificio casa = SEM_EDIFICIO;
     IdEdificio trabalho = SEM_EDIFICIO;
+    int dias_sem_comida = 0;
 };
 
 // Moradores pertencem à simulação, não aos edifícios: assim continuam
@@ -17,6 +18,7 @@ public:
 
     void alojar(Cidade& cidade);
     void empregar(const Cidade& cidade);
+    void consumir_comida(Cidade& cidade);
 
     int total() const { return static_cast<int>(moradores_.size()); }
     int alojados() const;

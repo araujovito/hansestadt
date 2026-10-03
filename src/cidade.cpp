@@ -143,6 +143,13 @@ int Cidade::espaco_para(IdEdificio id, IdItem item) const {
         for (int q : e.estoque) total += q;
         return def.estoque - total;
     }
+    if (def.moradores > 0 && conteudo_->itens[item].tipo == TipoItem::Comida) {
+        int comida = 0;
+        for (IdItem i = 0; i < conteudo_->itens.size(); ++i) {
+            if (conteudo_->itens[i].tipo == TipoItem::Comida) comida += e.estoque[i];
+        }
+        return def.estoque - comida;
+    }
     return def.usa_item(item) ? def.estoque - e.estoque[item] : 0;
 }
 

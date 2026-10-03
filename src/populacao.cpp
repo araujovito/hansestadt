@@ -57,3 +57,20 @@ void Populacao::empregar(const Cidade& cidade) {
         }
     }
 }
+
+void Populacao::consumir_comida(Cidade& cidade) {
+    const Conteudo& conteudo = cidade.conteudo();
+    for (Morador& m : moradores_) {
+        bool comeu = false;
+        if (m.casa != SEM_EDIFICIO) {
+            for (IdItem item = 0; item < conteudo.itens.size(); ++item) {
+                if (conteudo.itens[item].tipo != TipoItem::Comida) continue;
+                if (cidade.retirar(m.casa, item, 1)) {
+                    comeu = true;
+                    break;
+                }
+            }
+        }
+        m.dias_sem_comida = comeu ? 0 : m.dias_sem_comida + 1;
+    }
+}

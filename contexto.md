@@ -141,8 +141,8 @@ agora, estamentos depois):
 
 1. ~~Moradores nas casas e população na barra do topo.~~ Concluído.
 2. ~~Trabalhadores limitam a produção.~~ Concluído.
-3. **Agora:** casas pedem comida pelo sistema de pedidos; consumo diário.
-4. Fome mata.
+3. ~~Casas pedem comida pelo sistema de pedidos; consumo diário.~~ Concluído.
+4. **Agora:** fome mata.
 5. Início da partida: jogador posiciona o primeiro armazém; estoque inicial.
 6. Ferramenta de balanceamento em Python (simula anos sem janela, plota
    produção × consumo por mês) e ajuste do TOML.
@@ -170,6 +170,9 @@ de fase, arte, estamentos.
 
 ### 2026-10-03
 
+- **Alimentação das casas**: despensa compartilhada entre os tipos de comida,
+  pedidos atendidos pelos carregadores e consumo diário por morador. A falta
+  já é contada individualmente, preparando as mortes por fome. 87 testes.
 - **Trabalho limita a produção**: moradores alojados ocupam empregos em
   ordem determinística; edifícios sem a equipe completa param e explicam o
   motivo na interface. 84 testes.

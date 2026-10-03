@@ -59,3 +59,19 @@ TESTE("população: moradores alojados ocupam empregos em ordem") {
     p.empregar(c);
     VERIFICAR(p.trabalhadores_em(colheita) == 1);
 }
+
+TESTE("população: cada morador consome uma comida por dia") {
+    Cidade c = cidade_para_populacao();
+    const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+    Populacao p(2);
+    p.alojar(c);
+    c.adicionar(casa, item("pao"), 3);
+
+    p.consumir_comida(c);
+    VERIFICAR(c.edificio(casa).estoque[item("pao")] == 1);
+    VERIFICAR(p.moradores()[0].dias_sem_comida == 0);
+    p.consumir_comida(c);
+    VERIFICAR(c.edificio(casa).estoque[item("pao")] == 0);
+    VERIFICAR(p.moradores()[0].dias_sem_comida == 0);
+    VERIFICAR(p.moradores()[1].dias_sem_comida == 1);
+}

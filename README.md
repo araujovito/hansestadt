@@ -10,7 +10,8 @@ clima e dos acontecimentos históricos.
 
 > Status: protótipo. Dá para construir a vila, e os edifícios produzem
 > e trocam mercadorias por carregadores. A vila começa com 3 casais, que
-> ocupam as casas e trabalham nos edifícios; ainda não há consumo nem eventos.
+> ocupam as casas, trabalham e recebem comida por carregadores; ainda não há
+> mortes, crescimento da população nem eventos.
 
 ## Ideia central
 
@@ -90,6 +91,9 @@ das casas em ordem de construção e ficam sem teto se a moradia for demolida;
 a barra superior mostra a população total, os sem-casa e os desempregados.
 Só moradores alojados trabalham. Os empregos são preenchidos na ordem de
 construção dos edifícios, e uma oficina só produz com a equipe completa.
+As casas têm uma despensa compartilhada, pedem qualquer alimento disponível
+pelo mesmo sistema de transporte das oficinas e consomem uma unidade por
+morador a cada dia.
 
 ## Tecnologia
 
@@ -137,8 +141,9 @@ vez de abrir com conteúdo pela metade.
    abaixo do meio da borda inferior), e sem estrada nela ele fica isolado.
 3. **Transporte** (`src/transporte.cpp`). Os carregadores moram no
    armazém. A cada 10 ticks, cada vaga na entrada de um produtor pede um
-   item à origem mais próxima, e depois o que sobra nas saídas vai para o
-   depósito. Item e vaga são reservados na hora da atribuição. Se a
+   item à origem mais próxima; casas fazem o mesmo para encher a despensa.
+   Depois, o que sobra nas saídas vai para o depósito. Item e vaga são
+   reservados na hora da atribuição. Se a
    origem é demolida, o carregador desiste. Se o destino some ou lota, a
    carga vai para o depósito.
 

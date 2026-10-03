@@ -38,6 +38,15 @@ TESTE("estoque: depósito aceita qualquer item, com limite total") {
     VERIFICAR(!c.adicionar(d, item("tabua"), 1));
 }
 
+TESTE("estoque: casa guarda comida em uma despensa compartilhada") {
+    Cidade c = cidade_vazia();
+    const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+    VERIFICAR(c.espaco_para(casa, item("pao")) == 8);
+    VERIFICAR(c.espaco_para(casa, item("tora")) == 0);
+    VERIFICAR(c.adicionar(casa, item("pao"), 5));
+    VERIFICAR(c.espaco_para(casa, item("pao")) == 3);
+}
+
 TESTE("estoque: retirar não deixa ficar negativo") {
     Cidade c = cidade_vazia();
     const IdEdificio d = *c.construir_edificio(tipo("deposito"), { 1, 1 });

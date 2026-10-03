@@ -93,6 +93,7 @@ fase = "vila"
 tamanho = [2, 2]
 terreno = "campo"
 cor = "#808080"
+estoque = 8
 moradores = 4
 
 [[edificio]]

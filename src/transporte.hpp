@@ -36,8 +36,8 @@ struct Carregador {
 // Quem leva o quê para onde.
 //
 // A cada PLANEJAR_A_CADA ticks o transporte distribui pedidos:
-// 1. Demandas: cada vaga livre na entrada de um produtor (descontado o que
-//    já está a caminho) pede um item. A origem é o edifício de rota mais
+// 1. Demandas: cada vaga livre na entrada de um produtor ou na despensa de
+//    uma casa (descontado o que já está a caminho) pede um item. A origem é o edifício de rota mais
 //    curta que tem o item disponível, seja produtor (na saída) ou depósito.
 // 2. Sobras: o que está na saída de um produtor e ninguém pediu vai para o
 //    depósito de rota mais curta com vaga.

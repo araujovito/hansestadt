@@ -48,7 +48,7 @@ tamanho = [2, 2]
 terreno = "campo"
 cor = "#d6be96"   # enxaimel caiado
 trabalhadores = 0
-estoque = 0
+estoque = 12
 moradores = 4
 
 [[edificio]]

@@ -16,7 +16,8 @@ clima e dos acontecimentos históricos.
 > Eventos históricos em `dados/eventos.toml`: Grande Fome (1315–17) e inverno
 > rigoroso de 1322–23 reduzem a produção; a Peste Negra (1347–51) também mata.
 > Há menu de pausa com quatro vagas de partida, alertas clicáveis e relatório
-> de emprego, comida, produção e transporte. O equilíbrio da comida ainda está
+> de emprego, comida, produção, transporte e história (os acontecimentos já
+> vividos, com aviso quando um começa). O equilíbrio da comida ainda está
 > em ajuste: sem expandir a produção, a vila inicial passa fome no primeiro
 > ano (ver `contexto.md`).
 
@@ -314,7 +315,7 @@ Controles:
 | Ver o nome de um edifício | apontar com o mouse (sem ferramenta ativa) |
 | Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
 | Evoluir a instituição selecionada (provisório) | `U` |
-| Relatório de emprego, comida, produção e transporte | `V` ou o botão `Relatório` no canto de cima (o jogo continua andando) |
+| Relatório de emprego, comida, produção, transporte e história | `V` ou o botão `Relatório` no canto de cima (o jogo continua andando) |
 | Ir até um edifício com problema | clicar em `ver >` no alerta, no canto esquerdo (cliques seguidos percorrem os edifícios do alerta) |
 | Salvar / carregar rápido | `F5` / `F9` (`partida.hanse`) |
 | Menu de pausa (continuar, salvar e carregar em 4 vagas, sair) | `Esc` sem ferramenta nem painel aberto, ou o botão `Menu` no canto de cima |

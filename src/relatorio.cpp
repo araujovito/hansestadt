@@ -105,7 +105,8 @@ RelatorioTransporte montar_transporte(const Simulacao& sim) {
 }  // namespace
 
 Relatorio montar_relatorio(const Simulacao& sim) {
-    return { montar_emprego(sim), montar_comida(sim), montar_producao(sim), montar_transporte(sim) };
+    return { montar_emprego(sim), montar_comida(sim), montar_producao(sim), montar_transporte(sim),
+             montar_historico(sim.eventos, sim.data, sim.cidade.conteudo()) };
 }
 
 std::string resumir_producao(const LinhaDeProducao& linha) {

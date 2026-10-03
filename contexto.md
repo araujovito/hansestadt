@@ -264,6 +264,10 @@ documentos não voltarem a divergir.
   plano): monta a lista de eventos já iniciados, com período por extenso,
   dias restantes e efeitos em palavras, e detecta eventos que começaram entre
   duas datas. Sem raylib, com 7 testes; a tela vem no commit seguinte.
+- **Aba História no relatório e aviso de evento**: quinta aba da janela da
+  tecla V, com quebra de linha da descrição e resumo do que não couber; a
+  barra de cima avisa "começou: <evento>" por 5 s. O aviso compara a data de
+  antes e depois dos passos do quadro, para carregar partida não disparar.
 - **Memória atualizada com o recado do Claude**: o plano agora tem o item
   7b com as três decisões do Vitor sobre alimentação e as perguntas abertas;
   problemas conhecidos registram o déficit alimentar da vila inicial e a

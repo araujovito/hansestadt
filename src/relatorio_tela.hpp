@@ -6,11 +6,11 @@
 
 #include "relatorio.hpp"
 
-// Janela de relatório com quatro abas. Não para o jogo: dá para acompanhar a
+// Janela de relatório com cinco abas. Não para o jogo: dá para acompanhar a
 // vila andando. Abre e fecha pela tecla V ou pelo botão na barra de cima.
 class JanelaDeRelatorio {
 public:
-    enum class Aba { Emprego, Comida, Producao, Transporte };
+    enum class Aba { Emprego, Comida, Producao, Transporte, Historia };
 
     bool aberta() const { return aberta_; }
     void alternar() { aberta_ = !aberta_; }
@@ -32,6 +32,7 @@ private:
     void desenhar_comida(const RelatorioComida& c, float x, float y) const;
     void desenhar_producao(const std::vector<LinhaDeProducao>& p, float x, float y) const;
     void desenhar_transporte(const RelatorioTransporte& t, float x, float y) const;
+    void desenhar_historia(const std::vector<EntradaDoHistorico>& h, float x, float y) const;
 
     bool aberta_ = false;
     Aba aba_ = Aba::Emprego;

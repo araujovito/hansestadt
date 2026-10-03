@@ -13,6 +13,7 @@
 #include "desenho.hpp"
 #include "ferramentas.hpp"
 #include "fundacao.hpp"
+#include "historico.hpp"
 #include "mapa.hpp"
 #include "menu.hpp"
 #include "painel.hpp"
@@ -308,7 +309,14 @@ int main() {
 
             const int passos = relogio.passos_para(GetFrameTime());
             if (fundacao.concluida()) {
+                const Data antes_dos_passos = sim.data;
                 for (int i = 0; i < passos; ++i) sim.passo();
+                // A data de antes é deste quadro, então carregar uma partida
+                // de outro ano não anuncia eventos que já tinham passado.
+                for (const EventoHistorico* e : comecaram_entre(sim.eventos, antes_dos_passos, sim.data)) {
+                    aviso = "começou: " + e->nome + " (Relatório > História)";
+                    aviso_quadros = 300;
+                }
             }
         }
         // Antes da fundação não há vila para ter problema.

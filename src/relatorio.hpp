@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 
+#include "historico.hpp"
 #include "producao.hpp"
 #include "simulacao.hpp"
 
-// Números da vila para a janela de relatório (emprego, comida, produção e
-// transporte). Só lê a simulação e não depende da raylib, para ser testado
+// Números da vila para a janela de relatório (emprego, comida, produção,
+// transporte e acontecimentos). Só lê a simulação e não depende da raylib, para ser testado
 // sem janela; o desenho fica em relatorio_tela.
 
 struct LinhaDeEmprego {
@@ -72,6 +73,7 @@ struct Relatorio {
     RelatorioComida comida;
     std::vector<LinhaDeProducao> producao;  // só tipos com receita e ao menos um ativo
     RelatorioTransporte transporte;
+    std::vector<EntradaDoHistorico> historico;
 };
 
 Relatorio montar_relatorio(const Simulacao& sim);

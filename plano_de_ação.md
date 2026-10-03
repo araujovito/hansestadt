@@ -115,8 +115,9 @@ do README e do contexto e um ou mais commits pequenos.
      trabalhadores, sem insumo e saída cheia; o clique leva ao edifício.
    - ~~Visões de emprego, fome, produção e logística~~ — concluído: janela de
      relatório (tecla V) com quatro abas e gráfico da comida.
-   - Histórico de acontecimentos: a API de eventos já está integrada
-     (`sim.eventos.ativos/ocorridos`); falta a tela.
+   - ~~Histórico de acontecimentos~~ — concluído: aba História no relatório
+     (só eventos já iniciados, com período, dias restantes e efeitos) e aviso
+     na barra quando um evento começa.
    - Painel das instituições com nível, custo e botão de melhoria (hoje só a
      tecla U provisória).
    - Explicar por que uma construção, produção ou entrega está bloqueada:

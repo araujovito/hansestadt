@@ -53,20 +53,31 @@ bool Transporte::enviar(const Cidade& cidade, Carregador& c, Celula alvo) {
     return true;
 }
 
+void Transporte::indexar(const Cidade& cidade) {
+    ofertas_.resize(cidade.conteudo().itens.size());
+    for (IdEdificio id = indexados_; id < cidade.edificios().size(); ++id) {
+        const DefinicaoEdificio& def = cidade.definicao(id);
+        if (def.deposito) depositos_.push_back(id);
+        for (IdItem item = 0; item < ofertas_.size(); ++item) {
+            // Do produtor só sai o que ele produz; a entrada dele é dele.
+            bool oferece = def.deposito;
+            for (const Receita& r : def.receitas)
+                for (const Quantidade& q : r.saidas) oferece = oferece || q.item == item;
+            if (oferece) ofertas_[item].push_back(id);
+        }
+    }
+    indexados_ = static_cast<IdEdificio>(cidade.edificios().size());
+}
+
 IdEdificio Transporte::origem_mais_proxima(const Cidade& cidade, IdItem item, IdEdificio destino) {
+    indexar(cidade);
     IdEdificio melhor = SEM_EDIFICIO;
     std::size_t menor = std::numeric_limits<std::size_t>::max();
     // A busca só é feita quando aparece o primeiro candidato: a maior parte
     // das vagas pede um item que ninguém tem, e aí não há o que medir.
     bool mediu = false;
-    for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
+    for (const IdEdificio id : ofertas_[item]) {
         if (id == destino || !cidade.tem_acesso(id) || cidade.disponivel(id, item) <= 0) continue;
-        const DefinicaoEdificio& def = cidade.definicao(id);
-        // Do produtor só sai o que ele produz; a entrada dele é dele.
-        bool oferece = def.deposito;
-        for (const Receita& r : def.receitas)
-            for (const Quantidade& q : r.saidas) oferece = oferece || q.item == item;
-        if (!oferece) continue;
         if (!mediu) {
             perto_do_destino_.calcular(cidade, cidade.porta(destino));
             mediu = true;
@@ -81,11 +92,12 @@ IdEdificio Transporte::origem_mais_proxima(const Cidade& cidade, IdItem item, Id
 }
 
 IdEdificio Transporte::deposito_mais_proximo(const Cidade& cidade, IdItem item, Celula de) {
+    indexar(cidade);
     IdEdificio melhor = SEM_EDIFICIO;
     std::size_t menor = std::numeric_limits<std::size_t>::max();
     bool mediu = false;
-    for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
-        if (!cidade.definicao(id).deposito || !cidade.tem_acesso(id) || cidade.espaco_livre(id, item) <= 0) continue;
+    for (const IdEdificio id : depositos_) {
+        if (!cidade.tem_acesso(id) || cidade.espaco_livre(id, item) <= 0) continue;
         if (!mediu) {
             perto_da_origem_.calcular(cidade, de);
             mediu = true;

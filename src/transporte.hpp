@@ -68,6 +68,8 @@ private:
     void planejar(Cidade& cidade);
     bool atender_demandas(Cidade& cidade);
     bool escoar_sobras(Cidade& cidade);
+    // Acrescenta aos índices os edifícios construídos desde a última vez.
+    void indexar(const Cidade& cidade);
     IdEdificio origem_mais_proxima(const Cidade& cidade, IdItem item, IdEdificio destino);
     IdEdificio deposito_mais_proximo(const Cidade& cidade, IdItem item, Celula de);
     Carregador* carregador_mais_proximo(const Cidade& cidade, Celula alvo);
@@ -99,6 +101,15 @@ private:
     // cada pedido refaria as duas buscas.
     DistanciasPelaEstrada perto_do_destino_;
     DistanciasPelaEstrada perto_da_origem_;
+    // Índices para não percorrer a cidade inteira a cada pedido: por IdItem,
+    // quem pode ceder o item (depósitos e produtores dele), e quem é
+    // depósito. Em ordem de id, para o empate continuar decidido pelo menor
+    // id. Ids não são reaproveitados e o tipo de um edifício não muda, então
+    // basta acrescentar os novos; demolidos continuam na lista e são
+    // filtrados por tem_acesso, como antes.
+    std::vector<std::vector<IdEdificio>> ofertas_;
+    std::vector<IdEdificio> depositos_;
+    IdEdificio indexados_ = 0;
     std::uint64_t tick_ = 0;
     std::uint64_t entregas_ = 0;
     std::uint64_t perdidos_ = 0;

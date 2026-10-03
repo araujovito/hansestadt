@@ -150,6 +150,20 @@ TESTE("pedidos: busca na origem mais perto") {
     VERIFICAR(v.c.edificio(v.deposito).estoque[item("tora")] == 2);
 }
 
+TESTE("pedidos: depósito construído depois do primeiro planejamento entra na busca") {
+    Vila v;
+    rodar(v.t, v.c, VIAGEM);  // planejou com um depósito só
+    const IdEdificio perto = *v.c.construir_edificio(tipo("deposito"), { 7, 1 });  // porta (7,2)
+    v.c.adicionar(perto, item("tora"), 2);
+    v.c.adicionar(v.serraria, item("tabua"), 1);
+    rodar(v.t, v.c, VIAGEM * 2);
+    // O novo é a única origem de tora e o depósito mais perto para a sobra.
+    VERIFICAR(v.c.edificio(v.serraria).estoque[item("tora")] == 2);
+    VERIFICAR(v.c.edificio(perto).estoque[item("tora")] == 0);
+    VERIFICAR(v.c.edificio(perto).estoque[item("tabua")] == 1);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("tabua")] == 0);
+}
+
 TESTE("pedidos: um item só é prometido a um destino") {
     Vila v;
     const IdEdificio outra = *v.c.construir_edificio(tipo("serraria"), { 5, 3 });  // porta (5,5)

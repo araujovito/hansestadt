@@ -97,9 +97,26 @@ do README e do contexto e um ou mais commits pequenos.
 
 ## Divisão de trabalho em paralelo
 
-Para avançar com Codex e Claude ao mesmo tempo, cada um trabalha em seu
-próprio *worktree* e branch. Não executar os dois na mesma pasta de trabalho:
-os arquivos são compartilhados e alterações simultâneas poderiam se misturar.
+Para avançar com Codex e Claude ao mesmo tempo, a decisão de fluxo é usar
+uma branch de integração e um worktree/branch exclusivo para cada agente.
+Nunca executar os dois na mesma pasta de trabalho: os arquivos são
+compartilhados e alterações simultâneas poderiam se misturar.
+
+### Fluxo decidido de branches
+
+- `main` recebe somente trabalho integrado e validado.
+- `integracao/plano-de-acao` é a branch de integração dos próximos blocos;
+  ambos os agentes partem dela.
+- `codex/simulacao` recebe eventos, regras de jogo, fases e economia.
+- `claude/interface` recebe menus, painéis, alertas e apresentação visual.
+- Cada branch tem seu próprio worktree. O Vitor integra primeiro
+  `codex/simulacao` em `integracao/plano-de-acao`, roda testes e build; depois
+  integra `claude/interface` e valida novamente.
+- Após validar o conjunto, a branch de integração pode ser mesclada em
+  `main`. Não fazer push ou merge de uma branch de agente diretamente em
+  `main`.
+- Se um nome já estiver ocupado, criar um nome com sufixo de tarefa/data,
+  sem reutilizar nem sobrescrever a branch existente.
 
 ### Codex — simulação e regras do jogo
 
@@ -133,15 +150,15 @@ os arquivos são compartilhados e alterações simultâneas poderiam se misturar
 
 ### Protocolo de integração
 
-1. Antes de cada bloco, registrar o escopo e os arquivos principais atribuídos.
+1. Antes de cada bloco, registrar o escopo, a branch e os arquivos principais atribuídos.
 2. Não editar o mesmo arquivo nos dois worktrees. Se surgir dependência,
    combinar uma interface primeiro e integrar a mudança central em um só
    branch.
 3. Fazer commits pequenos e deixar cada branch compilável e testada.
 4. Atualizar este plano para marcar progresso; `contexto.md` guarda decisões
    e histórico, e o README explica o estado atual do jogo.
-5. Mesclar primeiro a parte de simulação/API; depois, adaptar a interface à
-   API já integrada.
+5. Mesclar primeiro a parte de simulação/API em `integracao/plano-de-acao`;
+   depois, integrar a interface usando a API já consolidada.
 
 ## Concluído recentemente
 

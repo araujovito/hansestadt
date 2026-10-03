@@ -56,7 +56,11 @@ struct LinhaDeProducao {
 };
 
 struct RelatorioTransporte {
+    // Agentes de transporte. Os do depósito vêm das vagas de carregador; os
+    // outros moram num edifício de produção (o transporte cria um agente por
+    // trabalhador de cada edifício, ver Transporte::criar_carregadores).
     int carregadores = 0;
+    int do_deposito = 0;
     int ocupados = 0;    // com tarefa (indo buscar ou entregando)
     int carregando = 0;  // com item na mão
     unsigned long long entregas = 0;

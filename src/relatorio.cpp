@@ -93,6 +93,7 @@ RelatorioTransporte montar_transporte(const Simulacao& sim) {
     RelatorioTransporte r;
     for (const Carregador& c : sim.transporte.carregadores()) {
         ++r.carregadores;
+        if (c.casa < sim.cidade.edificios().size() && sim.cidade.definicao(c.casa).deposito) ++r.do_deposito;
         if (!c.livre()) ++r.ocupados;
         if (c.carregando) ++r.carregando;
     }

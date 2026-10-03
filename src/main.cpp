@@ -16,6 +16,7 @@
 #include "menu.hpp"
 #include "painel.hpp"
 #include "partidas.hpp"
+#include "relatorio_tela.hpp"
 #include "relogio.hpp"
 #include "salvamento.hpp"
 #include "simulacao.hpp"
@@ -89,11 +90,14 @@ Rectangle area_do_botao_menu() {
     return { static_cast<float>(GetScreenWidth()) - 110.0f, 6.0f, 100.0f, 26.0f };
 }
 
-void desenhar_botao_menu() {
-    const Rectangle r = area_do_botao_menu();
+Rectangle area_do_botao_relatorio() {
+    return { static_cast<float>(GetScreenWidth()) - 240.0f, 6.0f, 124.0f, 26.0f };
+}
+
+void desenhar_botao(Rectangle r, const char* rotulo, bool ativo) {
     const bool sob_mouse = CheckCollisionPointRec(GetMousePosition(), r);
-    DrawRectangleRec(r, sob_mouse ? Color{ 80, 64, 48, 255 } : Color{ 58, 48, 38, 255 });
-    DrawText("Menu (Esc)", static_cast<int>(r.x + 8.0f), static_cast<int>(r.y + 6.0f), 16, RAYWHITE);
+    DrawRectangleRec(r, ativo ? Color{ 150, 110, 60, 255 } : sob_mouse ? Color{ 80, 64, 48, 255 } : Color{ 58, 48, 38, 255 });
+    DrawText(rotulo, static_cast<int>(r.x + 8.0f), static_cast<int>(r.y + 6.0f), 16, RAYWHITE);
 }
 
 std::string salvar(const Simulacao& sim, const Fundacao& fundacao, const std::string& arquivo) {
@@ -158,6 +162,7 @@ int main() {
     std::string aviso;
     int aviso_quadros = 0;
     MenuDePausa menu;
+    JanelaDeRelatorio relatorio;
     std::vector<Alerta> alertas;
     // Por tipo de alerta, qual edifício da lista o próximo clique mostra:
     // cliques seguidos percorrem os edifícios um a um.
@@ -184,6 +189,7 @@ int main() {
                     break;
                 case PedidoDoMenu::Acao::Carregar:
                     if (carregar(sim, fundacao, ferramenta, conteudo, pedido.arquivo, aviso)) {
+                        relatorio.esquecer_historico();
                         menu.fechar();
                         aviso_quadros = 180;
                     } else {
@@ -201,7 +207,9 @@ int main() {
                                      CheckCollisionPointRec(GetMousePosition(), area_do_botao_menu());
             const bool esc_livre = IsKeyPressed(KEY_ESCAPE) && ferramenta.ativa == Ferramenta::Nenhuma &&
                                    !ferramenta.selecionado;
-            if (clicou_menu || esc_livre) menu.abrir(conteudo, fundacao.concluida());
+            // Com o relatório aberto, o Esc livre fecha o relatório primeiro.
+            if (esc_livre && relatorio.aberta()) relatorio.fechar();
+            else if (clicou_menu || esc_livre) menu.abrir(conteudo, fundacao.concluida());
         }
 
         if (!menu_estava_aberto && !menu.aberto()) {
@@ -211,11 +219,16 @@ int main() {
                 aviso_quadros = 180;
             }
             if (IsKeyPressed(KEY_F9)) {
-                carregar(sim, fundacao, ferramenta, conteudo, arquivo_rapido, aviso);
+                if (carregar(sim, fundacao, ferramenta, conteudo, arquivo_rapido, aviso)) relatorio.esquecer_historico();
                 aviso_quadros = 180;
             }
             ler_atalhos(ferramenta);
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            const bool clicou_relatorio = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                                          CheckCollisionPointRec(GetMousePosition(), area_do_botao_relatorio());
+            if (IsKeyPressed(KEY_V) || clicou_relatorio) relatorio.alternar();
+            relatorio.atualizar();
+            // A lista de alertas fica escondida atrás do relatório aberto.
+            if (!relatorio.aberta() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 const int i = alerta_sob_mouse(alertas);
                 if (i >= 0 && !alertas[static_cast<std::size_t>(i)].edificios.empty()) {
                     const Alerta& a = alertas[static_cast<std::size_t>(i)];
@@ -236,7 +249,9 @@ int main() {
                              (painel_aberto && CheckCollisionPointRec(GetMousePosition(),
                                                                       area_do_painel_edificio())) ||
                              CheckCollisionPointRec(GetMousePosition(), area_do_botao_menu()) ||
-                             mouse_sobre_alertas(alertas);
+                             CheckCollisionPointRec(GetMousePosition(), area_do_botao_relatorio()) ||
+                             (relatorio.aberta() ? CheckCollisionPointRec(GetMousePosition(), relatorio.area())
+                                                 : mouse_sobre_alertas(alertas));
             camera.atualizar(GetFrameTime());
             sob_cursor = celula_em(camera.mouse_no_mundo());
             if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
@@ -248,8 +263,12 @@ int main() {
             }
         }
         // Antes da fundação não há vila para ter problema.
-        if (fundacao.concluida()) alertas = levantar_alertas(sim);
-        else alertas.clear();
+        if (fundacao.concluida()) {
+            alertas = levantar_alertas(sim);
+            relatorio.registrar_dia(sim);
+        } else {
+            alertas.clear();
+        }
 
         BeginDrawing();
         ClearBackground(Color{ 20, 26, 34, 255 });
@@ -268,8 +287,10 @@ int main() {
         if (!fundacao.concluida() && dica.empty()) dica = "escolha onde fundar a vila";
         if (aviso_quadros > 0) { dica = aviso; --aviso_quadros; }
         desenhar_painel(sim, relogio, mapa, sob_cursor, dica);
-        desenhar_botao_menu();
-        desenhar_alertas(alertas);
+        desenhar_botao(area_do_botao_relatorio(), "Relatório (V)", relatorio.aberta());
+        desenhar_botao(area_do_botao_menu(), "Menu (Esc)", false);
+        if (relatorio.aberta()) relatorio.desenhar(montar_relatorio(sim));
+        else desenhar_alertas(alertas);
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
             desenhar_painel_edificio(cidade, sim.populacao, *ferramenta.selecionado, sim.data.mes,

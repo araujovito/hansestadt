@@ -70,5 +70,6 @@ TESTE("relatório: transporte conta carregadores, tarefas e entregas") {
     for (int i = 0; i < 3; ++i) sim.passo();
     const RelatorioTransporte depois = montar_relatorio(sim).transporte;
     VERIFICAR(depois.carregadores == static_cast<int>(sim.transporte.carregadores().size()));
+    VERIFICAR(depois.do_deposito <= depois.carregadores);
     VERIFICAR(depois.ocupados <= depois.carregadores && depois.carregando <= depois.ocupados);
 }

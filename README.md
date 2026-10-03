@@ -10,7 +10,7 @@ clima e dos acontecimentos históricos.
 
 > Status: protótipo. Dá para construir a vila, e os edifícios produzem
 > e trocam mercadorias por carregadores. A vila começa com 3 casais, que
-> ocupam as casas construídas; ainda não há trabalho, consumo nem eventos.
+> ocupam as casas e trabalham nos edifícios; ainda não há consumo nem eventos.
 
 ## Ideia central
 
@@ -87,7 +87,9 @@ Decisões tomadas para o primeiro marco jogável:
 
 Os moradores já existem como entidades da simulação. Eles ocupam as vagas
 das casas em ordem de construção e ficam sem teto se a moradia for demolida;
-a barra superior mostra a população total e quantos estão sem casa.
+a barra superior mostra a população total, os sem-casa e os desempregados.
+Só moradores alojados trabalham. Os empregos são preenchidos na ordem de
+construção dos edifícios, e uma oficina só produz com a equipe completa.
 
 ## Tecnologia
 

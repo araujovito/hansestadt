@@ -22,6 +22,7 @@ Color cor_da_situacao(Situacao s) {
         case Situacao::Pausado:
         case Situacao::ForaDeEstacao: return { 220, 200, 120, 255 };
         case Situacao::FaltaEntrada:
+        case Situacao::SemTrabalhadores:
         case Situacao::SaidaCheia: return { 235, 130, 110, 255 };
         case Situacao::SemReceita: break;
     }
@@ -75,9 +76,15 @@ void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, 
         y += LINHA;
     }
 
-    const Situacao s = situacao(cidade, id, mes);
+    const Situacao s = situacao(cidade, id, mes, &populacao);
     if (s != Situacao::SemReceita) {
         DrawText(descrever(s), x, y, TEXTO, cor_da_situacao(s));
+        y += LINHA;
+    }
+
+    if (def.trabalhadores > 0) {
+        DrawText(TextFormat("trabalhadores %d/%d", populacao.trabalhadores_em(id), def.trabalhadores), x, y,
+                 TEXTO, CLARO);
         y += LINHA;
     }
 

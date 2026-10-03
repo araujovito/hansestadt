@@ -1,6 +1,7 @@
 #include "cidade.hpp"
 #include "conteudo_de_teste.hpp"
 #include "producao.hpp"
+#include "populacao.hpp"
 #include "verificar.hpp"
 
 namespace {
@@ -80,6 +81,23 @@ TESTE("produção: edifício demolido para de produzir") {
     c.demolir({ 1, 1 });
     rodar(c, TICKS_POR_DIA * 3, 7);
     VERIFICAR(c.edificio(f).estoque[item("pao")] == 0);
+}
+
+TESTE("produção: só avança com a equipe completa") {
+    Cidade c(Mapa(8, 8), conteudo_de_teste());
+    const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio f = *c.construir_edificio(tipo("colheita"), { 4, 1 });
+    Populacao p(1);
+
+    avancar_producao(c, 7, TICKS_POR_DIA, &p);
+    VERIFICAR(c.edificio(f).receita_ativa == -1);
+    VERIFICAR(situacao(c, f, 7, &p) == Situacao::SemTrabalhadores);
+
+    p.alojar(c);
+    p.empregar(c);
+    VERIFICAR(p.moradores_na_casa(casa) == 1);
+    for (int i = 0; i < TICKS_POR_DIA; ++i) avancar_producao(c, 7, TICKS_POR_DIA, &p);
+    VERIFICAR(c.edificio(f).estoque[item("pao")] == 1);
 }
 
 TESTE("situação: explica por que o edifício está parado") {

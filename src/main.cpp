@@ -40,8 +40,8 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     DrawText(ritmo, 340, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
     int ocupados = 0;
     for (const Carregador& c : sim.transporte.carregadores()) ocupados += c.livre() ? 0 : 1;
-    DrawText(TextFormat("população %d (%d sem casa)  |  carregadores %d/%d  |  %d fps",
-                        sim.populacao.total(), sim.populacao.sem_casa(), ocupados,
+    DrawText(TextFormat("população %d (%d sem casa, %d sem trabalho)  |  carregadores %d/%d  |  %d fps",
+                        sim.populacao.total(), sim.populacao.sem_casa(), sim.populacao.desempregados(), ocupados,
                         static_cast<int>(sim.transporte.carregadores().size()), GetFPS()),
              GetScreenWidth() - 580, 12, 16, LIGHTGRAY);
 

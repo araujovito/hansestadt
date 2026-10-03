@@ -253,6 +253,7 @@ TESTE("demolição: sem depósito alcançável, a carga se perde e as reservas s
 
 TESTE("simulação: produção e transporte rodam juntos no passo") {
     Vila v;
+    v.c.construir_edificio(tipo("casa"), { 4, 4 });
     v.c.adicionar(v.deposito, item("tora"), 4);
     Simulacao sim(std::move(v.c));
     for (int i = 0; i < Simulacao::TICKS_POR_DIA * 10; ++i) sim.passo();

@@ -114,8 +114,6 @@ as de implementação, que o README não explica.
 - **Viagens longas demais.** Com o moinho a ~30 células da fazenda, cada
   trecho leva ~4,5 dias de jogo; em 12 dias de colheita só 2 entregas
   chegaram. Resolver no balanceamento (tarefa 10).
-- **Trabalhadores ainda não limitam nada**: todo edifício funciona com
-  equipe completa.
 - **Os 6 carregadores do armazém surgem do nada**, fora da população.
 - **Os 6 moradores iniciais ainda não nascem nem envelhecem**; nesta etapa
   apenas procuram vagas nas casas.
@@ -142,8 +140,8 @@ reproduzem, jogador escolhe onde fundar, fome mata, balanceamento em Python
 agora, estamentos depois):
 
 1. ~~Moradores nas casas e população na barra do topo.~~ Concluído.
-2. **Agora:** trabalhadores limitam a produção.
-3. Casas pedem comida pelo sistema de pedidos; consumo diário.
+2. ~~Trabalhadores limitam a produção.~~ Concluído.
+3. **Agora:** casas pedem comida pelo sistema de pedidos; consumo diário.
 4. Fome mata.
 5. Início da partida: jogador posiciona o primeiro armazém; estoque inicial.
 6. Ferramenta de balanceamento em Python (simula anos sem janela, plota
@@ -172,6 +170,9 @@ de fase, arte, estamentos.
 
 ### 2026-10-03
 
+- **Trabalho limita a produção**: moradores alojados ocupam empregos em
+  ordem determinística; edifícios sem a equipe completa param e explicam o
+  motivo na interface. 84 testes.
 - **População nas casas**: a simulação começa com 3 casais, moradores ocupam
   vagas livres, voltam a ficar sem teto após demolição e aparecem na barra
   superior e no painel da casa. 82 testes.

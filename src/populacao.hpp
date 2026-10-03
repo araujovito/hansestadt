@@ -6,6 +6,7 @@
 
 struct Morador {
     IdEdificio casa = SEM_EDIFICIO;
+    IdEdificio trabalho = SEM_EDIFICIO;
 };
 
 // Moradores pertencem à simulação, não aos edifícios: assim continuam
@@ -15,11 +16,14 @@ public:
     explicit Populacao(int quantidade_inicial = 6);
 
     void alojar(Cidade& cidade);
+    void empregar(const Cidade& cidade);
 
     int total() const { return static_cast<int>(moradores_.size()); }
     int alojados() const;
     int sem_casa() const { return total() - alojados(); }
     int moradores_na_casa(IdEdificio casa) const;
+    int trabalhadores_em(IdEdificio edificio) const;
+    int desempregados() const;
     const std::vector<Morador>& moradores() const { return moradores_; }
 
 private:

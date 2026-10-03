@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "populacao.hpp"
+
 int fator_do_mes(const Receita& r, int mes) {
     return static_cast<int>(std::lround(r.sazonalidade[static_cast<std::size_t>(mes - 1)] * ESCALA_FATOR));
 }
@@ -39,11 +41,12 @@ void tentar_comecar(Cidade& cidade, IdEdificio id, int mes) {
 
 }  // namespace
 
-void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia) {
+void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populacao* populacao) {
     // Por índice, em ordem crescente: a ordem de atualização faz parte do
     // resultado quando dois edifícios disputarem o mesmo recurso.
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo || cidade.definicao(id).receitas.empty()) continue;
+        if (populacao && populacao->trabalhadores_em(id) < cidade.definicao(id).trabalhadores) continue;
 
         if (cidade.edificio(id).receita_ativa < 0) tentar_comecar(cidade, id, mes);
 
@@ -65,6 +68,7 @@ void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia) {
 const char* descrever(Situacao s) {
     switch (s) {
         case Situacao::SemReceita: return "";
+        case Situacao::SemTrabalhadores: return "faltam trabalhadores";
         case Situacao::Produzindo: return "produzindo";
         case Situacao::Pausado: return "pausado pela estação";
         case Situacao::ForaDeEstacao: return "fora de estação";
@@ -74,9 +78,10 @@ const char* descrever(Situacao s) {
     return "?";
 }
 
-Situacao situacao(const Cidade& cidade, IdEdificio id, int mes) {
+Situacao situacao(const Cidade& cidade, IdEdificio id, int mes, const Populacao* populacao) {
     const DefinicaoEdificio& def = cidade.definicao(id);
     if (def.receitas.empty()) return Situacao::SemReceita;
+    if (populacao && populacao->trabalhadores_em(id) < def.trabalhadores) return Situacao::SemTrabalhadores;
 
     const Edificio& e = cidade.edificio(id);
     if (e.receita_ativa >= 0) {

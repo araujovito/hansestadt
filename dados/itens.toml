@@ -53,3 +53,19 @@ tipo = "insumo"
 id = "tijolo"
 nome = "tijolo"
 tipo = "insumo"
+
+# Novos itens são sempre acrescentados ao fim: saves guardam estes índices.
+[[item]]
+id = "cevada"
+nome = "cevada"
+tipo = "insumo"
+
+[[item]]
+id = "malte"
+nome = "malte"
+tipo = "insumo"
+
+[[item]]
+id = "cerveja"
+nome = "cerveja"
+tipo = "insumo"

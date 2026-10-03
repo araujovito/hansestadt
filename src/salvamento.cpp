@@ -111,8 +111,14 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
         e.estoque = ler_vetor<int>(in); e.reservado = ler_vetor<int>(in); e.a_caminho = ler_vetor<int>(in);
         e.receita_ativa = ler<int>(in); e.progresso = ler<std::int64_t>(in);
         if (!legado_v3) e.nivel = ler<int>(in);
-        if (e.tipo >= conteudo.edificios.size() || e.estoque.size() != conteudo.itens.size())
+        if (e.tipo >= conteudo.edificios.size() || e.estoque.size() > conteudo.itens.size() ||
+            e.reservado.size() > conteudo.itens.size() || e.a_caminho.size() > conteudo.itens.size())
             throw std::runtime_error("conteúdo incompatível");
+        // Itens são acrescentados ao fim do catálogo. Saves anteriores não
+        // têm seus slots; inicializá-los vazios preserva os índices antigos.
+        e.estoque.resize(conteudo.itens.size(), 0);
+        e.reservado.resize(conteudo.itens.size(), 0);
+        e.a_caminho.resize(conteudo.itens.size(), 0);
         if (e.nivel < 1 || static_cast<std::size_t>(e.nivel) > conteudo.edificio(e.tipo).melhorias.size() + 1)
             throw std::runtime_error("nível de edifício inválido");
         edificios.push_back(std::move(e));

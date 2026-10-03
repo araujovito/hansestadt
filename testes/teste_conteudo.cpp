@@ -43,6 +43,21 @@ TESTE("conteúdo: os arquivos reais do jogo carregam sem erros") {
     for (const auto& e : r.erros) std::printf("    %s\n", e.c_str());
     VERIFICAR(r.conteudo.has_value());
     VERIFICAR(r.conteudo && r.conteudo->buscar_edificio("fazenda").has_value());
+    if (r.conteudo) {
+        const Conteudo& c = *r.conteudo;
+        VERIFICAR(c.buscar_item("cerveja").has_value());
+        const auto fazenda = c.buscar_edificio("fazenda_cevada");
+        const auto malteria = c.buscar_edificio("malteria");
+        const auto cervejaria = c.buscar_edificio("cervejaria");
+        VERIFICAR(fazenda && malteria && cervejaria);
+        if (fazenda && malteria && cervejaria) {
+            VERIFICAR(c.edificio(*fazenda).receitas[0].saidas[0].item == *c.buscar_item("cevada"));
+            VERIFICAR(c.edificio(*malteria).receitas[0].entradas[0].item == *c.buscar_item("cevada"));
+            VERIFICAR(c.edificio(*malteria).receitas[0].saidas[0].item == *c.buscar_item("malte"));
+            VERIFICAR(c.edificio(*cervejaria).receitas[0].entradas[0].item == *c.buscar_item("malte"));
+            VERIFICAR(c.edificio(*cervejaria).receitas[0].saidas[0].item == *c.buscar_item("cerveja"));
+        }
+    }
 }
 
 TESTE("conteúdo: lê receita, sazonalidade e requisito") {

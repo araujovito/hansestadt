@@ -58,7 +58,7 @@ Quatro ramos, liberados aos poucos pelas fases:
 | Ramo | Vila (~1150) | Mercado (~1200) | Cidade e Hansa (~1250+) |
 |---|---|---|---|
 | Construção | lenhador, toras | carvoaria, turfa | poço de argila, olaria (tijolo) |
-| Agricultura | fazenda de centeio e aveia, moinho d'água, padaria | cervejaria (cevada) | lúpulo, linho |
+| Agricultura | fazenda de centeio, moinho d'água, padaria | cevada → malte → cerveja | lúpulo, linho |
 | Pecuária | pocilga (porcos na floresta) | gado, ovelhas, açougue, tecelão | curtume |
 | Pesca | pescador de rio | | pescador de mar (arenque), tanoeiro, salgadeira |
 
@@ -182,6 +182,12 @@ materiais necessários; a construção só é aceita quando há itens disponíve
 nos estoques da cidade e os consome em ordem de edifício, sem tomar cargas já
 reservadas pelo transporte. A expedição inicial traz 40 toras para erguer o
 primeiro conjunto de casas e oficinas.
+
+A cadeia inicial de cerveja já pode ser construída na fase Mercado:
+fazenda de cevada (colheita de verão) → malteria → cervejaria. A cerveja é,
+por enquanto, um insumo produzido e transportado; ainda não é consumida pelos
+moradores nem negociada por um sistema de mercado. Os valores de produção e
+custos continuam provisórios.
 
 ## Como a economia funciona
 

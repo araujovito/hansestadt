@@ -193,6 +193,14 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Cadeia da cerveja**: adicionados cevada, malte e cerveja e as oficinas
+  de cultivo, maltagem e produção de cerveja na fase Mercado. A cerveja ainda
+  não participa das necessidades da população ou de comércio. Saves antigos
+  com menos itens ganham slots vazios no fim dos vetores, sem mudar IDs
+  existentes. Teste de carga de conteúdo e migração incluídos.
+
+### 2026-10-03
+
 - **Núcleo da progressão histórica**: `campanha.cpp` define os anos-limite
   1150, 1200, 1250, 1300 e 1370 e permite avançar uma etapa quando todas as
   instituições disponíveis informadas estão no nível máximo. O calendário

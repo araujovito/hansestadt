@@ -326,3 +326,56 @@ custo = { tora = 12 }
 [[edificio.melhoria]]
 fase = "auge"
 custo = { tijolo = 12 }
+
+# ---------------------------------------------------------- cerveja
+# Novos edifícios são acrescentados ao fim para preservar índices de saves.
+
+[[edificio]]
+id = "fazenda_cevada"
+nome = "fazenda de cevada"
+fase = "mercado"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#c6a45c"
+trabalhadores = 2
+estoque = 12
+campos = 1
+custo = { tora = 8 }
+
+[[edificio.receita]]
+dias = 2
+saidas = { cevada = 1 }
+# Cevada de primavera, colhida no verão.
+sazonalidade = [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
+
+[[edificio]]
+id = "malteria"
+nome = "malteria"
+fase = "mercado"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#a68b53"
+trabalhadores = 1
+estoque = 8
+custo = { tora = 8 }
+
+[[edificio.receita]]
+dias = 3
+entradas = { cevada = 2 }
+saidas = { malte = 1 }
+
+[[edificio]]
+id = "cervejaria"
+nome = "cervejaria"
+fase = "mercado"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#b08a4a"
+trabalhadores = 1
+estoque = 8
+custo = { tora = 10 }
+
+[[edificio.receita]]
+dias = 3
+entradas = { malte = 1 }
+saidas = { cerveja = 2 }

@@ -62,7 +62,9 @@ do README e do contexto e um ou mais commits pequenos.
      nível e custo explicados permanece na tarefa de interface.
 
 7. **Completar as cadeias econômicas**
-   - Cerveja, gado, ovelhas, tecidos, couro, arenque, barris e salga.
+   - Primeiro corte concluído: cevada → malte → cerveja, disponível no
+     Mercado; cerveja ainda não é consumida nem vendida.
+   - Próximas fatias: gado/ovelhas, tecidos/couro e arenque/barris/salga.
    - Cadeia completa de argila, combustível e tijolos.
    - Rebalancear mão de obra, transporte e custos após cada ramo.
 

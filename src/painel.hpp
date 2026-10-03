@@ -1,7 +1,10 @@
 #pragma once
 
+#include <vector>
+
 #include "raylib.h"
 
+#include "alertas.hpp"
 #include "cidade.hpp"
 #include "populacao.hpp"
 
@@ -10,3 +13,12 @@
 Rectangle area_do_painel_edificio();
 void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, IdEdificio id, int mes,
                               int ticks_por_dia);
+
+// Lista de alertas no canto esquerdo, abaixo da barra de cima. Mostra no
+// máximo MAXIMO_ALERTAS_NA_TELA; os demais são resumidos numa última linha.
+inline constexpr std::size_t MAXIMO_ALERTAS_NA_TELA = 6;
+void desenhar_alertas(const std::vector<Alerta>& alertas);
+// Índice do alerta sob o mouse, ou -1. A área inteira da lista também conta
+// como "mouse na barra", para o clique não atravessar para o mapa.
+int alerta_sob_mouse(const std::vector<Alerta>& alertas);
+bool mouse_sobre_alertas(const std::vector<Alerta>& alertas);

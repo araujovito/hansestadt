@@ -1,5 +1,6 @@
 #include "painel.hpp"
 
+#include <algorithm>
 #include <string>
 
 #include "producao.hpp"
@@ -124,6 +125,67 @@ void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, 
             if (e.estoque[i] == 0 && !def.usa_item(i)) continue;
             DrawText(TextFormat("%s: %d", conteudo.itens[i].nome.c_str(), e.estoque[i]), x, y, TEXTO, CLARO);
             y += LINHA;
+        }
+    }
+}
+
+namespace {
+
+constexpr float ALERTA_X = 8.0f;
+constexpr float ALERTA_Y = 72.0f;
+constexpr float ALERTA_LARGURA = 420.0f;
+constexpr float ALERTA_ALTURA = 24.0f;
+constexpr float ALERTA_ESPACO = 4.0f;
+
+std::size_t linhas_de_alerta(const std::vector<Alerta>& alertas) {
+    // Com alertas demais, a última linha vira "e mais N".
+    return alertas.size() > MAXIMO_ALERTAS_NA_TELA ? MAXIMO_ALERTAS_NA_TELA + 1 : alertas.size();
+}
+
+Rectangle area_do_alerta(std::size_t i) {
+    return { ALERTA_X, ALERTA_Y + static_cast<float>(i) * (ALERTA_ALTURA + ALERTA_ESPACO), ALERTA_LARGURA,
+             ALERTA_ALTURA };
+}
+
+}  // namespace
+
+int alerta_sob_mouse(const std::vector<Alerta>& alertas) {
+    const std::size_t n = std::min(alertas.size(), MAXIMO_ALERTAS_NA_TELA);
+    for (std::size_t i = 0; i < n; ++i)
+        if (CheckCollisionPointRec(GetMousePosition(), area_do_alerta(i))) return static_cast<int>(i);
+    return -1;
+}
+
+bool mouse_sobre_alertas(const std::vector<Alerta>& alertas) {
+    for (std::size_t i = 0; i < linhas_de_alerta(alertas); ++i)
+        if (CheckCollisionPointRec(GetMousePosition(), area_do_alerta(i))) return true;
+    return false;
+}
+
+void desenhar_alertas(const std::vector<Alerta>& alertas) {
+    const int sob_mouse = alerta_sob_mouse(alertas);
+    for (std::size_t i = 0; i < linhas_de_alerta(alertas); ++i) {
+        const Rectangle r = area_do_alerta(i);
+        if (i == MAXIMO_ALERTAS_NA_TELA) {
+            DrawRectangleRec(r, FUNDO);
+            DrawText(TextFormat("e mais %d", static_cast<int>(alertas.size() - MAXIMO_ALERTAS_NA_TELA)),
+                     static_cast<int>(r.x) + 26, static_cast<int>(r.y) + 4, TEXTO, APAGADO);
+            break;
+        }
+        const Alerta& a = alertas[i];
+        const bool clicavel = !a.edificios.empty();
+        const bool destacado = clicavel && static_cast<int>(i) == sob_mouse;
+        DrawRectangleRec(r, destacado ? Color{ 70, 56, 42, 240 } : FUNDO);
+        const Color cor = a.grave ? Color{ 235, 110, 90, 255 } : Color{ 230, 196, 100, 255 };
+        DrawCircle(static_cast<int>(r.x) + 13, static_cast<int>(r.y + r.height / 2.0f), 5.0f, cor);
+        DrawText(a.texto.c_str(), static_cast<int>(r.x) + 26, static_cast<int>(r.y) + 4, TEXTO, CLARO);
+        // Só quem leva a algum lugar ganha a seta, e ela diz quantos cliques
+        // percorrem a lista.
+        if (clicavel) {
+            const char* seta = a.edificios.size() > 1 ? TextFormat("ver (%d) >", static_cast<int>(a.edificios.size()))
+                                                       : "ver >";
+            DrawText(seta, static_cast<int>(r.x + r.width) - MeasureText(seta, TEXTO) - 8,
+                     static_cast<int>(r.y) + 4, TEXTO, destacado ? CLARO : APAGADO);
         }
     }
 }

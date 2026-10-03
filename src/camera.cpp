@@ -19,6 +19,11 @@ CameraJogo::CameraJogo(float largura_mundo, float altura_mundo)
     camera_.target = { largura_mundo / 2.0f, altura_mundo / 2.0f };
 }
 
+void CameraJogo::centralizar(Vector2 ponto_mundo) {
+    camera_.target = ponto_mundo;
+    limitar_ao_mundo();
+}
+
 void CameraJogo::atualizar(float dt) {
     // O offset mantém o alvo da câmera no centro da tela, inclusive quando a
     // janela é redimensionada.

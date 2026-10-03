@@ -1,8 +1,10 @@
+#include <array>
 #include <cstdio>
 #include <string>
 
 #include "raylib.h"
 
+#include "alertas.hpp"
 #include "calendario.hpp"
 #include "camera.hpp"
 #include "cidade.hpp"
@@ -11,7 +13,10 @@
 #include "ferramentas.hpp"
 #include "fundacao.hpp"
 #include "mapa.hpp"
+#include "menu.hpp"
 #include "painel.hpp"
+#include "partidas.hpp"
+#include "relatorio_tela.hpp"
 #include "relogio.hpp"
 #include "salvamento.hpp"
 #include "simulacao.hpp"
@@ -29,7 +34,6 @@ constexpr int LARGURA_MAPA = 128;
 constexpr int ALTURA_MAPA = 128;
 // Semente fixa enquanto o mapa da campanha não é desenhado à mão.
 constexpr unsigned SEMENTE_MAPA = 1150;
-constexpr const char* ARQUIVO_PARTIDA = "partida.hanse";
 
 void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& mapa, Celula sob_cursor,
                      const std::string& dica) {
@@ -43,20 +47,35 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     DrawText(ritmo, 300, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
     int ocupados = 0;
     for (const Carregador& c : sim.transporte.carregadores()) ocupados += c.livre() ? 0 : 1;
-    DrawText(TextFormat("população %d (%d crianças) | sem casa %d | sem trabalho %d | mortos %d",
-                        sim.populacao.total(), sim.populacao.criancas(), sim.populacao.sem_casa(),
-                        sim.populacao.desempregados(), sim.populacao.mortos_de_fome()),
-             12, 40, 16, LIGHTGRAY);
+
+    // Segunda linha: cada trecho começa onde o anterior terminou. Com
+    // posições fixas, um número com mais dígitos fazia um trecho cobrir o
+    // seguinte ("mortos" ficava por baixo de "comida").
+    constexpr int TAMANHO = 16;
+    int x = 12;
+    auto escrever = [&x](const char* texto, Color cor) {
+        if (x > 12) {
+            DrawText("|", x, 40, TAMANHO, GRAY);
+            x += MeasureText("|", TAMANHO) + 8;
+        }
+        DrawText(texto, x, 40, TAMANHO, cor);
+        x += MeasureText(texto, TAMANHO) + 8;
+    };
+    escrever(TextFormat("população %d (%d crianças)", sim.populacao.total(), sim.populacao.criancas()), LIGHTGRAY);
+    escrever(TextFormat("sem casa %d", sim.populacao.sem_casa()), LIGHTGRAY);
+    escrever(TextFormat("sem trabalho %d", sim.populacao.desempregados()), LIGHTGRAY);
+    escrever(TextFormat("mortos %d", sim.populacao.mortos_de_fome()), LIGHTGRAY);
 
     const int comida = sim.cidade.estoque_total(TipoItem::Comida);
     const int dias = sim.populacao.total() > 0 ? comida / sim.populacao.total() : 0;
     const Color cor_comida = dias < 30 ? Color{ 240, 110, 90, 255 }
                            : dias < 90 ? GOLD
                                       : LIGHTGRAY;
-    DrawText(TextFormat("comida %d (%d dias)", comida, dias), 455, 40, 16, cor_comida);
-    DrawText(TextFormat("carregadores %d/%d | %d fps", ocupados,
-                        static_cast<int>(sim.transporte.carregadores().size()), GetFPS()),
-             GetScreenWidth() - 250, 40, 16, LIGHTGRAY);
+    escrever(TextFormat("comida %d (%d dias)", comida, dias), cor_comida);
+    escrever(TextFormat("carregadores %d/%d", ocupados, static_cast<int>(sim.transporte.carregadores().size())),
+             LIGHTGRAY);
+    const char* fps = TextFormat("%d fps", GetFPS());
+    DrawText(fps, GetScreenWidth() - MeasureText(fps, TAMANHO) - 12, 40, TAMANHO, GRAY);
 
     if (mapa.dentro(sob_cursor.x, sob_cursor.y)) {
         DrawText(TextFormat("(%d, %d) %s", sob_cursor.x, sob_cursor.y,
@@ -64,6 +83,51 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
                  390, 12, 16, RAYWHITE);
     }
     if (!dica.empty()) DrawText(dica.c_str(), 680, 12, 16, Color{ 255, 220, 160, 255 });
+}
+
+// Botão no canto da barra de cima, para quem não sabe que o Esc abre o menu.
+Rectangle area_do_botao_menu() {
+    return { static_cast<float>(GetScreenWidth()) - 110.0f, 6.0f, 100.0f, 26.0f };
+}
+
+Rectangle area_do_botao_relatorio() {
+    return { static_cast<float>(GetScreenWidth()) - 240.0f, 6.0f, 124.0f, 26.0f };
+}
+
+void desenhar_botao(Rectangle r, const char* rotulo, bool ativo) {
+    const bool sob_mouse = CheckCollisionPointRec(GetMousePosition(), r);
+    DrawRectangleRec(r, ativo ? Color{ 150, 110, 60, 255 } : sob_mouse ? Color{ 80, 64, 48, 255 } : Color{ 58, 48, 38, 255 });
+    DrawText(rotulo, static_cast<int>(r.x + 8.0f), static_cast<int>(r.y + 6.0f), 16, RAYWHITE);
+}
+
+std::string salvar(const Simulacao& sim, const Fundacao& fundacao, const std::string& arquivo) {
+    if (!fundacao.concluida()) return "não foi possível salvar: funde a vila primeiro";
+    std::string erro;
+    return salvar_partida(sim, arquivo, erro) ? "partida salva" : "não foi possível salvar: " + erro;
+}
+
+// Troca a partida em andamento pela do arquivo. A fundação e a barra de
+// ferramentas não vão para o arquivo: são refeitas a partir da cidade.
+// Os eventos históricos também não vão para o arquivo (são dados do jogo) e
+// precisam ser postos de volta; sem isso a partida carregada ficaria sem
+// Grande Fome e sem Peste.
+bool carregar(Simulacao& sim, Fundacao& fundacao, EstadoFerramenta& ferramenta, Fase& fase_da_barra,
+              const Conteudo& conteudo, const Eventos& eventos, const std::string& arquivo, std::string& mensagem) {
+    ResultadoSalvamento carga = carregar_partida(arquivo, conteudo);
+    if (!carga.simulacao) {
+        mensagem = "não foi possível carregar: " + carga.erro;
+        return false;
+    }
+    sim = std::move(*carga.simulacao);
+    sim.eventos = eventos;
+    IdEdificio armazem = SEM_EDIFICIO;
+    for (IdEdificio id = 0; id < sim.cidade.edificios().size(); ++id)
+        if (sim.cidade.edificio(id).ativo && sim.cidade.definicao(id).deposito) { armazem = id; break; }
+    fundacao.restaurar(armazem);
+    ferramenta = criar_ferramentas(conteudo, sim.fase);
+    fase_da_barra = sim.fase;
+    mensagem = "partida carregada";
+    return true;
 }
 
 // Rodando da raiz do projeto (make run), os dados estão em ./dados; rodando
@@ -93,7 +157,8 @@ int main() {
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(1280, 720, "Hansestadt");
-    // Esc solta a ferramenta; fechar o jogo fica só com o botão da janela.
+    // Esc solta a ferramenta ou abre o menu; fechar o jogo fica com o botão
+    // da janela ou com "Sair do jogo" no menu.
     SetExitKey(KEY_NULL);
 
     Simulacao sim(Cidade(gerar_mapa(LARGURA_MAPA, ALTURA_MAPA, SEMENTE_MAPA), conteudo));
@@ -110,56 +175,124 @@ int main() {
     Relogio relogio(1.0 / Simulacao::TICKS_POR_SEGUNDO);
     std::string aviso;
     int aviso_quadros = 0;
+    MenuDePausa menu;
+    JanelaDeRelatorio relatorio;
+    std::vector<Alerta> alertas;
+    // Por tipo de alerta, qual edifício da lista o próximo clique mostra:
+    // cliques seguidos percorrem os edifícios um a um.
+    std::array<std::size_t, 6> proximo_do_alerta{};
+    const std::string& arquivo_rapido = vagas_de_partida().front().arquivo;
+    bool sair = false;
 
-    while (!WindowShouldClose()) {
-        ler_comandos(relogio);
-        if (IsKeyPressed(KEY_F5)) {
-            std::string erro;
-            aviso = fundacao.concluida() && salvar_partida(sim, ARQUIVO_PARTIDA, erro)
-                        ? "partida salva"
-                        : "não foi possível salvar: " + (erro.empty() ? std::string("funde a vila primeiro") : erro);
-            aviso_quadros = 180;
+    while (!sair && !WindowShouldClose()) {
+        // Com o menu aberto o jogo para: nada de atalhos, câmera, cliques no
+        // mapa nem passos da simulação.
+        bool mouse_na_barra = true;
+        Celula sob_cursor{ -1, -1 };
+        // O quadro em que o menu fecha também fica sem entrada do jogo: o
+        // clique em "Continuar" não pode cair no mapa por baixo.
+        const bool menu_estava_aberto = menu.aberto();
+        if (menu_estava_aberto) {
+            const PedidoDoMenu pedido = menu.atualizar();
+            switch (pedido.acao) {
+                case PedidoDoMenu::Acao::Nenhuma:
+                    break;
+                case PedidoDoMenu::Acao::Salvar:
+                    menu.informar(salvar(sim, fundacao, pedido.arquivo));
+                    menu.reexaminar();
+                    break;
+                case PedidoDoMenu::Acao::Carregar:
+                    if (carregar(sim, fundacao, ferramenta, fase_da_barra, conteudo, configuracao_eventos, pedido.arquivo, aviso)) {
+                        relatorio.esquecer_historico();
+                        menu.fechar();
+                        aviso_quadros = 180;
+                    } else {
+                        menu.informar(aviso);  // fica no menu para escolher outra vaga
+                    }
+                    break;
+                case PedidoDoMenu::Acao::Sair:
+                    sair = true;
+                    break;
+            }
+        } else {
+            // Esc é de quem estiver usando: primeiro solta a ferramenta e fecha
+            // o painel do edifício; só com nada disso abre o menu.
+            const bool clicou_menu = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                                     CheckCollisionPointRec(GetMousePosition(), area_do_botao_menu());
+            const bool esc_livre = IsKeyPressed(KEY_ESCAPE) && ferramenta.ativa == Ferramenta::Nenhuma &&
+                                   !ferramenta.selecionado;
+            // Com o relatório aberto, o Esc livre fecha o relatório primeiro.
+            if (esc_livre && relatorio.aberta()) relatorio.fechar();
+            else if (clicou_menu || esc_livre) menu.abrir(conteudo, fundacao.concluida());
         }
-        if (IsKeyPressed(KEY_F9)) {
-            ResultadoSalvamento carga_partida = carregar_partida(ARQUIVO_PARTIDA, conteudo);
-            if (carga_partida.simulacao) {
-                sim = std::move(*carga_partida.simulacao);
-                sim.eventos = configuracao_eventos;
-                IdEdificio armazem = SEM_EDIFICIO;
-                for (IdEdificio id = 0; id < sim.cidade.edificios().size(); ++id)
-                    if (sim.cidade.edificio(id).ativo && sim.cidade.definicao(id).deposito) { armazem = id; break; }
-                fundacao.restaurar(armazem);
+
+        if (!menu_estava_aberto && !menu.aberto()) {
+            ler_comandos(relogio);
+            if (IsKeyPressed(KEY_F5)) {
+                aviso = salvar(sim, fundacao, arquivo_rapido);
+                aviso_quadros = 180;
+            }
+            if (IsKeyPressed(KEY_F9)) {
+                if (carregar(sim, fundacao, ferramenta, fase_da_barra, conteudo, configuracao_eventos, arquivo_rapido, aviso)) relatorio.esquecer_historico();
+                aviso_quadros = 180;
+            }
+            ler_atalhos(ferramenta);
+            const bool clicou_relatorio = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                                          CheckCollisionPointRec(GetMousePosition(), area_do_botao_relatorio());
+            if (IsKeyPressed(KEY_V) || clicou_relatorio) relatorio.alternar();
+            relatorio.atualizar();
+            // A lista de alertas fica escondida atrás do relatório aberto.
+            if (!relatorio.aberta() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                const int i = alerta_sob_mouse(alertas);
+                if (i >= 0 && !alertas[static_cast<std::size_t>(i)].edificios.empty()) {
+                    const Alerta& a = alertas[static_cast<std::size_t>(i)];
+                    std::size_t& proximo = proximo_do_alerta[static_cast<std::size_t>(a.tipo)];
+                    const IdEdificio id = a.edificios[proximo++ % a.edificios.size()];
+                    const Edificio& e = cidade.edificio(id);
+                    const DefinicaoEdificio& def = cidade.definicao(id);
+                    camera.centralizar({ (static_cast<float>(e.origem.x) + def.largura_total() / 2.0f) * TAMANHO_CELULA,
+                                         (static_cast<float>(e.origem.y) + def.altura_total() / 2.0f) * TAMANHO_CELULA });
+                    ferramenta.ativa = Ferramenta::Nenhuma;
+                    ferramenta.selecionado = id;
+                }
+            }
+            const bool painel_aberto = ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo;
+            // Clique sobre a barra, o painel ou o botão do menu não pode
+            // atravessar para o mapa.
+            mouse_na_barra = atualizar_barra(ferramenta) ||
+                             (painel_aberto && CheckCollisionPointRec(GetMousePosition(),
+                                                                      area_do_painel_edificio())) ||
+                             CheckCollisionPointRec(GetMousePosition(), area_do_botao_menu()) ||
+                             CheckCollisionPointRec(GetMousePosition(), area_do_botao_relatorio()) ||
+                             (relatorio.aberta() ? CheckCollisionPointRec(GetMousePosition(), relatorio.area())
+                                                 : mouse_sobre_alertas(alertas));
+            camera.atualizar(GetFrameTime());
+            sob_cursor = celula_em(camera.mouse_no_mundo());
+            if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
+            if (IsKeyPressed(KEY_U) && ferramenta.selecionado) {
+                const ResultadoMelhoria r = cidade.melhorar_edificio(*ferramenta.selecionado, sim.fase);
+                aviso = r == ResultadoMelhoria::Ok
+                            ? "instituição evoluiu para o nível " +
+                                  std::to_string(cidade.edificio(*ferramenta.selecionado).nivel)
+                            : descrever(r);
+                aviso_quadros = 180;
+            }
+            if (fundacao.concluir_se_possivel(cidade)) {
                 ferramenta = criar_ferramentas(conteudo, sim.fase);
                 fase_da_barra = sim.fase;
-                aviso = "partida carregada";
-            } else aviso = "não foi possível carregar: " + carga_partida.erro;
-            aviso_quadros = 180;
-        }
-        ler_atalhos(ferramenta);
-        const bool painel_aberto = ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo;
-        // Clique sobre a barra ou o painel não pode atravessar para o mapa.
-        const bool mouse_na_barra = atualizar_barra(ferramenta) ||
-                                    (painel_aberto && CheckCollisionPointRec(GetMousePosition(),
-                                                                             area_do_painel_edificio()));
-        camera.atualizar(GetFrameTime());
-        const Celula sob_cursor = celula_em(camera.mouse_no_mundo());
-        if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
-        if (IsKeyPressed(KEY_U) && ferramenta.selecionado) {
-            const ResultadoMelhoria r = cidade.melhorar_edificio(*ferramenta.selecionado, sim.fase);
-            aviso = r == ResultadoMelhoria::Ok
-                        ? "instituição evoluiu para o nível " +
-                              std::to_string(cidade.edificio(*ferramenta.selecionado).nivel)
-                        : descrever(r);
-            aviso_quadros = 180;
-        }
-        if (fundacao.concluir_se_possivel(cidade)) {
-            ferramenta = criar_ferramentas(conteudo, sim.fase);
-            fase_da_barra = sim.fase;
-        }
+            }
 
-        const int passos = relogio.passos_para(GetFrameTime());
+            const int passos = relogio.passos_para(GetFrameTime());
+            if (fundacao.concluida()) {
+                for (int i = 0; i < passos; ++i) sim.passo();
+            }
+        }
+        // Antes da fundação não há vila para ter problema.
         if (fundacao.concluida()) {
-            for (int i = 0; i < passos; ++i) sim.passo();
+            alertas = levantar_alertas(sim);
+            relatorio.registrar_dia(sim);
+        } else {
+            alertas.clear();
         }
         if (fundacao.concluida() && fase_da_barra != sim.fase) {
             ferramenta = criar_ferramentas(conteudo, sim.fase);
@@ -185,11 +318,16 @@ int main() {
         if (!fundacao.concluida() && dica.empty()) dica = "escolha onde fundar a vila";
         if (aviso_quadros > 0) { dica = aviso; --aviso_quadros; }
         desenhar_painel(sim, relogio, mapa, sob_cursor, dica);
+        desenhar_botao(area_do_botao_relatorio(), "Relatório (V)", relatorio.aberta());
+        desenhar_botao(area_do_botao_menu(), "Menu (Esc)", false);
+        if (relatorio.aberta()) relatorio.desenhar(montar_relatorio(sim));
+        else desenhar_alertas(alertas);
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
             desenhar_painel_edificio(cidade, sim.populacao, *ferramenta.selecionado, sim.data.mes,
                                      Simulacao::TICKS_POR_DIA);
         }
+        menu.desenhar();
         EndDrawing();
     }
 

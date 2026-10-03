@@ -165,33 +165,16 @@ as de implementação, que o README não explica.
 
 ## Em aberto
 
-- Formato dos eventos históricos: TOML ou Lua (sol2 está sem versão nova
-  desde 2022).
-- Quando trocar a arte provisória pelos sprites da Kenney.
+- As decisões ainda abertas e sua ordem de resolução ficam no
+  [`plano_de_ação.md`](plano_de_ação.md). Este arquivo registra o motivo das
+  decisões depois que forem tomadas.
 
 ## Próximos passos
 
-Tarefa 10, nesta ordem (decisões do Vitor em 2026-10-01: 3 casais que se
-reproduzem, jogador escolhe onde fundar, fome mata, balanceamento em Python
-agora, estamentos depois):
-
-1. ~~Moradores nas casas e população na barra do topo.~~ Concluído.
-2. ~~Trabalhadores limitam a produção.~~ Concluído.
-3. ~~Casas pedem comida pelo sistema de pedidos; consumo diário.~~ Concluído.
-4. ~~Fome mata.~~ Concluído: 30 dias consecutivos sem comida.
-5. ~~Início da partida: jogador posiciona o primeiro armazém; estoque
-   inicial.~~ Concluído, com 480 porções de pão após o balanceamento.
-6. ~~Ferramenta de balanceamento em Python (simula anos sem janela, plota
-   produção × consumo por mês) e ajuste do TOML.~~ Concluído.
-7. ~~Interface de acompanhamento: estoque total, "comida para N dias",
-   avisos.~~ Concluído.
-8. ~~Teste do marco: a vila atravessa o inverno 1150–51 com a configuração
-   certa e passa fome sem a fazenda.~~ Concluído.
-
-**Primeiro marco concluído.** Salvar/carregar também está pronto. Próxima
-ordem: eventos
-históricos, evolução de fase, arte,
-estamentos e mapa histórico.
+O primeiro marco e suas extensões estão concluídos. A fila oficial, incluindo
+o plano de produto e as salvaguardas de desempenho, fica em
+[`plano_de_ação.md`](plano_de_ação.md). Ela não é duplicada aqui para os dois
+documentos não voltarem a divergir.
 
 ## Como trabalhamos
 

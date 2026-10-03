@@ -7,6 +7,8 @@ clima e dos acontecimentos históricos.
 
 > Decisões de implementação, coisas descartadas, pendências e histórico
 > ficam em [`contexto.md`](contexto.md).
+> O roteiro único do trabalho futuro fica em
+> [`plano_de_ação.md`](plano_de_ação.md).
 
 > Status: primeiro marco jogável. Dá para fundar e construir a vila; os edifícios produzem
 > e trocam mercadorias por carregadores. A vila começa com 3 casais, que

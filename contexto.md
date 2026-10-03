@@ -193,6 +193,13 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Progressão da campanha**: o jogo usa um único mapa contínuo. A passagem
+  de fase exige simultaneamente chegar ao ano histórico correspondente e
+  elevar as instituições exigidas ao último nível disponível; o calendário
+  não para esperando os objetivos. Os anos do README são apenas a proposta
+  inicial (1150, 1200, 1250, 1300 e 1370), e a lista exata de edifícios da
+  condição ainda precisa ser confirmada antes da implementação.
+
 - **Primeiro corte de eventos históricos**: `dados/eventos.toml` define
   intervalos julianos inclusivos e multiplicadores combináveis por edifício
   ou gerais. A Grande Fome reduz colheitas e pesca; a Peste Negra reduz a

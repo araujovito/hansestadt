@@ -21,9 +21,10 @@ clima e dos acontecimentos históricos.
   oficina → produto, com carregadores levando cada item pelas estradas.
 - **Construção em grade** e crescimento da cidade no estilo *Cities: Skylines*,
   sem combate.
-- **Campanha histórica**: os edifícios principais (igreja, governo, porto)
-  evoluem em estágios, e cada estágio libera uma fase da história com eventos
-  em datas reais.
+- **Campanha histórica em um mapa contínuo**: as fases não reiniciam a cidade.
+  Cada uma exige alcançar seu ano histórico e evoluir as instituições
+  necessárias ao nível máximo disponível; o calendário continua correndo
+  mesmo se os objetivos ainda não foram cumpridos.
 
 ## Por que a Hansa
 

@@ -40,9 +40,15 @@ do README e do contexto e um ou mais commits pequenos.
    - Registrar acontecimentos e seus efeitos para o jogador.
 
 5. **Evolução das fases**
-   - Vila, mercado, cidade, cidade hanseática e auge.
-   - Requisitos e liberações próprios de cada fase.
-   - Manter o calendário histórico separado do avanço por objetivos.
+   - A campanha acontece em um único mapa contínuo, sem reiniciar a cidade
+     ao trocar de fase.
+   - Cada fase tem um ano-limite histórico e só é alcançada quando o
+     calendário chega a esse ano e as instituições exigidas estão no maior
+     nível disponível.
+   - O calendário continua avançando independentemente; chegar ao ano sem
+     cumprir os requisitos mantém a fase atual até cumpri-los.
+   - Anos sugeridos pelo README (1150, 1200, 1250, 1300 e 1370) e quais
+     edifícios contam como instituições aguardam confirmação.
 
 6. **Edifícios institucionais**
    - Igreja, governo, mercado e porto.
@@ -74,7 +80,8 @@ do README e do contexto e um ou mais commits pequenos.
 
 12. **Campanha e mapa histórico**
     - Mapa próprio no lugar do gerador provisório.
-    - Objetivos e progressão histórica de 1150 a 1370.
+    - Manter a campanha de fases no mapa contínuo, avançando por ano e
+      requisitos de nível das instituições (regra detalhada no bloco 5).
 
 13. **Acabamento técnico**
     - Migração de arquivos de salvamento.

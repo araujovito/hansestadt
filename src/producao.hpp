@@ -3,8 +3,10 @@
 #include <cstdint>
 
 #include "cidade.hpp"
+#include "calendario.hpp"
 
 class Populacao;
+class Eventos;
 
 // O fator de sazonalidade vira inteiro em milésimos: o progresso de um ciclo
 // é uma soma de inteiros, sem erro de arredondamento acumulado ao longo de
@@ -22,7 +24,8 @@ std::int64_t progresso_total(const Receita& r, int ticks_por_dia);
 // entradas são consumidas no início. A cada tick o progresso cresce pelo
 // fator do mês, então o mesmo ciclo dura o dobro com fator 0,5 e pausa com
 // fator 0. Ao completar, as saídas vão para o estoque do próprio edifício.
-void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populacao* populacao = nullptr);
+void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populacao* populacao = nullptr,
+                      const Eventos* eventos = nullptr, Data data = { 1, 1, 1 });
 
 enum class Situacao : std::uint8_t {
     SemReceita,     // armazém, casa

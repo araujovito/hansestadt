@@ -83,6 +83,13 @@ int main() {
         return 1;
     }
     const Conteudo& conteudo = *carga.conteudo;
+    const ResultadoEventos carga_eventos = carregar_eventos(pasta_de_dados(), conteudo);
+    if (!carga_eventos.eventos) {
+        std::fprintf(stderr, "erro ao carregar eventos históricos:\n");
+        for (const std::string& erro : carga_eventos.erros) std::fprintf(stderr, "  %s\n", erro.c_str());
+        return 1;
+    }
+    const Eventos configuracao_eventos(*carga_eventos.eventos);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(1280, 720, "Hansestadt");
@@ -90,6 +97,7 @@ int main() {
     SetExitKey(KEY_NULL);
 
     Simulacao sim(Cidade(gerar_mapa(LARGURA_MAPA, ALTURA_MAPA, SEMENTE_MAPA), conteudo));
+    sim.eventos = configuracao_eventos;
     Cidade& cidade = sim.cidade;
     const Mapa& mapa = cidade.mapa();
     // A campanha começa na vila; a troca de fase vem com a evolução dos
@@ -115,6 +123,7 @@ int main() {
             ResultadoSalvamento carga_partida = carregar_partida(ARQUIVO_PARTIDA, conteudo);
             if (carga_partida.simulacao) {
                 sim = std::move(*carga_partida.simulacao);
+                sim.eventos = configuracao_eventos;
                 IdEdificio armazem = SEM_EDIFICIO;
                 for (IdEdificio id = 0; id < sim.cidade.edificios().size(); ++id)
                     if (sim.cidade.edificio(id).ativo && sim.cidade.definicao(id).deposito) { armazem = id; break; }

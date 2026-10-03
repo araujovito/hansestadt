@@ -1,5 +1,6 @@
 #include "cidade.hpp"
 #include "conteudo_de_teste.hpp"
+#include "eventos.hpp"
 #include "producao.hpp"
 #include "populacao.hpp"
 #include "verificar.hpp"
@@ -63,6 +64,24 @@ TESTE("produção: fator 0,5 dobra a duração do ciclo") {
     rodar(c, TICKS_POR_DIA * 2 - 1, 8);
     VERIFICAR(c.edificio(f).estoque[item("pao")] == 0);
     rodar(c, 1, 8);
+    VERIFICAR(c.edificio(f).estoque[item("pao")] == 1);
+}
+
+TESTE("produção: evento reduz o ritmo durante o intervalo histórico") {
+    Cidade c(Mapa(8, 8), conteudo_de_teste());
+    const IdEdificio f = *c.construir_edificio(tipo("colheita"), { 1, 1 });
+    EventoHistorico evento;
+    evento.id = "chuvas";
+    evento.inicio = { 1150, 7, 1 };
+    evento.fim = { 1150, 7, 31 };
+    evento.producao_por_edificio.emplace_back(tipo("colheita"), 0.5f);
+    const Eventos eventos({ evento });
+
+    for (int i = 0; i < TICKS_POR_DIA; ++i)
+        avancar_producao(c, 7, TICKS_POR_DIA, nullptr, &eventos, { 1150, 7, 15 });
+    VERIFICAR(c.edificio(f).estoque[item("pao")] == 0);
+    for (int i = 0; i < TICKS_POR_DIA; ++i)
+        avancar_producao(c, 7, TICKS_POR_DIA, nullptr, &eventos, { 1150, 7, 15 });
     VERIFICAR(c.edificio(f).estoque[item("pao")] == 1);
 }
 

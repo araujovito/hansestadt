@@ -4,6 +4,7 @@
 
 #include "calendario.hpp"
 #include "cidade.hpp"
+#include "eventos.hpp"
 #include "populacao.hpp"
 #include "transporte.hpp"
 
@@ -21,6 +22,7 @@ struct Simulacao {
     Cidade cidade;
     Populacao populacao;
     Transporte transporte;
+    Eventos eventos;
     std::uint64_t tick = 0;
     // Primavera de 1150: início da estação de desmatamento e plantio, quando
     // os colonos da Ostsiedlung chegavam para fundar uma vila.

@@ -1,0 +1,20 @@
+# Eventos históricos e climáticos da costa báltica.
+# As datas usam o calendário juliano; fim é inclusivo.
+# multiplicador_geral afeta toda produção durante o intervalo.
+# producao pode ajustar edifícios específicos, combinando com o fator geral.
+
+[[evento]]
+id = "grande_fome"
+nome = "Grande Fome"
+descricao = "Anos de chuva persistente arruínam as colheitas no norte da Europa."
+inicio = [1315, 1, 1]
+fim = [1317, 12, 31]
+producao = { fazenda = 0.25, pescador = 0.75 }
+
+[[evento]]
+id = "peste_negra"
+nome = "Peste Negra"
+descricao = "A peste interrompe o comércio e reduz a capacidade produtiva das cidades."
+inicio = [1347, 1, 1]
+fim = [1351, 12, 31]
+multiplicador_geral = 0.65

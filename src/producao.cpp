@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "populacao.hpp"
+#include "eventos.hpp"
 
 int fator_do_mes(const Receita& r, int mes) {
     return static_cast<int>(std::lround(r.sazonalidade[static_cast<std::size_t>(mes - 1)] * ESCALA_FATOR));
@@ -14,8 +15,13 @@ std::int64_t progresso_total(const Receita& r, int ticks_por_dia) {
 
 namespace {
 
-bool pode_comecar(const Cidade& cidade, IdEdificio id, const Receita& r, int mes) {
-    if (fator_do_mes(r, mes) == 0) return false;
+int fator_efetivo(const Cidade& cidade, IdEdificio id, const Receita& r, int mes, const Eventos* eventos, Data data) {
+    const float evento = eventos ? eventos->multiplicador_producao(data, cidade.edificio(id).tipo) : 1.0f;
+    return static_cast<int>(std::lround(fator_do_mes(r, mes) * evento));
+}
+
+bool pode_comecar(const Cidade& cidade, IdEdificio id, const Receita& r, int mes, const Eventos* eventos, Data data) {
+    if (fator_efetivo(cidade, id, r, mes, eventos, data) == 0) return false;
     const Edificio& e = cidade.edificio(id);
     if (cidade.definicao(id).extrai && !cidade.tem_recurso_proximo(id)) return false;
     for (const Quantidade& q : r.entradas) {
@@ -27,11 +33,11 @@ bool pode_comecar(const Cidade& cidade, IdEdificio id, const Receita& r, int mes
     return true;
 }
 
-void tentar_comecar(Cidade& cidade, IdEdificio id, int mes) {
+void tentar_comecar(Cidade& cidade, IdEdificio id, int mes, const Eventos* eventos, Data data) {
     const DefinicaoEdificio& def = cidade.definicao(id);
     for (std::size_t i = 0; i < def.receitas.size(); ++i) {
         const Receita& r = def.receitas[i];
-        if (!pode_comecar(cidade, id, r, mes)) continue;
+        if (!pode_comecar(cidade, id, r, mes, eventos, data)) continue;
         for (const Quantidade& q : r.entradas) cidade.retirar(id, q.item, q.quantidade);
         Edificio& e = cidade.edificio(id);
         e.receita_ativa = static_cast<int>(i);
@@ -42,20 +48,21 @@ void tentar_comecar(Cidade& cidade, IdEdificio id, int mes) {
 
 }  // namespace
 
-void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populacao* populacao) {
+void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populacao* populacao,
+                      const Eventos* eventos, Data data) {
     // Por índice, em ordem crescente: a ordem de atualização faz parte do
     // resultado quando dois edifícios disputarem o mesmo recurso.
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo || cidade.definicao(id).receitas.empty()) continue;
         if (populacao && populacao->trabalhadores_em(id) < cidade.definicao(id).trabalhadores) continue;
 
-        if (cidade.edificio(id).receita_ativa < 0) tentar_comecar(cidade, id, mes);
+        if (cidade.edificio(id).receita_ativa < 0) tentar_comecar(cidade, id, mes, eventos, data);
 
         Edificio& e = cidade.edificio(id);
         if (e.receita_ativa < 0) continue;
 
         const Receita& r = cidade.definicao(id).receitas[static_cast<std::size_t>(e.receita_ativa)];
-        e.progresso += fator_do_mes(r, mes);
+        e.progresso += fator_efetivo(cidade, id, r, mes, eventos, data);
         if (e.progresso < progresso_total(r, ticks_por_dia)) continue;
 
         // O espaço foi conferido no início e só a produção põe saídas aqui,

@@ -76,8 +76,7 @@ do README e do contexto e um ou mais commits pequenos.
    - Cadeia completa de argila, combustível e tijolos.
    - Rebalancear mão de obra, transporte e custos após cada ramo.
 
-7a. **Carregadores por edifício e trilhas** — decisão registrada; regras
-     operacionais pendentes antes de implementar
+7a. **Carregadores por edifício e trilhas** — regras decididas; a implementar
    - Decidido pelo Vitor em 2026-10-03: o armazém mantém um carregador
      próprio, além da cobertura de transporte dos demais edifícios.
    - Decidido pelo Vitor em 2026-10-03: quando faltarem adultos, as vagas de
@@ -88,9 +87,13 @@ do README e do contexto e um ou mais commits pequenos.
      que sobrarem aumentam essa cobertura até um por edifício.
    - O percurso casa–trabalho dos funcionários cria trilhas que, com o uso,
      viram estradas automaticamente. Estradas manuais continuam disponíveis.
-   - Falta decidir: limiares e desgaste das trilhas; velocidade em
-     campo/trilha/estrada; se carregadores também criam trilhas; e se trilhas
-     atravessam floresta.
+   - Funcionários e carregadores registram uso no caminho percorrido.
+   - 30 passagens criam uma trilha; 200 passagens consolidam uma estrada.
+   - Depois de criada, a trilha perde 1 ponto de uso a cada 7 dias sem nenhuma
+     passagem e desaparece ao chegar a zero; estradas consolidadas não
+     desaparecem.
+   - Velocidade relativa: campo 50%, trilha 75%, estrada 100% e floresta 35%.
+     Pessoas podem atravessar floresta e formar trilhas nela.
 
 7b. **Comida para a vila crescer** — em andamento na `codex/simulacao`
    - Motivo: a vila inicial produz no máximo 2.303 porções por ano (6,3
@@ -102,10 +105,14 @@ do README e do contexto e um ou mais commits pequenos.
      alertas e relatório consideram esse consumo.
    - Edifícios podem receber melhorias de tecnologia que aumentam a
      produtividade, para a comida acompanhar o crescimento da vila.
-   - Falta decidir: melhoria por edifício ou para todos do mesmo tipo; quanto
-     cada nível aumenta e quantos níveis existem; custo (material, tempo,
-     trabalhadores) e se depende da fase; quais edifícios podem melhorar; e
-     quando a comida é pouca, quem tem preferência (com ou sem casa).
+   - Decidido: melhorias são globais por tipo de edifício, com três níveis e
+     aproximadamente 15% de produtividade adicional por nível.
+   - Os níveis são liberados conforme as fases e têm custos crescentes: madeira
+     primeiro; tecido e couro nas fases intermediárias; tijolos nas posteriores.
+     A compra é instantânea e não reserva trabalhadores nem exige tempo de obra.
+   - O primeiro corte abrange fazendas, pesca, moinho e padaria.
+   - Quando falta comida, a prioridade é: crianças, adultos alojados e, por
+     último, adultos sem casa.
 
 8. **Agricultura, clima e recursos**
    - Plantio e colheita mais visíveis.
@@ -126,6 +133,15 @@ do README e do contexto e um ou mais commits pequenos.
    - Explicar por que uma construção, produção ou entrega está bloqueada:
      os alertas e o painel do edifício já explicam a produção; faltam
      construção e entrega.
+
+9a. **Editor visual de mapa e cenário** — aprovado; a implementar
+   - Entrada "Editor de mapa" no menu principal; atalho de teclado é apenas
+     uma conveniência, não a única forma de abrir o editor.
+   - Pintar terreno e recursos com o mouse.
+   - Posicionar e remover edifícios e estradas visualmente.
+   - Painel de propriedades para o objeto selecionado.
+   - Salvar e carregar mapas/cenários em arquivo próprio.
+   - Depois do primeiro corte, permitir recarregar dados e arte sem recompilar.
 
 10. **Arte e áudio**
     - Em andamento na `claude/interface`: o mundo já é desenhado em pixel art
@@ -165,8 +181,6 @@ do README e do contexto e um ou mais commits pequenos.
 
 ## Decisões ainda abertas
 
-- Regras operacionais de carregadores e trilhas listadas no item 7a.
-- Detalhes das melhorias de tecnologia e da comida dos sem-teto (item 7b).
 - Escopo exato dos estamentos sociais após a economia básica estar completa.
 - Formato definitivo dos eventos depois do primeiro conjunto em TOML.
 

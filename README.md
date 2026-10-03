@@ -279,6 +279,7 @@ Controles:
 | Edifício | botão na barra inferior, depois clicar no mapa |
 | Demolir | `X`, depois clicar ou arrastar |
 | Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
+| Evoluir a instituição selecionada (provisório) | `U` |
 | Relatório de emprego, comida, produção e transporte | `V` ou o botão `Relatório` no canto de cima (o jogo continua andando) |
 | Ir até um edifício com problema | clicar em `ver >` no alerta, no canto esquerdo (cliques seguidos percorrem os edifícios do alerta) |
 | Salvar / carregar rápido | `F5` / `F9` (`partida.hanse`) |

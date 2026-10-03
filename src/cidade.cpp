@@ -1,5 +1,6 @@
 #include "cidade.hpp"
 
+#include <algorithm>
 #include <utility>
 
 const char* descrever(Validacao v) {
@@ -12,6 +13,18 @@ const char* descrever(Validacao v) {
         case Validacao::PortaBloqueada: return "entrada bloqueada";
         case Validacao::SemRecursos: return "faltam materiais";
         case Validacao::JaExiste: return "já existe";
+    }
+    return "?";
+}
+
+const char* descrever(ResultadoMelhoria r) {
+    switch (r) {
+        case ResultadoMelhoria::Ok: return "ok";
+        case ResultadoMelhoria::EdificioInativo: return "instituição inativa";
+        case ResultadoMelhoria::NaoInstituicao: return "não é uma instituição";
+        case ResultadoMelhoria::NivelMaximo: return "já está no nível máximo";
+        case ResultadoMelhoria::FaseBloqueada: return "nível ainda não disponível nesta fase";
+        case ResultadoMelhoria::SemRecursos: return "faltam materiais";
     }
     return "?";
 }
@@ -49,6 +62,11 @@ Celula porta_de(const DefinicaoEdificio& def, Celula origem) {
 
 Validacao Cidade::validar_edificio(IdTipoEdificio tipo, Celula origem) const {
     const DefinicaoEdificio& def = conteudo_->edificio(tipo);
+    if (def.instituicao) {
+        for (const Edificio& existente : edificios_)
+            if (existente.ativo && conteudo_->edificio(existente.tipo).instituicao == def.instituicao)
+                return Validacao::JaExiste;
+    }
     for (int dy = 0; dy < def.altura_total(); ++dy) {
         for (int dx = 0; dx < def.largura_total(); ++dx) {
             const Celula c{ origem.x + dx, origem.y + dy };
@@ -104,6 +122,42 @@ std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula
     portas_[indice(porta_de(def, origem))] = 1;
     consumir_custo(def);
     return id;
+}
+
+ResultadoMelhoria Cidade::validar_melhoria(IdEdificio id, Fase fase_atual) const {
+    if (id >= edificios_.size() || !edificios_[id].ativo) return ResultadoMelhoria::EdificioInativo;
+    const DefinicaoEdificio& def = definicao(id);
+    if (!def.instituicao) return ResultadoMelhoria::NaoInstituicao;
+    const Edificio& e = edificios_[id];
+    if (e.nivel < 1 || static_cast<std::size_t>(e.nivel) > def.melhorias.size())
+        return ResultadoMelhoria::NivelMaximo;
+    const MelhoriaEdificio& melhoria = def.melhorias[static_cast<std::size_t>(e.nivel - 1)];
+    if (melhoria.fase > fase_atual) return ResultadoMelhoria::FaseBloqueada;
+    for (const Quantidade& q : melhoria.custo) {
+        int disponivel_total = 0;
+        for (IdEdificio origem = 0; origem < edificios_.size(); ++origem)
+            disponivel_total += disponivel(origem, q.item);
+        if (disponivel_total < q.quantidade) return ResultadoMelhoria::SemRecursos;
+    }
+    return ResultadoMelhoria::Ok;
+}
+
+ResultadoMelhoria Cidade::melhorar_edificio(IdEdificio id, Fase fase_atual) {
+    const ResultadoMelhoria resultado = validar_melhoria(id, fase_atual);
+    if (resultado != ResultadoMelhoria::Ok) return resultado;
+    const MelhoriaEdificio& melhoria = definicao(id).melhorias[static_cast<std::size_t>(edificios_[id].nivel - 1)];
+    for (const Quantidade& q : melhoria.custo) {
+        int restante = q.quantidade;
+        for (IdEdificio origem = 0; origem < edificios_.size() && restante > 0; ++origem) {
+            Edificio& e = edificios_[origem];
+            if (!e.ativo) continue;
+            const int retirado = std::min(restante, disponivel(origem, q.item));
+            e.estoque[q.item] -= retirado;
+            restante -= retirado;
+        }
+    }
+    ++edificios_[id].nivel;
+    return ResultadoMelhoria::Ok;
 }
 
 Validacao Cidade::validar_estrada(Celula c) const {

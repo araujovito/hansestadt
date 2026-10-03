@@ -7,7 +7,8 @@
 
 namespace {
 
-constexpr char MAGIA[] = "HANSESTADT\3";
+constexpr char MAGIA_V3[] = "HANSESTADT\3";
+constexpr char MAGIA[] = "HANSESTADT\4";
 constexpr std::uint64_t MAXIMO_VETOR = 10'000'000;
 
 template <class T>
@@ -47,6 +48,7 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
     out.write(MAGIA, sizeof(MAGIA));
     escrever(out, sim.tick);
     escrever(out, sim.data.ano); escrever(out, sim.data.mes); escrever(out, sim.data.dia);
+    escrever(out, sim.fase);
 
     const Mapa& mapa = sim.cidade.mapa();
     escrever(out, mapa.largura()); escrever(out, mapa.altura());
@@ -57,7 +59,7 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
     for (const Edificio& e : sim.cidade.edificios()) {
         escrever(out, e.tipo); escrever_celula(out, e.origem); escrever(out, e.ativo);
         escrever_vetor(out, e.estoque); escrever_vetor(out, e.reservado); escrever_vetor(out, e.a_caminho);
-        escrever(out, e.receita_ativa); escrever(out, e.progresso);
+        escrever(out, e.receita_ativa); escrever(out, e.progresso); escrever(out, e.nivel);
     }
     escrever_vetor(out, sim.cidade.estradas());
     escrever(out, sim.cidade.versao_estradas());
@@ -85,10 +87,15 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
 
 Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     char magia[sizeof(MAGIA)]{};
-    if (!in.read(magia, sizeof(magia)) || std::string(magia, sizeof(magia)) != std::string(MAGIA, sizeof(MAGIA)))
+    if (!in.read(magia, sizeof(magia))) throw std::runtime_error("formato ou versão incompatível");
+    const std::string versao_arquivo(magia, sizeof(magia));
+    const bool legado_v3 = versao_arquivo == std::string(MAGIA_V3, sizeof(MAGIA_V3));
+    if (!legado_v3 && versao_arquivo != std::string(MAGIA, sizeof(MAGIA)))
         throw std::runtime_error("formato ou versão incompatível");
     const auto tick = ler<std::uint64_t>(in);
     const Data data{ler<int>(in), ler<int>(in), ler<int>(in)};
+    const Fase fase = legado_v3 ? Fase::Vila : ler<Fase>(in);
+    if (fase > Fase::Auge) throw std::runtime_error("fase inválida");
     const int largura = ler<int>(in), altura = ler<int>(in);
     if (largura <= 0 || altura <= 0 || largura > 4096 || altura > 4096) throw std::runtime_error("mapa inválido");
     Mapa mapa(largura, altura);
@@ -103,14 +110,17 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
         e.tipo = ler<IdTipoEdificio>(in); e.origem = ler_celula(in); e.ativo = ler<bool>(in);
         e.estoque = ler_vetor<int>(in); e.reservado = ler_vetor<int>(in); e.a_caminho = ler_vetor<int>(in);
         e.receita_ativa = ler<int>(in); e.progresso = ler<std::int64_t>(in);
+        if (!legado_v3) e.nivel = ler<int>(in);
         if (e.tipo >= conteudo.edificios.size() || e.estoque.size() != conteudo.itens.size())
             throw std::runtime_error("conteúdo incompatível");
+        if (e.nivel < 1 || static_cast<std::size_t>(e.nivel) > conteudo.edificio(e.tipo).melhorias.size() + 1)
+            throw std::runtime_error("nível de edifício inválido");
         edificios.push_back(std::move(e));
     }
     auto estradas = ler_vetor<std::uint8_t>(in);
-    const auto versao = ler<std::uint64_t>(in);
-    Cidade cidade = Cidade::restaurar(std::move(mapa), conteudo, std::move(edificios), std::move(estradas), versao);
-    Simulacao sim(std::move(cidade)); sim.tick = tick; sim.data = data;
+    const auto versao_estradas = ler<std::uint64_t>(in);
+    Cidade cidade = Cidade::restaurar(std::move(mapa), conteudo, std::move(edificios), std::move(estradas), versao_estradas);
+    Simulacao sim(std::move(cidade)); sim.tick = tick; sim.data = data; sim.fase = fase;
 
     const std::uint64_t n_moradores = ler<std::uint64_t>(in);
     if (n_moradores > MAXIMO_VETOR) throw std::runtime_error("moradores demais");

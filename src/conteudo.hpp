@@ -31,6 +31,11 @@ struct Quantidade {
     int quantidade;
 };
 
+struct MelhoriaEdificio {
+    Fase fase;
+    std::vector<Quantidade> custo;
+};
+
 struct Receita {
     int dias;
     std::vector<Quantidade> entradas;
@@ -65,6 +70,9 @@ struct DefinicaoEdificio {
     std::optional<Requisito> requer;
     // Recurso do terreno consumido a cada ciclo (ex.: floresta do lenhador).
     std::optional<Terreno> extrai;
+    // Instituição evolui por fases; cada melhoria libera o nível seguinte.
+    std::optional<std::string> instituicao;
+    std::vector<MelhoriaEdificio> melhorias;
     std::vector<Receita> receitas;
     std::vector<Quantidade> custo;
 
@@ -76,6 +84,8 @@ struct DefinicaoEdificio {
     int largura_total() const { return largura + 2 * campos; }
     int altura_total() const { return altura + 2 * campos; }
 };
+
+int nivel_maximo_disponivel(const DefinicaoEdificio& edificio, Fase fase);
 
 // Se a célula (dx, dy), relativa à origem da área total, é lavoura e não o
 // edifício em si.

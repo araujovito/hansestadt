@@ -29,6 +29,7 @@ struct Edificio {
     // parado, e quanto do ciclo já correu (ver producao.hpp).
     int receita_ativa = -1;
     std::int64_t progresso = 0;
+    int nivel = 1;
 };
 
 enum class Validacao : std::uint8_t {
@@ -41,6 +42,17 @@ enum class Validacao : std::uint8_t {
     SemRecursos,
     JaExiste,  // estrada sobre estrada: não é erro, só não muda nada
 };
+
+enum class ResultadoMelhoria : std::uint8_t {
+    Ok,
+    EdificioInativo,
+    NaoInstituicao,
+    NivelMaximo,
+    FaseBloqueada,
+    SemRecursos,
+};
+
+const char* descrever(ResultadoMelhoria resultado);
 
 const char* descrever(Validacao v);
 
@@ -62,6 +74,8 @@ public:
 
     Validacao validar_edificio(IdTipoEdificio tipo, Celula origem) const;
     std::optional<IdEdificio> construir_edificio(IdTipoEdificio tipo, Celula origem);
+    ResultadoMelhoria melhorar_edificio(IdEdificio id, Fase fase_atual);
+    ResultadoMelhoria validar_melhoria(IdEdificio id, Fase fase_atual) const;
 
     Validacao validar_estrada(Celula c) const;
     bool construir_estrada(Celula c);

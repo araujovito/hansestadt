@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "calendario.hpp"
+#include "campanha.hpp"
 #include "cidade.hpp"
 #include "eventos.hpp"
 #include "populacao.hpp"
@@ -23,6 +24,7 @@ struct Simulacao {
     Populacao populacao;
     Transporte transporte;
     Eventos eventos;
+    Fase fase = Fase::Vila;
     std::uint64_t tick = 0;
     // Primavera de 1150: início da estação de desmatamento e plantio, quando
     // os colonos da Ostsiedlung chegavam para fundar uma vila.

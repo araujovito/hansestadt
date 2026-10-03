@@ -100,10 +100,11 @@ int main() {
     sim.eventos = configuracao_eventos;
     Cidade& cidade = sim.cidade;
     const Mapa& mapa = cidade.mapa();
-    // A campanha começa na vila; a troca de fase vem com a evolução dos
-    // edifícios principais.
+    // A campanha começa na vila; os marcos históricos e as instituições
+    // determinam quando as ferramentas de cada fase são liberadas.
     Fundacao fundacao(conteudo);
     EstadoFerramenta ferramenta = criar_ferramentas_fundacao(conteudo);
+    Fase fase_da_barra = sim.fase;
     CameraJogo camera(static_cast<float>(LARGURA_MAPA * TAMANHO_CELULA),
                       static_cast<float>(ALTURA_MAPA * TAMANHO_CELULA));
     Relogio relogio(1.0 / Simulacao::TICKS_POR_SEGUNDO);
@@ -128,7 +129,8 @@ int main() {
                 for (IdEdificio id = 0; id < sim.cidade.edificios().size(); ++id)
                     if (sim.cidade.edificio(id).ativo && sim.cidade.definicao(id).deposito) { armazem = id; break; }
                 fundacao.restaurar(armazem);
-                ferramenta = criar_ferramentas(conteudo, Fase::Vila);
+                ferramenta = criar_ferramentas(conteudo, sim.fase);
+                fase_da_barra = sim.fase;
                 aviso = "partida carregada";
             } else aviso = "não foi possível carregar: " + carga_partida.erro;
             aviso_quadros = 180;
@@ -142,11 +144,28 @@ int main() {
         camera.atualizar(GetFrameTime());
         const Celula sob_cursor = celula_em(camera.mouse_no_mundo());
         if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
-        if (fundacao.concluir_se_possivel(cidade)) ferramenta = criar_ferramentas(conteudo, Fase::Vila);
+        if (IsKeyPressed(KEY_U) && ferramenta.selecionado) {
+            const ResultadoMelhoria r = cidade.melhorar_edificio(*ferramenta.selecionado, sim.fase);
+            aviso = r == ResultadoMelhoria::Ok
+                        ? "instituição evoluiu para o nível " +
+                              std::to_string(cidade.edificio(*ferramenta.selecionado).nivel)
+                        : descrever(r);
+            aviso_quadros = 180;
+        }
+        if (fundacao.concluir_se_possivel(cidade)) {
+            ferramenta = criar_ferramentas(conteudo, sim.fase);
+            fase_da_barra = sim.fase;
+        }
 
         const int passos = relogio.passos_para(GetFrameTime());
         if (fundacao.concluida()) {
             for (int i = 0; i < passos; ++i) sim.passo();
+        }
+        if (fundacao.concluida() && fase_da_barra != sim.fase) {
+            ferramenta = criar_ferramentas(conteudo, sim.fase);
+            fase_da_barra = sim.fase;
+            aviso = std::string("nova fase: ") + nome_da_fase(sim.fase);
+            aviso_quadros = 240;
         }
 
         BeginDrawing();

@@ -12,6 +12,7 @@ TESTE("salvamento: restaura o estado e continua deterministicamente") {
     for (const Celula c : caminho_em_l(cidade.porta(deposito), cidade.porta(casa))) cidade.construir_estrada(c);
     cidade.adicionar(deposito, item("pao"), 6);
     Simulacao original(std::move(cidade));
+    original.fase = Fase::Mercado;
     for (int i = 0; i < 37; ++i) original.passo();
 
     const std::string caminho = "/tmp/hansestadt-teste.hanse";
@@ -23,6 +24,7 @@ TESTE("salvamento: restaura o estado e continua deterministicamente") {
     Simulacao restaurada = std::move(*resultado.simulacao);
     VERIFICAR(restaurada.tick == original.tick);
     VERIFICAR(restaurada.data == original.data);
+    VERIFICAR(restaurada.fase == original.fase);
     VERIFICAR(restaurada.populacao.total() == original.populacao.total());
     VERIFICAR(restaurada.cidade.estoque_total(item("pao")) == original.cidade.estoque_total(item("pao")));
 

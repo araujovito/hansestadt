@@ -1,5 +1,7 @@
 #include "campanha.hpp"
 
+#include "cidade.hpp"
+
 namespace {
 
 bool todas_no_maximo(const std::vector<EstadoInstituicao>& instituicoes) {
@@ -21,6 +23,24 @@ int ano_de_abertura(Fase fase) {
         case Fase::Auge: return 1370;
     }
     return 0;
+}
+
+std::vector<EstadoInstituicao> estados_das_instituicoes(const Cidade& cidade, Fase fase) {
+    std::vector<EstadoInstituicao> resultado;
+    for (IdTipoEdificio tipo = 0; tipo < cidade.conteudo().edificios.size(); ++tipo) {
+        const DefinicaoEdificio& def = cidade.conteudo().edificio(tipo);
+        if (!def.instituicao || def.fase > fase) continue;
+        int nivel = 0;
+        for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
+            const Edificio& edificio = cidade.edificio(id);
+            if (edificio.ativo && edificio.tipo == tipo) {
+                nivel = edificio.nivel;
+                break;
+            }
+        }
+        resultado.push_back({ *def.instituicao, nivel, nivel_maximo_disponivel(def, fase) });
+    }
+    return resultado;
 }
 
 ResultadoProgressao tentar_avancar_fase(Fase fase_atual, Data data,

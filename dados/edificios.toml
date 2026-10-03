@@ -245,3 +245,84 @@ saidas = { tijolo = 4 }
 dias = 8
 entradas = { argila = 2, turfa = 2 }
 saidas = { tijolo = 4 }
+
+# ---------------------------------------------------------- instituições
+# Uma instituição só pode ser construída uma vez. Cada melhoria libera um
+# nível na fase indicada; níveis mais altos usam tijolo, quando disponível.
+
+[[edificio]]
+id = "igreja"
+nome = "igreja"
+fase = "vila"
+instituicao = "igreja"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#d8c8a0"
+custo = { tora = 8 }
+[[edificio.melhoria]]
+fase = "mercado"
+custo = { tora = 8 }
+[[edificio.melhoria]]
+fase = "cidade"
+custo = { tijolo = 4 }
+[[edificio.melhoria]]
+fase = "hansa"
+custo = { tijolo = 8 }
+[[edificio.melhoria]]
+fase = "auge"
+custo = { tijolo = 12 }
+
+[[edificio]]
+id = "governo"
+nome = "casa do conselho"
+fase = "vila"
+instituicao = "governo"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#b8a078"
+custo = { tora = 8 }
+[[edificio.melhoria]]
+fase = "mercado"
+custo = { tora = 8 }
+[[edificio.melhoria]]
+fase = "cidade"
+custo = { tijolo = 4 }
+[[edificio.melhoria]]
+fase = "hansa"
+custo = { tijolo = 8 }
+[[edificio.melhoria]]
+fase = "auge"
+custo = { tijolo = 12 }
+
+[[edificio]]
+id = "mercado"
+nome = "mercado coberto"
+fase = "mercado"
+instituicao = "mercado"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#a88c60"
+custo = { tora = 10 }
+[[edificio.melhoria]]
+fase = "cidade"
+custo = { tijolo = 4 }
+[[edificio.melhoria]]
+fase = "hansa"
+custo = { tijolo = 8 }
+[[edificio.melhoria]]
+fase = "auge"
+custo = { tijolo = 12 }
+
+[[edificio]]
+id = "porto"
+nome = "porto hanseático"
+fase = "hansa"
+instituicao = "porto"
+tamanho = [3, 2]
+terreno = "campo"
+cor = "#748c98"
+requer = { terreno = "agua", distancia = 2 }
+custo = { tora = 12 }
+[[edificio.melhoria]]
+fase = "auge"
+custo = { tijolo = 12 }

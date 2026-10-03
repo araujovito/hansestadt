@@ -28,6 +28,15 @@ bool DefinicaoEdificio::usa_item(IdItem item) const {
     return false;
 }
 
+int nivel_maximo_disponivel(const DefinicaoEdificio& edificio, Fase fase) {
+    int nivel = 1;
+    for (const MelhoriaEdificio& melhoria : edificio.melhorias) {
+        if (melhoria.fase > fase) break;
+        ++nivel;
+    }
+    return nivel;
+}
+
 std::optional<IdTipoEdificio> Conteudo::buscar_edificio(std::string_view id) const {
     for (std::size_t i = 0; i < edificios.size(); ++i) {
         if (edificios[i].id == id) return static_cast<IdTipoEdificio>(i);
@@ -201,7 +210,8 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         const std::string ctx = "edificios.toml, '" + (*t)["id"].value_or(std::string("?")) + "'";
         conferir_chaves(*t,
                         { "id", "nome", "fase", "tamanho", "terreno", "cor", "trabalhadores", "estoque", "moradores",
-                          "campos", "deposito", "carregadores", "requer", "extrai", "custo", "receita" },
+                          "campos", "deposito", "carregadores", "requer", "extrai", "custo", "receita",
+                          "instituicao", "melhoria" },
                         ctx, erros);
 
         DefinicaoEdificio d{};
@@ -259,6 +269,37 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         }
         d.custo = ler_quantidades(*t, "custo", c, ctx + ", custo", erros);
 
+        if (t->contains("instituicao")) {
+            auto instituicao = texto_obrigatorio(*t, "instituicao", ctx, erros);
+            if (instituicao) d.instituicao = *instituicao;
+        }
+        if (const toml::array* melhorias = (*t)["melhoria"].as_array()) {
+            Fase fase_anterior = d.fase;
+            for (std::size_t i = 0; i < melhorias->size(); ++i) {
+                const toml::table* melhoria = (*melhorias)[i].as_table();
+                const std::string ctx_m = ctx + ", melhoria " + std::to_string(i + 2);
+                if (!melhoria) {
+                    erros.adicionar(ctx_m, "cada melhoria precisa ser uma tabela");
+                    continue;
+                }
+                conferir_chaves(*melhoria, { "fase", "custo" }, ctx_m, erros);
+                if (!melhoria->contains("custo") || !(*melhoria)["custo"].as_table())
+                    erros.adicionar(ctx_m, "'custo' precisa ser uma tabela de materiais");
+                const auto fase_melhoria = fase_por_id((*melhoria)["fase"].value_or(std::string()));
+                if (!fase_melhoria) {
+                    erros.adicionar(ctx_m, "fase inválida para melhoria");
+                    continue;
+                }
+                if (*fase_melhoria <= fase_anterior)
+                    erros.adicionar(ctx_m, "fase precisa ser posterior à melhoria anterior e à fase inicial");
+                fase_anterior = *fase_melhoria;
+                d.melhorias.push_back({ *fase_melhoria,
+                    ler_quantidades(*melhoria, "custo", c, ctx_m + ", custo", erros) });
+            }
+        } else if (t->contains("melhoria")) {
+            erros.adicionar(ctx, "'melhoria' precisa ser uma lista de tabelas");
+        }
+
         if (const toml::array* receitas = (*t)["receita"].as_array()) {
             for (std::size_t i = 0; i < receitas->size(); ++i) {
                 if (const toml::table* r = (*receitas)[i].as_table()) {
@@ -277,6 +318,14 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         }
         if (d.extrai && (!d.requer || d.requer->terreno != *d.extrai)) {
             erros.adicionar(ctx, "extrai precisa corresponder ao terreno de requer");
+        }
+        if (!d.instituicao && !d.melhorias.empty())
+            erros.adicionar(ctx, "melhorias só podem ser declaradas em edifício com 'instituicao'");
+        if (d.instituicao && d.instituicao->empty()) erros.adicionar(ctx, "'instituicao' não pode ser vazia");
+        if (d.instituicao) {
+            for (const DefinicaoEdificio& existente : c.edificios)
+                if (existente.instituicao == d.instituicao)
+                    erros.adicionar(ctx, "id de instituição repetido: '" + *d.instituicao + "'");
         }
 
         if (erros.lista.size() == erros_antes) c.edificios.push_back(std::move(d));

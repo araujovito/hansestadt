@@ -6,6 +6,8 @@
 #include "calendario.hpp"
 #include "conteudo.hpp"
 
+class Cidade;
+
 struct EstadoInstituicao {
     std::string id;
     int nivel = 0;
@@ -22,3 +24,4 @@ struct ResultadoProgressao {
 ResultadoProgressao tentar_avancar_fase(Fase fase_atual, Data data,
                                          const std::vector<EstadoInstituicao>& instituicoes);
 int ano_de_abertura(Fase fase);
+std::vector<EstadoInstituicao> estados_das_instituicoes(const Cidade& cidade, Fase fase);

@@ -14,5 +14,6 @@ void Simulacao::passo() {
         populacao.consumir_comida(cidade);
         data = dia_seguinte(data);
         populacao.avancar_dia(cidade, data);
+        fase = tentar_avancar_fase(fase, data, estados_das_instituicoes(cidade, fase)).fase;
     }
 }

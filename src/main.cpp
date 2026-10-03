@@ -13,6 +13,7 @@
 #include "mapa.hpp"
 #include "painel.hpp"
 #include "relogio.hpp"
+#include "salvamento.hpp"
 #include "simulacao.hpp"
 
 namespace {
@@ -28,6 +29,7 @@ constexpr int LARGURA_MAPA = 128;
 constexpr int ALTURA_MAPA = 128;
 // Semente fixa enquanto o mapa da campanha não é desenhado à mão.
 constexpr unsigned SEMENTE_MAPA = 1150;
+constexpr const char* ARQUIVO_PARTIDA = "partida.hanse";
 
 void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& mapa, Celula sob_cursor,
                      const std::string& dica) {
@@ -96,9 +98,31 @@ int main() {
     CameraJogo camera(static_cast<float>(LARGURA_MAPA * TAMANHO_CELULA),
                       static_cast<float>(ALTURA_MAPA * TAMANHO_CELULA));
     Relogio relogio(1.0 / Simulacao::TICKS_POR_SEGUNDO);
+    std::string aviso;
+    int aviso_quadros = 0;
 
     while (!WindowShouldClose()) {
         ler_comandos(relogio);
+        if (IsKeyPressed(KEY_F5)) {
+            std::string erro;
+            aviso = fundacao.concluida() && salvar_partida(sim, ARQUIVO_PARTIDA, erro)
+                        ? "partida salva"
+                        : "não foi possível salvar: " + (erro.empty() ? std::string("funde a vila primeiro") : erro);
+            aviso_quadros = 180;
+        }
+        if (IsKeyPressed(KEY_F9)) {
+            ResultadoSalvamento carga_partida = carregar_partida(ARQUIVO_PARTIDA, conteudo);
+            if (carga_partida.simulacao) {
+                sim = std::move(*carga_partida.simulacao);
+                IdEdificio armazem = SEM_EDIFICIO;
+                for (IdEdificio id = 0; id < sim.cidade.edificios().size(); ++id)
+                    if (sim.cidade.edificio(id).ativo && sim.cidade.definicao(id).deposito) { armazem = id; break; }
+                fundacao.restaurar(armazem);
+                ferramenta = criar_ferramentas(conteudo, Fase::Vila);
+                aviso = "partida carregada";
+            } else aviso = "não foi possível carregar: " + carga_partida.erro;
+            aviso_quadros = 180;
+        }
         ler_atalhos(ferramenta);
         const bool painel_aberto = ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo;
         // Clique sobre a barra ou o painel não pode atravessar para o mapa.
@@ -130,6 +154,7 @@ int main() {
 
         std::string dica = mouse_na_barra ? std::string{} : dica_da_ferramenta(ferramenta, cidade, sob_cursor);
         if (!fundacao.concluida() && dica.empty()) dica = "escolha onde fundar a vila";
+        if (aviso_quadros > 0) { dica = aviso; --aviso_quadros; }
         desenhar_painel(sim, relogio, mapa, sob_cursor, dica);
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {

@@ -6,3 +6,7 @@ build/
 *.o
 *.a
 __pycache__/
+
+# Partida local
+partida.hanse
+partida.hanse.tmp

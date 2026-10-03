@@ -2,6 +2,18 @@
 
 #include <limits>
 
+Transporte Transporte::restaurar(std::vector<Carregador> carregadores,
+                                  std::vector<std::uint8_t> depositos_criados, std::uint64_t tick,
+                                  std::uint64_t entregas, std::uint64_t perdidos) {
+    Transporte t;
+    t.carregadores_ = std::move(carregadores);
+    t.ja_criou_ = std::move(depositos_criados);
+    t.tick_ = tick;
+    t.entregas_ = entregas;
+    t.perdidos_ = perdidos;
+    return t;
+}
+
 void Transporte::criar_carregadores(const Cidade& cidade) {
     ja_criou_.resize(cidade.edificios().size(), 0);
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {

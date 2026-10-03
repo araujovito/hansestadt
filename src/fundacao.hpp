@@ -14,6 +14,7 @@ public:
     bool concluir_se_possivel(Cidade& cidade);
     bool concluida() const { return concluida_; }
     IdEdificio armazem() const { return armazem_; }
+    void restaurar(IdEdificio armazem) { concluida_ = true; armazem_ = armazem; }
 
 private:
     IdItem comida_;

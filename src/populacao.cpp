@@ -5,6 +5,14 @@
 Populacao::Populacao(int quantidade_inicial)
     : moradores_(static_cast<std::size_t>(std::max(0, quantidade_inicial))) {}
 
+Populacao Populacao::restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas) {
+    Populacao p(0);
+    p.moradores_ = std::move(moradores);
+    p.mortos_de_fome_ = mortos_de_fome;
+    p.refeicoes_perdidas_ = refeicoes_perdidas;
+    return p;
+}
+
 int Populacao::total() const {
     return static_cast<int>(std::count_if(moradores_.begin(), moradores_.end(),
                                           [](const Morador& m) { return m.vivo; }));

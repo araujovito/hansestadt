@@ -23,6 +23,25 @@ Cidade::Cidade(Mapa mapa, const Conteudo& conteudo)
       estradas_(ocupacao_.size(), 0),
       portas_(ocupacao_.size(), 0) {}
 
+Cidade Cidade::restaurar(Mapa mapa, const Conteudo& conteudo, std::vector<Edificio> edificios,
+                         std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas) {
+    Cidade cidade(std::move(mapa), conteudo);
+    if (estradas.size() != cidade.estradas_.size()) return cidade;
+    cidade.edificios_ = std::move(edificios);
+    cidade.estradas_ = std::move(estradas);
+    cidade.versao_estradas_ = versao_estradas;
+    for (IdEdificio id = 0; id < cidade.edificios_.size(); ++id) {
+        const Edificio& e = cidade.edificios_[id];
+        if (!e.ativo) continue;
+        const DefinicaoEdificio& def = cidade.definicao(id);
+        for (int dy = 0; dy < def.altura_total(); ++dy)
+            for (int dx = 0; dx < def.largura_total(); ++dx)
+                cidade.ocupacao_[cidade.indice({e.origem.x + dx, e.origem.y + dy})] = id;
+        cidade.portas_[cidade.indice(porta_de(def, e.origem))] = 1;
+    }
+    return cidade;
+}
+
 Celula porta_de(const DefinicaoEdificio& def, Celula origem) {
     return { origem.x + (def.largura_total() - 1) / 2, origem.y + def.altura_total() };
 }

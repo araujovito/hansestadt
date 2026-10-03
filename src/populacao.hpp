@@ -31,6 +31,7 @@ public:
     int mortos_de_fome() const { return mortos_de_fome_; }
     int refeicoes_perdidas() const { return refeicoes_perdidas_; }
     const std::vector<Morador>& moradores() const { return moradores_; }
+    static Populacao restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas);
 
 private:
     std::vector<Morador> moradores_;

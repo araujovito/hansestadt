@@ -99,6 +99,12 @@ public:
     int estoque_total(IdItem item) const;
     int estoque_total(TipoItem tipo) const;
 
+    // Estado bruto usado pelo salvamento. A restauração reconstrói ocupação
+    // e portas, que são índices derivados e não precisam ir para o arquivo.
+    const std::vector<std::uint8_t>& estradas() const { return estradas_; }
+    static Cidade restaurar(Mapa mapa, const Conteudo& conteudo, std::vector<Edificio> edificios,
+                            std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas);
+
 private:
     bool atende_requisito(const Requisito& r, Celula origem, int largura, int altura) const;
 

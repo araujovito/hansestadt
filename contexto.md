@@ -114,7 +114,6 @@ as de implementação, que o README não explica.
 - **Os 12 carregadores do armazém surgem do nada**, fora da população.
 - **Os 6 moradores iniciais ainda não nascem nem envelhecem**; nesta etapa
   apenas procuram vagas nas casas.
-- **Não há salvar/carregar**: fechar o jogo perde a partida.
 - **Faixa de floresta na borda esquerda do mapa** é coincidência da semente
   1150, não defeito do ruído (média do hash por coluna conferida). Some
   quando o mapa da campanha for desenhado à mão.
@@ -149,8 +148,10 @@ agora, estamentos depois):
 8. ~~Teste do marco: a vila atravessa o inverno 1150–51 com a configuração
    certa e passa fome sem a fazenda.~~ Concluído.
 
-**Primeiro marco concluído.** Próxima ordem sugerida: salvar/carregar,
-lenhador desmatando, eventos históricos, evolução de fase, arte e estamentos.
+**Primeiro marco concluído.** Salvar/carregar também está pronto. Próxima
+ordem: lenhador desmatando, crescimento populacional, carregadores vindos da
+população, eventos históricos, evolução de fase, custos de construção, arte,
+estamentos e mapa histórico.
 
 ## Como trabalhamos
 
@@ -169,6 +170,9 @@ lenhador desmatando, eventos históricos, evolução de fase, arte e estamentos.
 
 ### 2026-10-03
 
+- **Salvar/carregar**: `F5` grava mapa, calendário, edifícios, estoques,
+  moradores e carregadores num arquivo binário versionado; `F9` restaura e
+  a simulação continua deterministicamente. 93 testes.
 - **Primeiro marco jogável**: teste integrado com conteúdo e distâncias reais
   atravessa o inverno de 1150–51 com a cadeia completa e registra fome sem a
   fazenda. O teste revelou o gargalo logístico; carregadores passaram a andar

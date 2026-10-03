@@ -59,6 +59,10 @@ public:
     CacheDeRotas& rotas() { return rotas_; }
     std::uint64_t entregas() const { return entregas_; }
     std::uint64_t perdidos() const { return perdidos_; }
+    const std::vector<std::uint8_t>& depositos_criados() const { return ja_criou_; }
+    std::uint64_t tick() const { return tick_; }
+    static Transporte restaurar(std::vector<Carregador> carregadores, std::vector<std::uint8_t> depositos_criados,
+                                std::uint64_t tick, std::uint64_t entregas, std::uint64_t perdidos);
 
 private:
     void planejar(Cidade& cidade);

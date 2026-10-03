@@ -208,4 +208,5 @@ Controles:
 | Edifício | botão na barra inferior, depois clicar no mapa |
 | Demolir | `X`, depois clicar ou arrastar |
 | Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
+| Salvar / carregar | `F5` / `F9` (`partida.hanse`) |
 | Soltar a ferramenta / fechar o painel | `Esc` |

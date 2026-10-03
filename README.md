@@ -19,7 +19,8 @@ clima e dos acontecimentos históricos.
 > de emprego, comida, produção, transporte, fase e história (os acontecimentos
 > já vividos, com aviso quando um começa). O equilíbrio da comida ainda está
 > em ajuste: sem expandir a produção, a vila inicial passa fome no primeiro
-> ano (ver `contexto.md`).
+> ano; crianças já consomem meia porção e sem-teto comem no armazém ou na
+> igreja (ver `contexto.md`).
 
 ## Ideia central
 

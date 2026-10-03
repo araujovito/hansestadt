@@ -60,7 +60,7 @@ RelatorioComida montar_comida(const Simulacao& sim) {
         r.estoque += r.itens.back().estoque;
     }
     r.moradores = sim.populacao.total();
-    r.dias = r.moradores > 0 ? r.estoque / r.moradores : 0;
+    r.dias = r.moradores > 0 ? 2 * r.estoque / sim.populacao.consumo_diario_x2() : 0;
     r.refeicoes_perdidas = sim.populacao.refeicoes_perdidas();
     r.mortos_de_fome = sim.populacao.mortos_de_fome();
     return r;

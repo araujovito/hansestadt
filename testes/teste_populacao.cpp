@@ -112,6 +112,39 @@ TESTE("população: cada morador consome uma comida por dia") {
     VERIFICAR(p.moradores()[1].dias_sem_comida == 1);
 }
 
+TESTE("população: criança consome meia porção por dia") {
+    Cidade c = cidade_para_populacao();
+    const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+    Morador crianca;
+    crianca.idade_dias = 0;
+    Populacao p = Populacao::restaurar({ crianca }, 0, 0);
+    p.alojar(c);
+    c.adicionar(casa, item("pao"), 2);
+
+    for (int dia = 0; dia < 4; ++dia) {
+        p.consumir_comida(c);
+        p.avancar_dia(c, { 1150, 3, 2 });
+    }
+    VERIFICAR(c.edificio(casa).estoque[item("pao")] == 0);
+    VERIFICAR(p.moradores()[0].dias_sem_comida == 0);
+    VERIFICAR(p.refeicoes_perdidas() == 0);
+}
+
+TESTE("população: sem-teto come no armazém ou no abrigo") {
+    Cidade c = cidade_para_populacao();
+    const IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 1, 1 });
+    const IdEdificio abrigo = *c.construir_edificio(tipo("abrigo"), { 4, 1 });
+    Populacao p(2);
+    c.adicionar(deposito, item("pao"), 1);
+    c.adicionar(abrigo, item("pao"), 1);
+
+    p.consumir_comida(c);
+    VERIFICAR(p.sem_casa() == 2);
+    VERIFICAR(p.refeicoes_perdidas() == 0);
+    VERIFICAR(c.edificio(deposito).estoque[item("pao")] == 0);
+    VERIFICAR(c.edificio(abrigo).estoque[item("pao")] == 0);
+}
+
 TESTE("população: trinta dias sem comida matam e liberam casa e trabalho") {
     Cidade c = cidade_para_populacao();
     const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });

@@ -137,6 +137,16 @@ TESTE("pedidos: casa pede comida para a despensa") {
     VERIFICAR(v.c.edificio(v.deposito).estoque[item("pao")] == 0);
 }
 
+TESTE("pedidos: abrigo pede comida para os sem-teto") {
+    Vila v;
+    const IdEdificio abrigo = *v.c.construir_edificio(tipo("abrigo"), { 5, 4 });
+    estrada(v.c, { 5, 5 }, { 7, 2 });
+    v.c.adicionar(v.deposito, item("pao"), 3);
+    rodar(v.t, v.c, VIAGEM * 2);
+    VERIFICAR(v.c.edificio(abrigo).estoque[item("pao")] == 3);
+    VERIFICAR(v.c.edificio(v.deposito).estoque[item("pao")] == 0);
+}
+
 TESTE("pedidos: não leva mais do que cabe na entrada") {
     Vila v;
     v.c.adicionar(v.deposito, item("tora"), 9);

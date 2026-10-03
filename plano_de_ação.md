@@ -88,19 +88,19 @@ do README e do contexto e um ou mais commits pequenos.
      velocidade em campo/trilha/estrada; se carregadores também criam trilhas;
      e se trilhas atravessam floresta.
 
-7b. **Comida para a vila crescer** — decisões do Vitor de 2026-10-03; a
-     implementar na `codex/simulacao`
+7b. **Comida para a vila crescer** — em andamento na `codex/simulacao`
    - Motivo: a vila inicial produz no máximo 2.303 porções por ano (6,3
      pessoas) e passa fome no primeiro ano; e morador sem casa morre de fome
      com o armazém cheio (ver contexto.md, Problemas conhecidos).
-   - Moradores sem casa comem no armazém ou na igreja (hoje a igreja não
-     guarda comida).
-   - Criança (menos de 16 anos) come meia porção.
+   - Implementado: moradores sem casa comem no armazém ou na igreja; a igreja
+     guarda comida e é abastecida pelos carregadores.
+   - Implementado: criança (menos de 16 anos) come meia porção; autonomia,
+     alertas e relatório consideram esse consumo.
    - Edifícios podem receber melhorias de tecnologia que aumentam a
      produtividade, para a comida acompanhar o crescimento da vila.
    - Falta decidir: melhoria por edifício ou para todos do mesmo tipo; quanto
      cada nível aumenta e quantos níveis existem; custo (material, tempo,
-     trabalhadores) e se depende da fase; quais edifícios podem melhorar;
+     trabalhadores) e se depende da fase; quais edifícios podem melhorar; e
      quando a comida é pouca, quem tem preferência (com ou sem casa).
 
 8. **Agricultura, clima e recursos**

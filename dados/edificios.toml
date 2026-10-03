@@ -13,6 +13,7 @@
 #   deposito        true = guarda qualquer item até `estoque` no total
 #                   (armazém); os demais guardam só o que as receitas usam,
 #                   até `estoque` de cada
+#   alimenta_sem_teto  guarda e distribui comida a moradores sem casa
 #   carregadores    quantos carregadores moram no depósito (só depósitos)
 #   campos          largura do anel de lavoura em volta (só fazendas);
 #                   as células do anel precisam ser campo livre
@@ -40,6 +41,7 @@ cor = "#96764e"
 trabalhadores = 0
 estoque = 800
 deposito = true
+alimenta_sem_teto = true
 carregadores = 1
 
 [[edificio]]
@@ -255,6 +257,8 @@ id = "igreja"
 nome = "igreja"
 fase = "vila"
 instituicao = "igreja"
+estoque = 24
+alimenta_sem_teto = true
 tamanho = [2, 2]
 terreno = "campo"
 cor = "#d8c8a0"

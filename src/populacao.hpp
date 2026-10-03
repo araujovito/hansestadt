@@ -41,6 +41,8 @@ public:
     int mortos_por_eventos() const { return mortos_por_eventos_; }
     int refeicoes_perdidas() const { return refeicoes_perdidas_; }
     int criancas() const;
+    // Consumo diário em meias porções: adulto vale 2, criança vale 1.
+    int consumo_diario_x2() const { return 2 * total() - criancas(); }
     const std::vector<Morador>& moradores() const { return moradores_; }
     static Populacao restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas,
                                int mortos_por_eventos = 0);

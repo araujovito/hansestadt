@@ -192,13 +192,27 @@ void Populacao::consumir_comida(Cidade& cidade) {
     const Conteudo& conteudo = cidade.conteudo();
     for (Morador& m : moradores_) {
         if (!m.vivo) continue;
-        bool comeu = false;
-        if (m.casa != SEM_EDIFICIO) {
+        // Estoques usam unidades inteiras. Uma refeição em dias alternados
+        // representa exatamente a meia porção diária de uma criança.
+        const bool precisa_comer = m.adulto() || m.idade_dias % 2 == 0;
+        bool comeu = !precisa_comer;
+        if (precisa_comer && m.casa != SEM_EDIFICIO) {
             for (IdItem item = 0; item < conteudo.itens.size(); ++item) {
                 if (conteudo.itens[item].tipo != TipoItem::Comida) continue;
                 if (cidade.retirar(m.casa, item, 1)) {
                     comeu = true;
                     break;
+                }
+            }
+        } else if (precisa_comer) {
+            for (IdEdificio abrigo = 0; abrigo < cidade.edificios().size() && !comeu; ++abrigo) {
+                if (!cidade.edificio(abrigo).ativo || !cidade.definicao(abrigo).alimenta_sem_teto) continue;
+                for (IdItem item = 0; item < conteudo.itens.size(); ++item) {
+                    if (conteudo.itens[item].tipo != TipoItem::Comida) continue;
+                    if (cidade.retirar(abrigo, item, 1)) {
+                        comeu = true;
+                        break;
+                    }
                 }
             }
         }

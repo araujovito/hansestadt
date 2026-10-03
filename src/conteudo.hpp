@@ -65,6 +65,8 @@ struct DefinicaoEdificio {
     // Depósito guarda qualquer item até `estoque` no total; os demais
     // guardam só o que suas receitas usam, até `estoque` de cada.
     bool deposito;
+    // Distribui comida diretamente a moradores sem casa.
+    bool alimenta_sem_teto;
     // Carregadores que moram no depósito e fazem todo o transporte.
     int carregadores;
     std::optional<Requisito> requer;

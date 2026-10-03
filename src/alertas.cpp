@@ -17,7 +17,8 @@ std::vector<Alerta> levantar_alertas(const Simulacao& sim) {
 
     const int moradores = sim.populacao.total();
     if (moradores > 0) {
-        const int dias = sim.cidade.estoque_total(TipoItem::Comida) / moradores;
+        const int dias = 2 * sim.cidade.estoque_total(TipoItem::Comida) /
+                         sim.populacao.consumo_diario_x2();
         if (dias < DIAS_COMIDA_AVISO) {
             alertas.push_back({ Alerta::Tipo::Fome, dias < DIAS_COMIDA_GRAVE,
                                 "comida para " + contar(static_cast<std::size_t>(dias), "dia", "dias"), {} });

@@ -26,6 +26,9 @@ public:
     Rectangle area() const;
     // Trata cliques nas abas e no botão de fechar.
     void atualizar();
+    // Se o clique deste quadro foi no botão da lei do trabalho infantil, na
+    // aba Emprego; quem chama troca a lei na simulação.
+    bool clicou_na_lei() const;
     void desenhar(const Relatorio& r) const;
 
 private:

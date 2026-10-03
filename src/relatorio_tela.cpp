@@ -36,6 +36,12 @@ Rectangle area_da_aba(const Rectangle& janela, int i) {
     return { janela.x + MARGEM + static_cast<float>(i) * largura, janela.y + MARGEM, largura - 4.0f, ALTURA_ABA };
 }
 
+// Na aba Emprego, à direita da segunda linha.
+Rectangle area_da_lei(const Rectangle& janela) {
+    return { janela.x + janela.width - MARGEM - 190.0f, janela.y + MARGEM + ALTURA_ABA + 16.0f + LINHA - 4.0f,
+             190.0f, 24.0f };
+}
+
 Rectangle area_de_fechar(const Rectangle& janela) {
     return { janela.x + janela.width - MARGEM - 32.0f, janela.y + MARGEM, 32.0f, ALTURA_ABA };
 }
@@ -103,6 +109,11 @@ void JanelaDeRelatorio::atualizar() {
         if (CheckCollisionPointRec(mouse, area_da_aba(janela, i))) aba_ = static_cast<Aba>(i);
 }
 
+bool JanelaDeRelatorio::clicou_na_lei() const {
+    return aberta_ && aba_ == Aba::Emprego && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+           CheckCollisionPointRec(GetMousePosition(), area_da_lei(area()));
+}
+
 void JanelaDeRelatorio::desenhar(const Relatorio& r) const {
     if (!aberta_) return;
     const Rectangle janela = area();
@@ -140,6 +151,17 @@ void JanelaDeRelatorio::desenhar_emprego(const RelatorioEmprego& e, float x, flo
           x, y);
     y += LINHA;
     texto(TextFormat("vagas ocupadas %d de %d", e.ocupadas, e.vagas), x, y, e.ocupadas < e.vagas ? AMARELO : CLARO);
+    if (e.trabalho_infantil)
+        texto(TextFormat("crianças trabalhando %d", e.criancas_trabalhando), x + 220, y, AMARELO);
+
+    // A lei vale para crianças de 10 a 15 anos, que rendem metade de um
+    // adulto e só ocupam vagas que sobraram.
+    const Rectangle lei = area_da_lei(area());
+    const bool sob_mouse = CheckCollisionPointRec(GetMousePosition(), lei);
+    DrawRectangleRec(lei, sob_mouse ? Color{ 80, 64, 48, 255 } : ABA);
+    const char* rotulo = e.trabalho_infantil ? "trabalho infantil: sim" : "trabalho infantil: não";
+    texto(rotulo, lei.x + (lei.width - static_cast<float>(MeasureText(rotulo, TEXTO))) / 2.0f, lei.y + 4.0f,
+          e.trabalho_infantil ? AMARELO : CLARO);
     y += LINHA + 8;
     if (e.linhas.empty()) {
         texto("nenhum edifício com vagas de trabalho ainda", x, y, APAGADO);

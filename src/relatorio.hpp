@@ -23,6 +23,8 @@ struct LinhaDeEmprego {
 struct RelatorioEmprego {
     int adultos = 0;
     int criancas = 0;
+    int criancas_trabalhando = 0;
+    bool trabalho_infantil = false;  // a lei escolhida pelo jogador
     int sem_casa = 0;
     int desempregados = 0;
     int vagas = 0;

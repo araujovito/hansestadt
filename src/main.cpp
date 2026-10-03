@@ -265,6 +265,13 @@ int main() {
             const bool clicou_relatorio = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
                                           CheckCollisionPointRec(GetMousePosition(), area_do_botao_relatorio());
             if (IsKeyPressed(KEY_V) || clicou_relatorio) relatorio.alternar();
+            if (relatorio.clicou_na_lei()) {
+                sim.trabalho_infantil = !sim.trabalho_infantil;
+                aviso = sim.trabalho_infantil
+                            ? "crianças de 10 a 15 anos podem trabalhar (rendem metade de um adulto)"
+                            : "trabalho infantil proibido";
+                aviso_quadros = 240;
+            }
             relatorio.atualizar();
             // A lista de alertas fica escondida atrás do relatório aberto.
             if (!relatorio.aberta() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {

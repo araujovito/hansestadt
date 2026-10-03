@@ -11,6 +11,8 @@ RelatorioEmprego montar_emprego(const Simulacao& sim) {
         if (m.adulto()) ++r.adultos;
         else ++r.criancas;
     }
+    r.criancas_trabalhando = sim.populacao.criancas_trabalhando();
+    r.trabalho_infantil = sim.trabalho_infantil;
     r.sem_casa = sim.populacao.sem_casa();
     r.desempregados = sim.populacao.desempregados();
 

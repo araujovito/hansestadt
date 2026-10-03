@@ -73,3 +73,18 @@ TESTE("relatório: transporte conta carregadores, tarefas e entregas") {
     VERIFICAR(depois.do_deposito <= depois.carregadores);
     VERIFICAR(depois.ocupados <= depois.carregadores && depois.carregando <= depois.ocupados);
 }
+
+TESTE("relatório: emprego mostra a lei e as crianças trabalhando") {
+    Simulacao sim = vila_com_trabalho(0);
+    Morador crianca;
+    crianca.idade_dias = Morador::IDADE_TRABALHO_INFANTIL;
+    sim.populacao = Populacao::restaurar({ Morador{}, Morador{}, crianca }, 0, 0);
+    sim.populacao.alojar(sim.cidade);
+    sim.trabalho_infantil = true;
+    sim.populacao.empregar(sim.cidade, true, sim.trabalho_infantil);
+    const RelatorioEmprego e = montar_relatorio(sim).emprego;
+    VERIFICAR(e.trabalho_infantil);
+    VERIFICAR(e.criancas_trabalhando == 1);
+    // Os dois adultos carregam; a criança fica com a vaga da serraria.
+    VERIFICAR(e.linhas.size() == 2 && e.linhas[1].ocupadas == 1);
+}

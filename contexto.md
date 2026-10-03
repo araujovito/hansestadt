@@ -106,6 +106,17 @@ as de implementação, que o README não explica.
   Uma assinatura do estado final (população, cargas perdidas, soma dos
   estoques, entregas) confere que uma otimização não mudou o resultado.
 
+### Interface
+- **O histórico de acontecimentos só mostra o que já começou.** A lista sai
+  de `Eventos::ocorridos`, e não de `definicoes`: anunciar a Peste Negra em
+  1150 tiraria a surpresa da campanha. É escolha de apresentação, provisória
+  até o Vitor decidir se quer prenúncios (um aviso meses antes, por exemplo).
+- **Efeitos em palavras, agrupados por fator.** "fazenda e fazenda de cevada
+  a 25%" em vez de uma linha por edifício: a Grande Fome e o inverno de 1322
+  mexem em pares de edifícios com o mesmo fator.
+- **Início de evento por intervalo de datas** (`comecaram_entre`), e não por
+  igualdade com o dia de hoje: a 4× vários dias passam num quadro.
+
 ### Visual
 - **Estilo pixel art de vila aconchegante** (pedido do Vitor: "algo como
   Stardew Valley", não um jogo de console). Avaliados em protótipo fora do
@@ -249,6 +260,10 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Lógica do histórico de acontecimentos** (`src/historico.*`, item 9 do
+  plano): monta a lista de eventos já iniciados, com período por extenso,
+  dias restantes e efeitos em palavras, e detecta eventos que começaram entre
+  duas datas. Sem raylib, com 7 testes; a tela vem no commit seguinte.
 - **Memória atualizada com o recado do Claude**: o plano agora tem o item
   7b com as três decisões do Vitor sobre alimentação e as perguntas abertas;
   problemas conhecidos registram o déficit alimentar da vila inicial e a

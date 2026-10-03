@@ -51,17 +51,31 @@ void Populacao::alojar(Cidade& cidade) {
         if (m.casa != SEM_EDIFICIO && !cidade.edificio(m.casa).ativo) m.casa = SEM_EDIFICIO;
     }
 
-    for (Morador& m : moradores_) {
+    // Quantos moram em cada edifício, contados uma vez. Perguntar
+    // moradores_na_casa a cada casa examinada percorria a população inteira
+    // por pergunta: sem-teto × casas × moradores por tick.
+    std::vector<int> ocupacao(cidade.edificios().size(), 0);
+    bool falta_casa = false;
+    for (const Morador& m : moradores_) {
         if (!m.vivo) continue;
-        if (m.casa != SEM_EDIFICIO) continue;
-        for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
-            const Edificio& e = cidade.edificio(id);
-            const DefinicaoEdificio& def = cidade.definicao(id);
-            if (e.ativo && def.moradores > moradores_na_casa(id)) {
-                m.casa = id;
-                break;
-            }
+        if (m.casa == SEM_EDIFICIO) falta_casa = true;
+        else ++ocupacao[m.casa];
+    }
+    if (!falta_casa) return;
+
+    // As casas são ocupadas em ordem de id, e uma casa cheia continua cheia
+    // até o fim desta chamada: cada sem-teto procura a partir de onde o
+    // anterior parou.
+    IdEdificio casa = 0;
+    for (Morador& m : moradores_) {
+        if (!m.vivo || m.casa != SEM_EDIFICIO) continue;
+        while (casa < cidade.edificios().size() &&
+               !(cidade.edificio(casa).ativo && cidade.definicao(casa).moradores > ocupacao[casa])) {
+            ++casa;
         }
+        if (casa == cidade.edificios().size()) break;
+        m.casa = casa;
+        ++ocupacao[casa];
     }
 }
 

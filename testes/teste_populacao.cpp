@@ -43,6 +43,24 @@ TESTE("população: casa demolida deixa moradores sem teto até haver vaga") {
     VERIFICAR(p.moradores_na_casa(nova) == 4);
 }
 
+TESTE("população: sem-teto preenchem primeiro a casa de menor id com vaga") {
+    Cidade c = cidade_para_populacao();
+    c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio segunda = *c.construir_edificio(tipo("casa"), { 5, 1 });
+    Populacao p(6);
+    p.alojar(c);  // 4 na primeira, 2 na segunda
+    c.demolir({ 1, 1 });
+    const IdEdificio terceira = *c.construir_edificio(tipo("casa"), { 1, 5 });
+    p.alojar(c);
+    // Os 4 da casa demolida: dois completam a segunda, dois vão para a nova.
+    VERIFICAR(p.moradores()[0].casa == segunda);
+    VERIFICAR(p.moradores()[1].casa == segunda);
+    VERIFICAR(p.moradores()[2].casa == terceira);
+    VERIFICAR(p.moradores()[3].casa == terceira);
+    VERIFICAR(p.moradores_na_casa(segunda) == 4);
+    VERIFICAR(p.sem_casa() == 0);
+}
+
 TESTE("população: moradores alojados ocupam empregos em ordem") {
     Cidade c = cidade_para_populacao();
     c.construir_edificio(tipo("casa"), { 1, 1 });

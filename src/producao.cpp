@@ -62,7 +62,10 @@ void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populaca
         if (e.receita_ativa < 0) continue;
 
         const Receita& r = cidade.definicao(id).receitas[static_cast<std::size_t>(e.receita_ativa)];
-        e.progresso += fator_efetivo(cidade, id, r, mes, eventos, data);
+        // Técnicas aceleram o ciclo em vez de aumentar a saída: o estoque
+        // continua em unidades inteiras e a sazonalidade segue valendo.
+        e.progresso += static_cast<std::int64_t>(fator_efetivo(cidade, id, r, mes, eventos, data)) *
+                       cidade.produtividade_tecnica(e.tipo) / PRODUTIVIDADE_NORMAL;
         if (e.progresso < progresso_total(r, ticks_por_dia)) continue;
 
         // O espaço foi conferido no início e só a produção põe saídas aqui,

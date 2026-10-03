@@ -1,5 +1,6 @@
 #include "cidade.hpp"
 #include "conteudo.hpp"
+#include "producao.hpp"
 #include "verificar.hpp"
 
 namespace {
@@ -123,4 +124,26 @@ TESTE("técnicas: restaurar recalcula a produtividade e completa lista curta") {
     VERIFICAR(cidade.tecnica_pesquisada(*c.buscar_tecnica("forno")));
     VERIFICAR(!cidade.tecnica_pesquisada(*c.buscar_tecnica("guilda")));
     VERIFICAR(cidade.produtividade_tecnica(*c.buscar_edificio("padaria")) == 1750);
+}
+
+TESTE("técnicas: produção fica mais rápida com a técnica pesquisada") {
+    const Conteudo& c = conteudo();
+    const IdItem pao = *c.buscar_item("pao");
+    // Sem população, todo edifício conta como cheio de trabalhadores.
+    const auto ticks_ate_o_primeiro_pao = [&](bool com_forno) {
+        Cidade cidade(Mapa(10, 10), c);
+        const IdEdificio deposito = *cidade.construir_edificio(*c.buscar_edificio("deposito"), { 1, 1 });
+        cidade.adicionar(deposito, *c.buscar_item("tora"), 10);
+        if (com_forno) cidade.pesquisar_tecnica(*c.buscar_tecnica("forno"), Fase::Vila);
+        const IdEdificio padaria = *cidade.construir_edificio(*c.buscar_edificio("padaria"), { 4, 1 });
+        int ticks = 0;
+        while (cidade.edificio(padaria).estoque[pao] == 0 && ticks < 100) {
+            avancar_producao(cidade, 1, 10);
+            ++ticks;
+        }
+        return ticks;
+    };
+    // Ciclo de 4 dias × 10 ticks: 40 ticks; a +75%, 4000/175 arredonda para 23.
+    VERIFICAR(ticks_ate_o_primeiro_pao(false) == 40);
+    VERIFICAR(ticks_ate_o_primeiro_pao(true) == 23);
 }

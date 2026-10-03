@@ -111,10 +111,7 @@ as de implementação, que o README não explica.
 
 ## Problemas conhecidos e limitações
 
-- **Viagens longas demais.** Com o moinho a ~30 células da fazenda, cada
-  trecho leva ~4,5 dias de jogo; em 12 dias de colheita só 2 entregas
-  chegaram. Resolver no balanceamento (tarefa 10).
-- **Os 6 carregadores do armazém surgem do nada**, fora da população.
+- **Os 12 carregadores do armazém surgem do nada**, fora da população.
 - **Os 6 moradores iniciais ainda não nascem nem envelhecem**; nesta etapa
   apenas procuram vagas nas casas.
 - **Não há salvar/carregar**: fechar o jogo perde a partida.
@@ -149,11 +146,11 @@ agora, estamentos depois):
    produção × consumo por mês) e ajuste do TOML.~~ Concluído.
 7. ~~Interface de acompanhamento: estoque total, "comida para N dias",
    avisos.~~ Concluído.
-8. **Agora:** teste do marco: a vila atravessa o inverno 1150–51 com a configuração
-   certa e passa fome sem a fazenda.
+8. ~~Teste do marco: a vila atravessa o inverno 1150–51 com a configuração
+   certa e passa fome sem a fazenda.~~ Concluído.
 
-Depois: salvar/carregar, lenhador desmatando, eventos históricos, evolução
-de fase, arte, estamentos.
+**Primeiro marco concluído.** Próxima ordem sugerida: salvar/carregar,
+lenhador desmatando, eventos históricos, evolução de fase, arte e estamentos.
 
 ## Como trabalhamos
 
@@ -172,6 +169,10 @@ de fase, arte, estamentos.
 
 ### 2026-10-03
 
+- **Primeiro marco jogável**: teste integrado com conteúdo e distâncias reais
+  atravessa o inverno de 1150–51 com a cadeia completa e registra fome sem a
+  fazenda. O teste revelou o gargalo logístico; carregadores passaram a andar
+  uma célula por tick e o armazém passou a abrigar 12. 92 testes.
 - **Indicadores da vila**: a barra ganhou uma segunda linha para população,
   moradia, emprego, mortes, comida total e autonomia; a cor avisa abaixo de
   90 e 30 dias. 90 testes.

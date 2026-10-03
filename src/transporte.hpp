@@ -46,7 +46,7 @@ struct Carregador {
 // duas vezes. Só entram edifícios com estrada na porta.
 class Transporte {
 public:
-    static constexpr int TICKS_POR_CELULA = 3;
+    static constexpr int TICKS_POR_CELULA = 1;
     // Planejar a cada tick gastaria buscas à toa: estoques mudam devagar.
     static constexpr int PLANEJAR_A_CADA = 10;
 

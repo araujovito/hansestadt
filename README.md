@@ -8,7 +8,7 @@ clima e dos acontecimentos históricos.
 > Decisões de implementação, coisas descartadas, pendências e histórico
 > ficam em [`contexto.md`](contexto.md).
 
-> Status: protótipo. Dá para construir a vila, e os edifícios produzem
+> Status: primeiro marco jogável. Dá para fundar e construir a vila; os edifícios produzem
 > e trocam mercadorias por carregadores. A vila começa com 3 casais, que
 > ocupam as casas, trabalham e recebem comida por carregadores; ainda não há
 > crescimento da população nem eventos. Trinta dias seguidos sem comida
@@ -115,7 +115,9 @@ em `build/balanceamento/economia.csv`, com totais mensais, e
 
 O primeiro ajuste produz 6.804 porções, consome 6.222 e não registra falta
 em três anos. A simulação é deliberadamente agregada: transporte, distância
-e limites físicos precisam ser confirmados no teste integrado do marco.
+e limites físicos também são cobertos pelo teste integrado do marco. Com a
+cadeia completa, os seis moradores atravessam o inverno de 1150–51; sem a
+fazenda, há refeições perdidas.
 
 ## Tecnologia
 

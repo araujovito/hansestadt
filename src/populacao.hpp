@@ -29,9 +29,11 @@ public:
     int trabalhadores_em(IdEdificio edificio) const;
     int desempregados() const;
     int mortos_de_fome() const { return mortos_de_fome_; }
+    int refeicoes_perdidas() const { return refeicoes_perdidas_; }
     const std::vector<Morador>& moradores() const { return moradores_; }
 
 private:
     std::vector<Morador> moradores_;
     int mortos_de_fome_ = 0;
+    int refeicoes_perdidas_ = 0;
 };

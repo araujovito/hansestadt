@@ -38,7 +38,7 @@ cor = "#96764e"
 trabalhadores = 0
 estoque = 600
 deposito = true
-carregadores = 6
+carregadores = 12
 
 [[edificio]]
 id = "casa"

@@ -80,6 +80,7 @@ void Populacao::consumir_comida(Cidade& cidade) {
             }
         }
         m.dias_sem_comida = comeu ? 0 : m.dias_sem_comida + 1;
+        if (!comeu) ++refeicoes_perdidas_;
         if (m.dias_sem_comida >= DIAS_ATE_MORRER_DE_FOME) {
             m.vivo = false;
             m.casa = SEM_EDIFICIO;

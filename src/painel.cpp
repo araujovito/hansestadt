@@ -149,6 +149,14 @@ void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, 
         y += LINHA;
     }
 
+    if (!def.produtividade.empty()) {
+        const int nivel = cidade.nivel_produtividade(e.tipo);
+        DrawText(TextFormat("tecnologia %d/%d (+%d%%) — T", nivel,
+                            static_cast<int>(def.produtividade.size()), cidade.bonus_produtividade(e.tipo)),
+                 x, y, TEXTO, CLARO);
+        y += LINHA;
+    }
+
     if (e.receita_ativa >= 0) {
         const Receita& r = def.receitas[static_cast<std::size_t>(e.receita_ativa)];
         const float fracao = static_cast<float>(e.progresso) / static_cast<float>(progresso_total(r, ticks_por_dia));

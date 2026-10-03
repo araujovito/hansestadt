@@ -12,6 +12,8 @@ void Simulacao::passo() {
     ++tick;
     if (tick % TICKS_POR_DIA == 0) {
         populacao.consumir_comida(cidade);
+        populacao.registrar_deslocamentos(cidade);
+        cidade.avancar_desgaste_trilhas();
         data = dia_seguinte(data);
         populacao.avancar_dia(cidade, data, &eventos);
         fase = tentar_avancar_fase(fase, data, estados_das_instituicoes(cidade, fase)).fase;

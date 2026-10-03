@@ -24,21 +24,20 @@ RelatorioEmprego montar_emprego(const Simulacao& sim) {
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo) continue;
         const DefinicaoEdificio& def = cidade.definicao(id);
-        // As vagas de carregador e de produção do mesmo edifício entram na
-        // mesma contagem da população; os carregadores são preenchidos
-        // primeiro (ver Populacao::empregar).
         const int ocupadas = sim.populacao.trabalhadores_em(id);
-        const int no_transporte = std::min(ocupadas, def.carregadores);
-        if (def.carregadores > 0) {
+        const int no_transporte = sim.populacao.carregadores_em(id);
+        const int vagas_transporte = def.deposito ? std::max(1, def.carregadores)
+                                                  : ((!def.receitas.empty() || def.alimenta_sem_teto) ? 1 : 0);
+        if (vagas_transporte > 0) {
             ++carregadores.edificios;
-            carregadores.vagas += def.carregadores;
+            carregadores.vagas += vagas_transporte;
             carregadores.ocupadas += no_transporte;
         }
         if (def.trabalhadores > 0) {
             LinhaDeEmprego& l = por_tipo[cidade.edificio(id).tipo];
             ++l.edificios;
             l.vagas += def.trabalhadores;
-            l.ocupadas += ocupadas - no_transporte;
+            l.ocupadas += ocupadas;
         }
     }
     if (carregadores.vagas > 0) r.linhas.push_back(carregadores);

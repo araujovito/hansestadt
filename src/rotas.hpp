@@ -7,10 +7,9 @@
 
 #include "cidade.hpp"
 
-// Rota mais curta pelas estradas, de `de` até `para`, com as duas pontas
-// incluídas. Anda só em células com estrada e só nas quatro direções: uma
-// diagonal entre duas estradas que só se tocam pela quina não é caminho.
-// Devolve nullopt se uma das pontas não tem estrada ou se não há ligação.
+// Rota mais rápida entre duas células transitáveis, com as pontas incluídas.
+// Estrada, trilha, campo e floresta têm custos diferentes; água e edifícios
+// bloqueiam. O movimento usa somente as quatro direções.
 std::optional<std::vector<Celula>> buscar_rota(const Cidade& cidade, Celula de, Celula para);
 
 // Quantos passos pela estrada separam uma célula de todas as outras, numa
@@ -40,7 +39,6 @@ private:
     int largura_ = 0;
     int altura_ = 0;
     std::vector<int> passos_;
-    std::vector<std::size_t> fila_;
 };
 
 // Guarda as rotas já calculadas. Uma vila repete as mesmas viagens (fazenda

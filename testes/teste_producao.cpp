@@ -67,6 +67,24 @@ TESTE("produção: fator 0,5 dobra a duração do ciclo") {
     VERIFICAR(c.edificio(f).estoque[item("pao")] == 1);
 }
 
+TESTE("produtividade: melhoria global acelera todos os edifícios do tipo") {
+    Cidade c(Mapa(10, 8), conteudo_de_teste());
+    const IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 1, 1 });
+    c.adicionar(deposito, item("tora"), 2);
+    VERIFICAR(c.validar_produtividade(tipo("colheita"), Fase::Vila) == ResultadoProdutividade::Ok);
+    VERIFICAR(c.melhorar_produtividade(tipo("colheita"), Fase::Vila) == ResultadoProdutividade::Ok);
+    VERIFICAR(c.nivel_produtividade(tipo("colheita")) == 1);
+    VERIFICAR(c.bonus_produtividade(tipo("colheita")) == 15);
+    VERIFICAR(c.edificio(deposito).estoque[item("tora")] == 0);
+
+    const IdEdificio a = *c.construir_edificio(tipo("colheita"), { 3, 1 });
+    const IdEdificio b = *c.construir_edificio(tipo("colheita"), { 5, 1 });
+    for (int i = 0; i < 9; ++i) avancar_producao(c, 7, TICKS_POR_DIA);
+    VERIFICAR(c.edificio(a).estoque[item("pao")] == 1);
+    VERIFICAR(c.edificio(b).estoque[item("pao")] == 1);
+    VERIFICAR(c.validar_produtividade(tipo("colheita"), Fase::Vila) == ResultadoProdutividade::FaseBloqueada);
+}
+
 TESTE("produção: evento reduz o ritmo durante o intervalo histórico") {
     Cidade c(Mapa(8, 8), conteudo_de_teste());
     const IdEdificio f = *c.construir_edificio(tipo("colheita"), { 1, 1 });

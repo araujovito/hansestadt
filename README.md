@@ -165,7 +165,8 @@ chance diária determinística de morte enquanto o evento estiver ativo. A
 Peste Negra usa 10% ao ano durante cinco anos (cerca de 41% acumulados); os
 efeitos da Grande Fome reduzem colheitas e pesca, e mortes acontecem pelo
 sistema normal de fome quando falta comida. O contador de mortes por evento
-é persistido em saves versão 5; versões 3 e 4 continuam carregáveis. A
+é persistido desde os saves versão 5; a versão 6 acrescenta as tecnologias
+globais e as versões 3 a 5 continuam carregáveis. A
 interface pode ler o histórico pelas APIs de eventos.
 
 O catálogo também inclui o inverno excepcional de 1322–1323, que reduz pesca
@@ -317,6 +318,7 @@ Controles:
 | Ver o nome de um edifício | apontar com o mouse (sem ferramenta ativa) |
 | Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
 | Evoluir a instituição selecionada | botão no painel, ou `U` |
+| Melhorar a produtividade do tipo selecionado | `T` |
 | Relatório de emprego, comida, produção, transporte, fase e história | `V` ou o botão `Relatório` no canto de cima (o jogo continua andando) |
 | Ir até um edifício com problema | clicar em `ver >` no alerta, no canto esquerdo (cliques seguidos percorrem os edifícios do alerta) |
 | Salvar / carregar rápido | `F5` / `F9` (`partida.hanse`) |

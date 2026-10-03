@@ -97,6 +97,19 @@ saidas = { centeio = 1 }
 # trabalha, mas não entrega grão.
 sazonalidade = [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
 
+[[edificio.produtividade]]
+fase = "vila"
+percentual = 15
+custo = { tora = 6 }
+[[edificio.produtividade]]
+fase = "mercado"
+percentual = 15
+custo = { tecido = 2, couro = 2 }
+[[edificio.produtividade]]
+fase = "cidade"
+percentual = 15
+custo = { tijolo = 8 }
+
 [[edificio]]
 id = "moinho"
 nome = "moinho d'água"
@@ -118,6 +131,19 @@ saidas = { farinha = 1 }
 # O rio congela ou baixa no auge do inverno.
 sazonalidade = [0.5, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.7]
 
+[[edificio.produtividade]]
+fase = "vila"
+percentual = 15
+custo = { tora = 6 }
+[[edificio.produtividade]]
+fase = "mercado"
+percentual = 15
+custo = { tecido = 2, couro = 1 }
+[[edificio.produtividade]]
+fase = "cidade"
+percentual = 15
+custo = { tijolo = 10 }
+
 [[edificio]]
 id = "padaria"
 nome = "padaria"
@@ -133,6 +159,19 @@ custo = { tora = 6 }
 dias = 3
 entradas = { farinha = 1 }
 saidas = { pao = 28 }
+
+[[edificio.produtividade]]
+fase = "vila"
+percentual = 15
+custo = { tora = 5 }
+[[edificio.produtividade]]
+fase = "mercado"
+percentual = 15
+custo = { tecido = 2, couro = 1 }
+[[edificio.produtividade]]
+fase = "cidade"
+percentual = 15
+custo = { tijolo = 8 }
 
 [[edificio]]
 id = "pescador"
@@ -151,6 +190,19 @@ dias = 3
 saidas = { peixe = 12 }
 # Pesca de rio rende pouco com o frio e o gelo.
 sazonalidade = [0.3, 0.3, 0.6, 1, 1, 1, 1, 1, 1, 0.8, 0.5, 0.3]
+
+[[edificio.produtividade]]
+fase = "vila"
+percentual = 15
+custo = { tora = 4 }
+[[edificio.produtividade]]
+fase = "mercado"
+percentual = 15
+custo = { tecido = 1, couro = 2 }
+[[edificio.produtividade]]
+fase = "cidade"
+percentual = 15
+custo = { tijolo = 6 }
 
 [[edificio]]
 id = "pocilga"
@@ -352,6 +404,19 @@ saidas = { cevada = 1 }
 # Cevada de primavera, colhida no verão.
 sazonalidade = [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
 
+[[edificio.produtividade]]
+fase = "mercado"
+percentual = 15
+custo = { tora = 8 }
+[[edificio.produtividade]]
+fase = "cidade"
+percentual = 15
+custo = { tecido = 3, couro = 2 }
+[[edificio.produtividade]]
+fase = "hansa"
+percentual = 15
+custo = { tijolo = 10 }
+
 [[edificio]]
 id = "malteria"
 nome = "malteria"
@@ -502,6 +567,19 @@ dias = 4
 saidas = { arenque = 16 }
 # Gelo e frio reduzem a pesca no inverno.
 sazonalidade = [0.3, 0.3, 0.6, 1, 1, 1, 1, 1, 1, 0.8, 0.5, 0.3]
+
+[[edificio.produtividade]]
+fase = "hansa"
+percentual = 15
+custo = { tora = 10, tecido = 3 }
+[[edificio.produtividade]]
+fase = "hansa"
+percentual = 15
+custo = { couro = 4, tijolo = 6 }
+[[edificio.produtividade]]
+fase = "auge"
+percentual = 15
+custo = { tijolo = 14 }
 
 [[edificio]]
 id = "salgadeira"

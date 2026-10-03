@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cstdint>
 
+#include "rotas.hpp"
+
 namespace {
 
 double sorte_deterministica(std::size_t morador, Data data) {
@@ -35,8 +37,9 @@ Populacao Populacao::restaurar(std::vector<Morador> moradores, int mortos_de_fom
     // moradores, que guardam onde trabalham.
     for (const Morador& m : p.moradores_) {
         if (!m.vivo || m.trabalho == SEM_EDIFICIO) continue;
-        if (m.trabalho >= p.trabalhadores_.size()) p.trabalhadores_.resize(m.trabalho + 1, 0);
-        ++p.trabalhadores_[m.trabalho];
+        std::vector<int>& contagem = m.transportador ? p.carregadores_ : p.trabalhadores_;
+        if (m.trabalho >= contagem.size()) contagem.resize(m.trabalho + 1, 0);
+        ++contagem[m.trabalho];
     }
     return p;
 }
@@ -63,6 +66,10 @@ int Populacao::moradores_na_casa(IdEdificio casa) const {
 
 int Populacao::trabalhadores_em(IdEdificio edificio) const {
     return edificio < trabalhadores_.size() ? trabalhadores_[edificio] : 0;
+}
+
+int Populacao::carregadores_em(IdEdificio edificio) const {
+    return edificio < carregadores_.size() ? carregadores_[edificio] : 0;
 }
 
 int Populacao::desempregados() const {
@@ -108,27 +115,38 @@ void Populacao::alojar(Cidade& cidade) {
 void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
     // Recalcular em ordem de id torna o resultado independente do histórico
     // de construções e libera imediatamente quem perdeu casa ou trabalho.
-    for (Morador& m : moradores_) m.trabalho = SEM_EDIFICIO;
+    for (Morador& m : moradores_) { m.trabalho = SEM_EDIFICIO; m.transportador = false; }
     trabalhadores_.assign(cidade.edificios().size(), 0);
+    carregadores_.assign(cidade.edificios().size(), 0);
     // Os empregos são distribuídos em ordem de morador, então quem ficou
     // para trás do cursor já tem trabalho ou não pode trabalhar: o próximo
     // edifício continua de onde o anterior parou, sem voltar ao começo.
     std::size_t proximo = 0;
-    if (incluir_carregadores) {
+    auto preencher_transporte = [&](bool somente_deposito, bool apenas_proprio) {
         for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
             if (!cidade.edificio(id).ativo) continue;
-            int ocupadas = 0;
-            const int vagas = cidade.definicao(id).carregadores;
+            const DefinicaoEdificio& def = cidade.definicao(id);
+            if (def.deposito != somente_deposito) continue;
+            if (!def.deposito && def.receitas.empty() && !def.alimenta_sem_teto) continue;
+            const int total_vagas = def.deposito ? std::max(1, def.carregadores) : 1;
+            const int vagas = apenas_proprio ? std::min(1, total_vagas) : total_vagas;
+            int ocupadas = carregadores_[id];
             for (; ocupadas < vagas && proximo < moradores_.size(); ++proximo) {
                 Morador& m = moradores_[proximo];
                 if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) {
                     m.trabalho = id;
+                    m.transportador = true;
                     ++ocupadas;
                 }
             }
-            trabalhadores_[id] += ocupadas;
+            carregadores_[id] = ocupadas;
         }
-    }
+    };
+    // A vaga própria do armazém é a exceção: ela mantém a vila conectada.
+    if (incluir_carregadores) preencher_transporte(true, true);
+
+    // Depois do carregador próprio do armazém, produção ocupa os adultos
+    // antes da cobertura adicional de transporte.
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo) continue;
         const int vagas = cidade.definicao(id).trabalhadores;
@@ -142,6 +160,10 @@ void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
         }
         trabalhadores_[id] += ocupadas;
     }
+    if (incluir_carregadores) {
+        preencher_transporte(true, false);
+        preencher_transporte(false, false);
+    }
 }
 
 void Populacao::avancar_dia(Cidade& cidade, Data data, const Eventos* eventos) {
@@ -154,8 +176,12 @@ void Populacao::avancar_dia(Cidade& cidade, Data data, const Eventos* eventos) {
             if (!m.vivo || sorte_deterministica(i, data) >= chance_morte) continue;
             m.vivo = false;
             m.casa = SEM_EDIFICIO;
-            if (m.trabalho != SEM_EDIFICIO) --trabalhadores_[m.trabalho];
+            if (m.trabalho != SEM_EDIFICIO) {
+                std::vector<int>& contagem = m.transportador ? carregadores_ : trabalhadores_;
+                --contagem[m.trabalho];
+            }
             m.trabalho = SEM_EDIFICIO;
+            m.transportador = false;
             ++mortos_por_eventos_;
         }
     }
@@ -221,8 +247,12 @@ void Populacao::consumir_comida(Cidade& cidade) {
         if (m.dias_sem_comida >= DIAS_ATE_MORRER_DE_FOME) {
             m.vivo = false;
             m.casa = SEM_EDIFICIO;
-            if (m.trabalho != SEM_EDIFICIO) --trabalhadores_[m.trabalho];
+            if (m.trabalho != SEM_EDIFICIO) {
+                std::vector<int>& contagem = m.transportador ? carregadores_ : trabalhadores_;
+                --contagem[m.trabalho];
+            }
             m.trabalho = SEM_EDIFICIO;
+            m.transportador = false;
             ++mortos_de_fome_;
         }
     };
@@ -235,4 +265,18 @@ void Populacao::consumir_comida(Cidade& cidade) {
         if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) alimentar(m);
     for (Morador& m : moradores_)
         if (m.vivo && m.adulto() && m.casa == SEM_EDIFICIO) alimentar(m);
+}
+
+void Populacao::registrar_deslocamentos(Cidade& cidade) const {
+    for (const Morador& m : moradores_) {
+        if (!m.vivo || m.casa == SEM_EDIFICIO || m.trabalho == SEM_EDIFICIO) continue;
+        if (!cidade.edificio(m.casa).ativo || !cidade.edificio(m.trabalho).ativo) continue;
+        const auto rota = buscar_rota(cidade, cidade.porta(m.casa), cidade.porta(m.trabalho));
+        if (!rota) continue;
+        // Ida e volta no mesmo dia: duas passagens por célula.
+        for (Celula c : *rota) {
+            cidade.registrar_passagem(c);
+            cidade.registrar_passagem(c);
+        }
+    }
 }

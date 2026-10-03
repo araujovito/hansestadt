@@ -48,7 +48,7 @@ TESTE("carregadores: vêm dos adultos empregados no depósito") {
     Transporte t;
     t.passo(c, &p);
     VERIFICAR(t.carregadores().size() == 1);
-    VERIFICAR(p.trabalhadores_em(d) == 1);
+    VERIFICAR(p.carregadores_em(d) == 1);
     for (int dia = 0; dia < Populacao::DIAS_ATE_MORRER_DE_FOME; ++dia) p.consumir_comida(c);
     p.empregar(c, true);
     t.passo(c, &p);

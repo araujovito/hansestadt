@@ -148,6 +148,19 @@ saidas = { pao = 1 }
 # Só julho (fator 1) e agosto (fator 0,5).
 sazonalidade = [0, 0, 0, 0, 0, 0, 1, 0.5, 0, 0, 0, 0]
 
+[[edificio.produtividade]]
+fase = "vila"
+percentual = 15
+custo = { tora = 2 }
+[[edificio.produtividade]]
+fase = "mercado"
+percentual = 15
+custo = { tabua = 2 }
+[[edificio.produtividade]]
+fase = "cidade"
+percentual = 15
+custo = { tora = 4 }
+
 [[edificio]]
 id = "forno"
 nome = "forno"

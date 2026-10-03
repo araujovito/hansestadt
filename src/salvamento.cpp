@@ -9,7 +9,8 @@ namespace {
 
 constexpr char MAGIA_V3[] = "HANSESTADT\3";
 constexpr char MAGIA_V4[] = "HANSESTADT\4";
-constexpr char MAGIA[] = "HANSESTADT\5";
+constexpr char MAGIA_V5[] = "HANSESTADT\5";
+constexpr char MAGIA[] = "HANSESTADT\6";
 constexpr std::uint64_t MAXIMO_VETOR = 10'000'000;
 
 template <class T>
@@ -64,10 +65,14 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
     }
     escrever_vetor(out, sim.cidade.estradas());
     escrever(out, sim.cidade.versao_estradas());
+    escrever_vetor(out, sim.cidade.niveis_produtividade());
+    escrever_vetor(out, sim.cidade.trilhas());
+    escrever_vetor(out, sim.cidade.uso_trilhas());
+    escrever_vetor(out, sim.cidade.dias_sem_uso_trilhas());
 
     escrever(out, static_cast<std::uint64_t>(sim.populacao.moradores().size()));
     for (const Morador& m : sim.populacao.moradores()) {
-        escrever(out, m.casa); escrever(out, m.trabalho); escrever(out, m.dias_sem_comida);
+        escrever(out, m.casa); escrever(out, m.trabalho); escrever(out, m.transportador); escrever(out, m.dias_sem_comida);
         escrever(out, m.idade_dias); escrever(out, m.mulher); escrever(out, m.vivo);
     }
     escrever(out, sim.populacao.mortos_de_fome()); escrever(out, sim.populacao.refeicoes_perdidas());
@@ -93,7 +98,8 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     const std::string versao_arquivo(magia, sizeof(magia));
     const bool legado_v3 = versao_arquivo == std::string(MAGIA_V3, sizeof(MAGIA_V3));
     const bool legado_v4 = versao_arquivo == std::string(MAGIA_V4, sizeof(MAGIA_V4));
-    if (!legado_v3 && !legado_v4 && versao_arquivo != std::string(MAGIA, sizeof(MAGIA)))
+    const bool legado_v5 = versao_arquivo == std::string(MAGIA_V5, sizeof(MAGIA_V5));
+    if (!legado_v3 && !legado_v4 && !legado_v5 && versao_arquivo != std::string(MAGIA, sizeof(MAGIA)))
         throw std::runtime_error("formato ou versão incompatível");
     const auto tick = ler<std::uint64_t>(in);
     const Data data{ler<int>(in), ler<int>(in), ler<int>(in)};
@@ -128,7 +134,28 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     }
     auto estradas = ler_vetor<std::uint8_t>(in);
     const auto versao_estradas = ler<std::uint64_t>(in);
-    Cidade cidade = Cidade::restaurar(std::move(mapa), conteudo, std::move(edificios), std::move(estradas), versao_estradas);
+    std::vector<int> produtividade = legado_v3 || legado_v4 || legado_v5
+                                         ? std::vector<int>(conteudo.edificios.size(), 0)
+                                         : ler_vetor<int>(in);
+    if (produtividade.size() != conteudo.edificios.size()) throw std::runtime_error("tecnologias incompatíveis");
+    for (IdTipoEdificio tipo = 0; tipo < produtividade.size(); ++tipo)
+        if (produtividade[tipo] < 0 ||
+            static_cast<std::size_t>(produtividade[tipo]) > conteudo.edificio(tipo).produtividade.size())
+            throw std::runtime_error("nível de produtividade inválido");
+    std::vector<std::uint8_t> trilhas;
+    std::vector<std::uint16_t> uso_trilhas;
+    std::vector<std::uint8_t> dias_sem_uso_trilhas;
+    if (!legado_v3 && !legado_v4 && !legado_v5) {
+        trilhas = ler_vetor<std::uint8_t>(in);
+        uso_trilhas = ler_vetor<std::uint16_t>(in);
+        dias_sem_uso_trilhas = ler_vetor<std::uint8_t>(in);
+        const std::size_t celulas = static_cast<std::size_t>(largura) * static_cast<std::size_t>(altura);
+        if (trilhas.size() != celulas || uso_trilhas.size() != celulas || dias_sem_uso_trilhas.size() != celulas)
+            throw std::runtime_error("trilhas incompatíveis");
+    }
+    Cidade cidade = Cidade::restaurar(std::move(mapa), conteudo, std::move(edificios), std::move(estradas),
+                                      versao_estradas, std::move(produtividade), std::move(trilhas),
+                                      std::move(uso_trilhas), std::move(dias_sem_uso_trilhas));
     Simulacao sim(std::move(cidade)); sim.tick = tick; sim.data = data; sim.fase = fase;
 
     const std::uint64_t n_moradores = ler<std::uint64_t>(in);
@@ -136,6 +163,7 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     std::vector<Morador> moradores;
     for (std::uint64_t i = 0; i < n_moradores; ++i) {
         Morador m; m.casa = ler<IdEdificio>(in); m.trabalho = ler<IdEdificio>(in);
+        m.transportador = legado_v3 || legado_v4 || legado_v5 ? false : ler<bool>(in);
         m.dias_sem_comida = ler<int>(in); m.idade_dias = ler<int>(in); m.mulher = ler<bool>(in);
         m.vivo = ler<bool>(in); moradores.push_back(m);
     }

@@ -142,7 +142,7 @@ TESTE("instituições: salvamento preserva fase e níveis") {
     std::filesystem::remove(caminho);
 }
 
-TESTE("salvamento: versões 3 e 4 migram para o formato atual") {
+TESTE("salvamento: versões 3 a 5 migram para o formato atual") {
     const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, EDIFICIOS);
     if (!r.conteudo) { VERIFICAR(false); return; }
     Simulacao sim(Cidade(Mapa(2, 2), *r.conteudo));
@@ -153,15 +153,34 @@ TESTE("salvamento: versões 3 e 4 migram para o formato atual") {
     const std::string caminho_v4 = "/tmp/hansestadt-teste-v4-legado.hanse";
     std::string erro;
     VERIFICAR(salvar_partida(sim, caminho, erro));
-    const ResultadoSalvamento carga_v5 = carregar_partida(caminho, *r.conteudo);
-    VERIFICAR(carga_v5.simulacao.has_value());
-    if (carga_v5.simulacao)
-        VERIFICAR(carga_v5.simulacao->populacao.mortos_por_eventos() == 123);
+    const ResultadoSalvamento carga_v6 = carregar_partida(caminho, *r.conteudo);
+    VERIFICAR(carga_v6.simulacao.has_value());
+    if (carga_v6.simulacao)
+        VERIFICAR(carga_v6.simulacao->populacao.mortos_por_eventos() == 123);
     std::ifstream entrada(caminho, std::ios::binary);
     std::string bytes{ std::istreambuf_iterator<char>(entrada), std::istreambuf_iterator<char>() };
     entrada.close();
-    // O save mínimo tem dois contadores de população antes do novo contador
-    // de mortes por evento, cujo offset é 89 bytes (sem edifícios/moradores).
+    // V6 acrescentou, no offset 73 deste save mínimo, um vetor com um nível
+    // de produtividade por tipo. Removê-lo produz um V5 legítimo.
+    constexpr std::size_t OFFSET_PRODUTIVIDADE = 73;
+    const std::size_t celulas = 4;
+    const std::size_t bytes_novos = sizeof(std::uint64_t) + r.conteudo->edificios.size() * sizeof(int) +
+                                    sizeof(std::uint64_t) + celulas * sizeof(std::uint8_t) +
+                                    sizeof(std::uint64_t) + celulas * sizeof(std::uint16_t) +
+                                    sizeof(std::uint64_t) + celulas * sizeof(std::uint8_t);
+    bytes.erase(OFFSET_PRODUTIVIDADE, bytes_novos);
+    bytes[10] = '\5';
+    const std::string caminho_v5 = "/tmp/hansestadt-teste-v5-legado.hanse";
+    std::ofstream saida_v5(caminho_v5, std::ios::binary | std::ios::trunc);
+    saida_v5.write(bytes.data(), static_cast<std::streamsize>(bytes.size()));
+    saida_v5.close();
+    const ResultadoSalvamento carga_v5 = carregar_partida(caminho_v5, *r.conteudo);
+    VERIFICAR(carga_v5.simulacao.has_value());
+    if (carga_v5.simulacao)
+        VERIFICAR(carga_v5.simulacao->cidade.nivel_produtividade(0) == 0);
+
+    // O save mínimo tem dois contadores de população antes do contador de
+    // mortes por evento, cujo offset é 89 bytes (sem edifícios/moradores).
     constexpr std::size_t OFFSET_MORTES_EVENTOS = 89;
     std::string bytes_v4 = bytes;
     bytes_v4.erase(OFFSET_MORTES_EVENTOS, sizeof(int));
@@ -189,4 +208,5 @@ TESTE("salvamento: versões 3 e 4 migram para o formato atual") {
     std::filesystem::remove(caminho);
     std::filesystem::remove(caminho_legado);
     std::filesystem::remove(caminho_v4);
+    std::filesystem::remove(caminho_v5);
 }

@@ -222,7 +222,7 @@ TESTE("população: criança não trabalha antes dos dezesseis anos") {
     VERIFICAR(p.criancas() == 0);
 }
 
-TESTE("população: carregador ocupa um adulto antes das oficinas") {
+TESTE("população: produção tem prioridade e o armazém fica com o adulto restante") {
     Cidade c = cidade_para_populacao();
     c.construir_edificio(tipo("casa"), { 1, 1 });
     const IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 5, 1 });
@@ -230,6 +230,7 @@ TESTE("população: carregador ocupa um adulto antes das oficinas") {
     Populacao p(2);
     p.alojar(c);
     p.empregar(c, true);
-    VERIFICAR(p.trabalhadores_em(deposito) == 2);
-    VERIFICAR(p.trabalhadores_em(serraria) == 0);
+    VERIFICAR(p.trabalhadores_em(serraria) == 1);
+    VERIFICAR(p.carregadores_em(deposito) == 1);
+    VERIFICAR(p.carregadores_em(serraria) == 0);
 }

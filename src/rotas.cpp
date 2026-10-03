@@ -15,10 +15,9 @@ int distancia_manhattan(Celula a, Celula b) {
 
 }  // namespace
 
-// A* com custo 1 por célula e heurística de Manhattan, que é admissível em
-// grade de quatro direções: a rota encontrada é sempre a mais curta.
+// A* ponderado: prefere estrada e trilha, mas atravessa campo e floresta.
 std::optional<std::vector<Celula>> buscar_rota(const Cidade& cidade, Celula de, Celula para) {
-    if (!cidade.tem_estrada(de) || !cidade.tem_estrada(para)) return std::nullopt;
+    if (!cidade.transitavel(de) || !cidade.transitavel(para)) return std::nullopt;
     if (de == para) return std::vector<Celula>{ de };
 
     const int largura = cidade.mapa().largura();
@@ -38,7 +37,7 @@ std::optional<std::vector<Celula>> buscar_rota(const Cidade& cidade, Celula de, 
     std::priority_queue<No, std::vector<No>, std::greater<No>> fronteira;
 
     custo[indice(de)] = 0;
-    fronteira.emplace(distancia_manhattan(de, para), distancia_manhattan(de, para), indice(de));
+    fronteira.emplace(distancia_manhattan(de, para) * 100, distancia_manhattan(de, para) * 100, indice(de));
 
     constexpr Celula VIZINHOS[] = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } };
 
@@ -53,13 +52,13 @@ std::optional<std::vector<Celula>> buscar_rota(const Cidade& cidade, Celula de, 
 
         for (const Celula d : VIZINHOS) {
             const Celula v{ c.x + d.x, c.y + d.y };
-            if (!cidade.tem_estrada(v)) continue;
+            if (!cidade.transitavel(v)) continue;
             const std::size_t iv = indice(v);
-            const int novo = custo[atual] + 1;
+            const int novo = custo[atual] + cidade.custo_movimento(v);
             if (novo >= custo[iv]) continue;
             custo[iv] = novo;
             veio_de[iv] = atual;
-            const int hv = distancia_manhattan(v, para);
+            const int hv = distancia_manhattan(v, para) * 100;
             fronteira.emplace(novo + hv, hv, iv);
         }
     }
@@ -82,26 +81,28 @@ void DistanciasPelaEstrada::calcular(const Cidade& cidade, Celula de) {
     largura_ = cidade.mapa().largura();
     altura_ = cidade.mapa().altura();
     passos_.assign(static_cast<std::size_t>(largura_) * static_cast<std::size_t>(altura_), SEM_LIGACAO);
-    if (!cidade.tem_estrada(de)) return;
+    if (!cidade.transitavel(de)) return;
 
     auto indice = [this](Celula c) { return static_cast<std::size_t>(c.y * largura_ + c.x); };
     constexpr Celula VIZINHOS[] = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } };
 
-    // A fila é um vetor percorrido por índice: cada célula entra uma vez só,
-    // então não precisa remover da frente.
-    fila_.clear();
-    fila_.push_back(indice(de));
+    using No = std::pair<int, std::size_t>;
+    std::priority_queue<No, std::vector<No>, std::greater<No>> fila;
+    fila.emplace(0, indice(de));
     passos_[indice(de)] = 0;
-    for (std::size_t i = 0; i < fila_.size(); ++i) {
-        const std::size_t atual = fila_[i];
+    while (!fila.empty()) {
+        const auto [distancia, atual] = fila.top();
+        fila.pop();
+        if (distancia != passos_[atual]) continue;
         const Celula c{ static_cast<int>(atual) % largura_, static_cast<int>(atual) / largura_ };
         for (const Celula d : VIZINHOS) {
             const Celula v{ c.x + d.x, c.y + d.y };
-            if (!cidade.tem_estrada(v)) continue;
+            if (!cidade.transitavel(v)) continue;
             const std::size_t iv = indice(v);
-            if (passos_[iv] != SEM_LIGACAO) continue;
-            passos_[iv] = passos_[atual] + 1;
-            fila_.push_back(iv);
+            const int novo = distancia + cidade.custo_movimento(v);
+            if (passos_[iv] != SEM_LIGACAO && novo >= passos_[iv]) continue;
+            passos_[iv] = novo;
+            fila.emplace(novo, iv);
         }
     }
 }

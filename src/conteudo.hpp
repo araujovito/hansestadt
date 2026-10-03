@@ -36,6 +36,12 @@ struct MelhoriaEdificio {
     std::vector<Quantidade> custo;
 };
 
+struct MelhoriaProdutividade {
+    Fase fase;
+    int percentual;
+    std::vector<Quantidade> custo;
+};
+
 struct Receita {
     int dias;
     std::vector<Quantidade> entradas;
@@ -75,6 +81,8 @@ struct DefinicaoEdificio {
     // Instituição evolui por fases; cada melhoria libera o nível seguinte.
     std::optional<std::string> instituicao;
     std::vector<MelhoriaEdificio> melhorias;
+    // Melhorias globais: uma compra beneficia todos os edifícios deste tipo.
+    std::vector<MelhoriaProdutividade> produtividade;
     std::vector<Receita> receitas;
     std::vector<Quantidade> custo;
 

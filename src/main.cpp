@@ -304,6 +304,16 @@ int main() {
                             : descrever(r);
                 aviso_quadros = 180;
             }
+            if (IsKeyPressed(KEY_T) && ferramenta.selecionado &&
+                cidade.edificio(*ferramenta.selecionado).ativo) {
+                const IdTipoEdificio tipo = cidade.edificio(*ferramenta.selecionado).tipo;
+                const ResultadoProdutividade r = cidade.melhorar_produtividade(tipo, sim.fase);
+                aviso = r == ResultadoProdutividade::Ok
+                            ? "tecnologia de " + cidade.conteudo().edificio(tipo).nome + " evoluiu para o nível " +
+                                  std::to_string(cidade.nivel_produtividade(tipo))
+                            : descrever(r);
+                aviso_quadros = 180;
+            }
             if (fundacao.concluir_se_possivel(cidade)) {
                 ferramenta = criar_ferramentas(conteudo, sim.fase);
                 fase_da_barra = sim.fase;

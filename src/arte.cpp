@@ -559,10 +559,11 @@ void Arte::desenhar_terreno(const Cidade& cidade, int x0, int y0, int x1, int y1
         for (int x = x0; x <= x1; ++x) {
             const Terreno t = mapa.terreno(x, y);
             const bool estrada = cidade.tem_estrada({ x, y });
+            const bool trilha = cidade.tem_trilha({ x, y });
             subpecas(x, y, [&](int sx, int sy, float px, float py) {
                 const float h = ruido::hash(sx, sy, 7);
                 if (t == Terreno::Agua) { nossa(AGUA + (h < 0.5f ? 0 : 1), px, py); return; }
-                if (estrada) { town(0, px, py, tom_da_estacao()); return; }
+                if (estrada || trilha) { town(0, px, py, tom_da_estacao()); return; }
                 const float prado = ruido::valor(static_cast<float>(sx), static_cast<float>(sy), 7.0f, 51);
                 const float chance_flor = (prado > 0.68f ? 0.35f : 0.01f) * (outono ? 0.25f : 1.0f);
                 const int n = (t == Terreno::Campo && !inverno && h < chance_flor) ? 2 : h < 0.2f ? 1 : 0;
@@ -606,7 +607,8 @@ void Arte::desenhar_terreno(const Cidade& cidade, int x0, int y0, int x1, int y1
     for (int sy = 2 * y0; sy <= 2 * y1 + 1; ++sy)
         for (int sx = 2 * x0; sx <= 2 * x1 + 1; ++sx) {
             const int x = sx / 2, y = sy / 2;
-            if (cidade.tem_estrada({ x, y }) || cidade.edificio_em({ x, y }) != SEM_EDIFICIO) continue;
+            if (cidade.tem_estrada({ x, y }) || cidade.tem_trilha({ x, y }) ||
+                cidade.edificio_em({ x, y }) != SEM_EDIFICIO) continue;
             const float h = ruido::hash(sx, sy, 11);
             const float px = static_cast<float>(sx * P), py = static_cast<float>(sy * P);
             const float grupo = ruido::valor(static_cast<float>(sx), static_cast<float>(sy), 5.0f, 41);

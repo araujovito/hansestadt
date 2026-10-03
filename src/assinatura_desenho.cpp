@@ -29,6 +29,7 @@ std::uint64_t assinatura_do_pedaco(const Cidade& cidade, int px, int py, Estacao
             }
             const Celula c{ x, y };
             misturar(static_cast<std::uint64_t>(mapa.terreno(x, y)) | (cidade.tem_estrada(c) ? 0x100u : 0u) |
+                     (cidade.tem_trilha(c) ? 0x400u : 0u) |
                      (cidade.edificio_em(c) != SEM_EDIFICIO ? 0x200u : 0u));
         }
     }

@@ -38,11 +38,30 @@ Simulacao vila_do_marco(bool com_fazenda) {
     estrada(cidade, { 16, 8 }, { 16, 10 });
     estrada(cidade, { 20, 8 }, { 20, 10 });
 
+    for (int id = 1; id <= 2; ++id) {
+        const auto r = buscar_rota(cidade, cidade.porta(0), cidade.porta(id));
+        int custo = 0;
+        if (r) for (std::size_t i = 1; i < r->size(); ++i) custo += cidade.custo_movimento((*r)[i]);
+        std::fprintf(stderr, "DEBUG rota casa%d passos=%zu custo=%d\n", id, r ? r->size() : 0, custo);
+    }
+
     return Simulacao(std::move(cidade));
 }
 
 void ate_marco(Simulacao& sim) {
-    while (sim.data.ano < 1151 || sim.data.mes < 3) sim.passo();
+    int ultimas = 0;
+    while (sim.data.ano < 1151 || sim.data.mes < 3) {
+        sim.passo();
+        if (sim.populacao.refeicoes_perdidas() != ultimas && sim.tick % Simulacao::TICKS_POR_DIA == 0) {
+            ultimas = sim.populacao.refeicoes_perdidas();
+            std::fprintf(stderr, "DEBUG falta %d-%02d-%02d pop=%d perd=%d entregas=%llu casas=%d/%d carr=%zu\n",
+                         sim.data.ano, sim.data.mes, sim.data.dia, sim.populacao.total(), ultimas,
+                         static_cast<unsigned long long>(sim.transporte.entregas()),
+                         sim.cidade.edificio(1).estoque[3] + sim.cidade.edificio(1).estoque[4],
+                         sim.cidade.edificio(2).estoque[3] + sim.cidade.edificio(2).estoque[4],
+                         sim.transporte.carregadores().size());
+        }
+    }
 }
 
 }  // namespace
@@ -50,6 +69,17 @@ void ate_marco(Simulacao& sim) {
 TESTE("marco: a cadeia de comida atravessa o inverno de 1150") {
     Simulacao sim = vila_do_marco(true);
     ate_marco(sim);
+    std::fprintf(stderr, "DEBUG marco pop=%d fome=%d perdidas=%d entregas=%llu\n",
+                 sim.populacao.total(), sim.populacao.mortos_de_fome(), sim.populacao.refeicoes_perdidas(),
+                 static_cast<unsigned long long>(sim.transporte.entregas()));
+    for (IdEdificio id = 0; id < sim.cidade.edificios().size(); ++id) {
+        const auto& e = sim.cidade.edificio(id);
+        std::fprintf(stderr, "DEBUG id=%u %s trab=%d carr=%d est=", id,
+                     sim.cidade.definicao(id).id.c_str(), sim.populacao.trabalhadores_em(id),
+                     sim.populacao.carregadores_em(id));
+        for (int q : e.estoque) std::fprintf(stderr, "%d,", q);
+        std::fprintf(stderr, "\n");
+    }
     VERIFICAR(sim.populacao.total() >= 6);
     VERIFICAR(sim.populacao.mortos_de_fome() == 0);
 }

@@ -21,7 +21,7 @@ void Transporte::criar_carregadores(Cidade& cidade, const Populacao* populacao) 
     if (populacao) {
         std::vector<int> mantidos(cidade.edificios().size(), 0);
         for (auto it = carregadores_.begin(); it != carregadores_.end();) {
-            const int desejados = it->casa < cidade.edificios().size() ? populacao->trabalhadores_em(it->casa) : 0;
+            const int desejados = it->casa < cidade.edificios().size() ? populacao->carregadores_em(it->casa) : 0;
             if (it->casa >= mantidos.size() || mantidos[it->casa] >= desejados) {
                 cancelar(cidade, *it);
                 it = carregadores_.erase(it);
@@ -35,7 +35,7 @@ void Transporte::criar_carregadores(Cidade& cidade, const Populacao* populacao) 
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo) continue;
         const DefinicaoEdificio& def = cidade.definicao(id);
-        const int desejados = populacao ? populacao->trabalhadores_em(id) : def.carregadores;
+        const int desejados = populacao ? populacao->carregadores_em(id) : def.carregadores;
         int existentes = 0;
         for (const Carregador& c : carregadores_) existentes += c.casa == id ? 1 : 0;
         for (int i = existentes; i < desejados; ++i) {
@@ -295,12 +295,9 @@ void Transporte::chegou(Cidade& cidade, Carregador& c) {
 
 void Transporte::mover(Cidade& cidade, Carregador& c) {
     if (!c.andando()) return;
-    if (++c.ticks_na_celula < TICKS_POR_CELULA) return;
-    c.ticks_na_celula = 0;
-
     const Celula proxima = c.rota[c.passo];
-    if (!cidade.tem_estrada(proxima)) {
-        // Demoliram a estrada à frente: recalcula até o mesmo alvo. Se não
+    if (!cidade.transitavel(proxima)) {
+        // Construíram um bloqueio à frente: recalcula até o mesmo alvo. Se não
         // houver outro caminho, para onde está e desiste da tarefa.
         const Celula alvo = c.rota.back();
         if (!enviar(cidade, c, alvo)) {
@@ -311,7 +308,12 @@ void Transporte::mover(Cidade& cidade, Carregador& c) {
         }
         return;
     }
+    c.ticks_na_celula += 100;
+    const int custo = cidade.custo_movimento(proxima);
+    if (c.ticks_na_celula < custo) return;
+    c.ticks_na_celula -= custo;
     c.posicao = proxima;
+    cidade.registrar_passagem(proxima);
     if (++c.passo == c.rota.size()) chegou(cidade, c);
 }
 

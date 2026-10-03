@@ -211,7 +211,7 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         conferir_chaves(*t,
                         { "id", "nome", "fase", "tamanho", "terreno", "cor", "trabalhadores", "estoque", "moradores",
                           "campos", "deposito", "alimenta_sem_teto", "carregadores", "requer", "extrai", "custo", "receita",
-                          "instituicao", "melhoria" },
+                          "instituicao", "melhoria", "produtividade" },
                         ctx, erros);
 
         DefinicaoEdificio d{};
@@ -303,6 +303,34 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
             }
         } else if (t->contains("melhoria")) {
             erros.adicionar(ctx, "'melhoria' precisa ser uma lista de tabelas");
+        }
+
+        if (const toml::array* niveis = (*t)["produtividade"].as_array()) {
+            Fase fase_anterior = d.fase;
+            for (std::size_t i = 0; i < niveis->size(); ++i) {
+                const toml::table* nivel = (*niveis)[i].as_table();
+                const std::string ctx_n = ctx + ", produtividade " + std::to_string(i + 1);
+                if (!nivel) {
+                    erros.adicionar(ctx_n, "cada nível precisa ser uma tabela");
+                    continue;
+                }
+                conferir_chaves(*nivel, { "fase", "percentual", "custo" }, ctx_n, erros);
+                const auto fase_n = fase_por_id((*nivel)["fase"].value_or(std::string()));
+                if (!fase_n) {
+                    erros.adicionar(ctx_n, "fase inválida");
+                    continue;
+                }
+                if (i > 0 && *fase_n < fase_anterior)
+                    erros.adicionar(ctx_n, "fase não pode ser anterior ao nível anterior");
+                fase_anterior = *fase_n;
+                const int percentual = inteiro(*nivel, "percentual", 15, 1, ctx_n, erros);
+                if (!nivel->contains("custo") || !(*nivel)["custo"].as_table())
+                    erros.adicionar(ctx_n, "'custo' precisa ser uma tabela de materiais");
+                d.produtividade.push_back({ *fase_n, percentual,
+                    ler_quantidades(*nivel, "custo", c, ctx_n + ", custo", erros) });
+            }
+        } else if (t->contains("produtividade")) {
+            erros.adicionar(ctx, "'produtividade' precisa ser uma lista de tabelas");
         }
 
         if (const toml::array* receitas = (*t)["receita"].as_array()) {

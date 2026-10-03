@@ -52,6 +52,11 @@ enum class ResultadoMelhoria : std::uint8_t {
     SemRecursos,
 };
 
+enum class ResultadoProdutividade : std::uint8_t {
+    Ok, TipoSemMelhoria, NivelMaximo, FaseBloqueada, SemRecursos
+};
+const char* descrever(ResultadoProdutividade resultado);
+
 const char* descrever(ResultadoMelhoria resultado);
 
 const char* descrever(Validacao v);
@@ -76,6 +81,10 @@ public:
     std::optional<IdEdificio> construir_edificio(IdTipoEdificio tipo, Celula origem);
     ResultadoMelhoria melhorar_edificio(IdEdificio id, Fase fase_atual);
     ResultadoMelhoria validar_melhoria(IdEdificio id, Fase fase_atual) const;
+    ResultadoProdutividade validar_produtividade(IdTipoEdificio tipo, Fase fase_atual) const;
+    ResultadoProdutividade melhorar_produtividade(IdTipoEdificio tipo, Fase fase_atual);
+    int nivel_produtividade(IdTipoEdificio tipo) const { return produtividade_[tipo]; }
+    int bonus_produtividade(IdTipoEdificio tipo) const;
 
     Validacao validar_estrada(Celula c) const;
     bool construir_estrada(Celula c);
@@ -84,6 +93,12 @@ public:
     bool demolir(Celula c);
 
     bool tem_estrada(Celula c) const;
+    bool tem_trilha(Celula c) const;
+    bool transitavel(Celula c) const;
+    // Custo relativo: estrada 100, trilha 133, campo 200, floresta 286.
+    int custo_movimento(Celula c) const;
+    void registrar_passagem(Celula c);
+    void avancar_desgaste_trilhas();
     IdEdificio edificio_em(Celula c) const;
     // Muda a cada estrada construída ou demolida; quem guarda rotas compara
     // com o valor da época para saber se elas ainda valem.
@@ -120,8 +135,15 @@ public:
     // Estado bruto usado pelo salvamento. A restauração reconstrói ocupação
     // e portas, que são índices derivados e não precisam ir para o arquivo.
     const std::vector<std::uint8_t>& estradas() const { return estradas_; }
+    const std::vector<std::uint8_t>& trilhas() const { return trilhas_; }
+    const std::vector<std::uint16_t>& uso_trilhas() const { return uso_trilhas_; }
+    const std::vector<std::uint8_t>& dias_sem_uso_trilhas() const { return dias_sem_uso_trilhas_; }
+    const std::vector<int>& niveis_produtividade() const { return produtividade_; }
     static Cidade restaurar(Mapa mapa, const Conteudo& conteudo, std::vector<Edificio> edificios,
-                            std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas);
+                            std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas,
+                            std::vector<int> produtividade = {}, std::vector<std::uint8_t> trilhas = {},
+                            std::vector<std::uint16_t> uso_trilhas = {},
+                            std::vector<std::uint8_t> dias_sem_uso_trilhas = {});
 
 private:
     void consumir_custo(const DefinicaoEdificio& def);
@@ -138,10 +160,15 @@ private:
     // Uma entrada por célula, na mesma ordem do mapa.
     std::vector<IdEdificio> ocupacao_;
     std::vector<std::uint8_t> estradas_;
+    std::vector<std::uint8_t> trilhas_;
+    std::vector<std::uint16_t> uso_trilhas_;
+    std::vector<std::uint8_t> dias_sem_uso_trilhas_;
+    std::vector<std::uint8_t> usada_hoje_;
     // Células que são a porta de algum edifício. Basta uma marca: dois
     // edifícios nunca dividem a porta, porque a célula logo acima dela é
     // sempre do próprio edifício.
     std::vector<std::uint8_t> portas_;
+    std::vector<int> produtividade_;
     std::uint64_t versao_estradas_ = 0;
 };
 

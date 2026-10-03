@@ -1,6 +1,7 @@
 #include "cidade.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <utility>
 
 const char* descrever(Validacao v) {
@@ -29,21 +30,45 @@ const char* descrever(ResultadoMelhoria r) {
     return "?";
 }
 
+const char* descrever(ResultadoProdutividade r) {
+    switch (r) {
+        case ResultadoProdutividade::Ok: return "ok";
+        case ResultadoProdutividade::TipoSemMelhoria: return "este edifício não tem melhoria de produtividade";
+        case ResultadoProdutividade::NivelMaximo: return "produtividade no nível máximo";
+        case ResultadoProdutividade::FaseBloqueada: return "melhoria ainda não disponível nesta fase";
+        case ResultadoProdutividade::SemRecursos: return "faltam materiais";
+    }
+    return "?";
+}
+
 Cidade::Cidade(Mapa mapa, const Conteudo& conteudo)
     : mapa_(std::move(mapa)),
       conteudo_(&conteudo),
       ocupacao_(static_cast<std::size_t>(mapa_.largura()) * static_cast<std::size_t>(mapa_.altura()),
                 SEM_EDIFICIO),
       estradas_(ocupacao_.size(), 0),
-      portas_(ocupacao_.size(), 0) {}
+      trilhas_(ocupacao_.size(), 0),
+      uso_trilhas_(ocupacao_.size(), 0),
+      dias_sem_uso_trilhas_(ocupacao_.size(), 0),
+      usada_hoje_(ocupacao_.size(), 0),
+      portas_(ocupacao_.size(), 0),
+      produtividade_(conteudo.edificios.size(), 0) {}
 
 Cidade Cidade::restaurar(Mapa mapa, const Conteudo& conteudo, std::vector<Edificio> edificios,
-                         std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas) {
+                         std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas,
+                         std::vector<int> produtividade, std::vector<std::uint8_t> trilhas,
+                         std::vector<std::uint16_t> uso_trilhas,
+                         std::vector<std::uint8_t> dias_sem_uso_trilhas) {
     Cidade cidade(std::move(mapa), conteudo);
     if (estradas.size() != cidade.estradas_.size()) return cidade;
     cidade.edificios_ = std::move(edificios);
     cidade.estradas_ = std::move(estradas);
+    if (trilhas.size() == cidade.trilhas_.size()) cidade.trilhas_ = std::move(trilhas);
+    if (uso_trilhas.size() == cidade.uso_trilhas_.size()) cidade.uso_trilhas_ = std::move(uso_trilhas);
+    if (dias_sem_uso_trilhas.size() == cidade.dias_sem_uso_trilhas_.size())
+        cidade.dias_sem_uso_trilhas_ = std::move(dias_sem_uso_trilhas);
     cidade.versao_estradas_ = versao_estradas;
+    if (!produtividade.empty()) cidade.produtividade_ = std::move(produtividade);
     for (IdEdificio id = 0; id < cidade.edificios_.size(); ++id) {
         const Edificio& e = cidade.edificios_[id];
         if (!e.ativo) continue;
@@ -54,6 +79,49 @@ Cidade Cidade::restaurar(Mapa mapa, const Conteudo& conteudo, std::vector<Edific
         cidade.portas_[cidade.indice(porta_de(def, e.origem))] = 1;
     }
     return cidade;
+}
+
+ResultadoProdutividade Cidade::validar_produtividade(IdTipoEdificio tipo, Fase fase_atual) const {
+    if (tipo >= conteudo_->edificios.size()) return ResultadoProdutividade::TipoSemMelhoria;
+    const DefinicaoEdificio& def = conteudo_->edificio(tipo);
+    if (def.produtividade.empty()) return ResultadoProdutividade::TipoSemMelhoria;
+    const int nivel = produtividade_[tipo];
+    if (nivel < 0 || static_cast<std::size_t>(nivel) >= def.produtividade.size())
+        return ResultadoProdutividade::NivelMaximo;
+    const MelhoriaProdutividade& melhoria = def.produtividade[static_cast<std::size_t>(nivel)];
+    if (melhoria.fase > fase_atual) return ResultadoProdutividade::FaseBloqueada;
+    for (const Quantidade& q : melhoria.custo) {
+        int total = 0;
+        for (IdEdificio id = 0; id < edificios_.size(); ++id) total += disponivel(id, q.item);
+        if (total < q.quantidade) return ResultadoProdutividade::SemRecursos;
+    }
+    return ResultadoProdutividade::Ok;
+}
+
+ResultadoProdutividade Cidade::melhorar_produtividade(IdTipoEdificio tipo, Fase fase_atual) {
+    const ResultadoProdutividade resultado = validar_produtividade(tipo, fase_atual);
+    if (resultado != ResultadoProdutividade::Ok) return resultado;
+    const MelhoriaProdutividade& melhoria = conteudo_->edificio(tipo).produtividade[produtividade_[tipo]];
+    for (const Quantidade& q : melhoria.custo) {
+        int restante = q.quantidade;
+        for (IdEdificio origem = 0; origem < edificios_.size() && restante > 0; ++origem) {
+            Edificio& e = edificios_[origem];
+            if (!e.ativo) continue;
+            const int retirado = std::min(restante, disponivel(origem, q.item));
+            e.estoque[q.item] -= retirado;
+            restante -= retirado;
+        }
+    }
+    ++produtividade_[tipo];
+    return ResultadoProdutividade::Ok;
+}
+
+int Cidade::bonus_produtividade(IdTipoEdificio tipo) const {
+    int bonus = 0;
+    const DefinicaoEdificio& def = conteudo_->edificio(tipo);
+    for (int i = 0; i < produtividade_[tipo]; ++i)
+        bonus += def.produtividade[static_cast<std::size_t>(i)].percentual;
+    return bonus;
 }
 
 Celula porta_de(const DefinicaoEdificio& def, Celula origem) {
@@ -174,8 +242,60 @@ Validacao Cidade::validar_estrada(Celula c) const {
 bool Cidade::construir_estrada(Celula c) {
     if (validar_estrada(c) != Validacao::Ok) return false;
     estradas_[indice(c)] = 1;
+    trilhas_[indice(c)] = 0;
+    uso_trilhas_[indice(c)] = 200;
     ++versao_estradas_;
     return true;
+}
+
+bool Cidade::tem_trilha(Celula c) const {
+    return mapa_.dentro(c.x, c.y) && trilhas_[indice(c)] != 0;
+}
+
+bool Cidade::transitavel(Celula c) const {
+    if (!mapa_.dentro(c.x, c.y) || mapa_.terreno(c.x, c.y) == Terreno::Agua) return false;
+    return ocupacao_[indice(c)] == SEM_EDIFICIO;
+}
+
+int Cidade::custo_movimento(Celula c) const {
+    if (!transitavel(c)) return std::numeric_limits<int>::max();
+    if (tem_estrada(c)) return 100;
+    if (tem_trilha(c)) return 133;
+    return mapa_.terreno(c.x, c.y) == Terreno::Floresta ? 286 : 200;
+}
+
+void Cidade::registrar_passagem(Celula c) {
+    if (!transitavel(c) || tem_estrada(c)) return;
+    const std::size_t i = indice(c);
+    usada_hoje_[i] = 1;
+    dias_sem_uso_trilhas_[i] = 0;
+    if (uso_trilhas_[i] < 200) ++uso_trilhas_[i];
+    if (!trilhas_[i] && uso_trilhas_[i] >= 30) {
+        trilhas_[i] = 1;
+        ++versao_estradas_;
+    }
+    if (uso_trilhas_[i] >= 200) {
+        trilhas_[i] = 0;
+        estradas_[i] = 1;
+        ++versao_estradas_;
+    }
+}
+
+void Cidade::avancar_desgaste_trilhas() {
+    for (std::size_t i = 0; i < trilhas_.size(); ++i) {
+        if (estradas_[i] || !trilhas_[i]) { usada_hoje_[i] = 0; continue; }
+        if (usada_hoje_[i]) {
+            dias_sem_uso_trilhas_[i] = 0;
+        } else if (++dias_sem_uso_trilhas_[i] >= 7) {
+            dias_sem_uso_trilhas_[i] = 0;
+            if (uso_trilhas_[i] > 0) --uso_trilhas_[i];
+            if (uso_trilhas_[i] == 0) {
+                trilhas_[i] = 0;
+                ++versao_estradas_;
+            }
+        }
+        usada_hoje_[i] = 0;
+    }
 }
 
 bool Cidade::demolir(Celula c) {
@@ -183,6 +303,7 @@ bool Cidade::demolir(Celula c) {
 
     if (estradas_[indice(c)]) {
         estradas_[indice(c)] = 0;
+        uso_trilhas_[indice(c)] = 0;
         ++versao_estradas_;
         return true;
     }
@@ -207,7 +328,7 @@ Celula Cidade::porta(IdEdificio id) const {
 }
 
 bool Cidade::tem_acesso(IdEdificio id) const {
-    return edificios_[id].ativo && tem_estrada(porta(id));
+    return edificios_[id].ativo && transitavel(porta(id));
 }
 
 int Cidade::espaco_para(IdEdificio id, IdItem item) const {

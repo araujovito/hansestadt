@@ -17,7 +17,8 @@ namespace {
 
 int fator_efetivo(const Cidade& cidade, IdEdificio id, const Receita& r, int mes, const Eventos* eventos, Data data) {
     const float evento = eventos ? eventos->multiplicador_producao(data, cidade.edificio(id).tipo) : 1.0f;
-    return static_cast<int>(std::lround(fator_do_mes(r, mes) * evento));
+    const float tecnologia = 1.0f + static_cast<float>(cidade.bonus_produtividade(cidade.edificio(id).tipo)) / 100.0f;
+    return static_cast<int>(std::lround(fator_do_mes(r, mes) * evento * tecnologia));
 }
 
 bool pode_comecar(const Cidade& cidade, IdEdificio id, const Receita& r, int mes, const Eventos* eventos, Data data) {

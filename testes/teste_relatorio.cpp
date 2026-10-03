@@ -27,19 +27,19 @@ TESTE("relatório: emprego separa carregadores das vagas de produção") {
     VERIFICAR(e.adultos == 4 && e.criancas == 0);
     VERIFICAR(e.linhas.size() == 2);
     if (e.linhas.size() != 2) return;
-    VERIFICAR(e.linhas[0].nome == "carregadores" && e.linhas[0].vagas == 2 && e.linhas[0].ocupadas == 2);
+    VERIFICAR(e.linhas[0].nome == "carregadores" && e.linhas[0].vagas == 3 && e.linhas[0].ocupadas == 3);
     VERIFICAR(e.linhas[1].nome == "serraria" && e.linhas[1].vagas == 1 && e.linhas[1].ocupadas == 1);
-    VERIFICAR(e.vagas == 3 && e.ocupadas == 3);
-    VERIFICAR(e.desempregados == 1);
+    VERIFICAR(e.vagas == 4 && e.ocupadas == 4);
+    VERIFICAR(e.desempregados == 0);
 }
 
-TESTE("relatório: com pouca gente, os carregadores ocupam primeiro") {
+TESTE("relatório: com pouca gente, produção ocupa primeiro") {
     const Simulacao sim = vila_com_trabalho(2);
     const RelatorioEmprego e = montar_relatorio(sim).emprego;
     VERIFICAR(e.linhas.size() == 2);
     if (e.linhas.size() != 2) return;
-    VERIFICAR(e.linhas[0].ocupadas == 2);
-    VERIFICAR(e.linhas[1].ocupadas == 0);
+    VERIFICAR(e.linhas[0].ocupadas == 1);
+    VERIFICAR(e.linhas[1].ocupadas == 1);
 }
 
 TESTE("relatório: comida lista todos os itens de comida e os dias como na barra") {

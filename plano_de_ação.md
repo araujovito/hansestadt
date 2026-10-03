@@ -40,6 +40,9 @@ do README e do contexto e um ou mais commits pequenos.
    - Registrar acontecimentos e seus efeitos para o jogador.
 
 5. **Evolução das fases**
+   - Núcleo em andamento na `codex/simulacao`: `tentar_avancar_fase` aplica
+     os cinco anos fixos e só avança se todas as instituições informadas
+     estiverem no máximo; ainda falta ligar aos níveis reais da cidade.
    - A campanha acontece em um único mapa contínuo, sem reiniciar a cidade
      ao trocar de fase.
    - Cada fase tem um ano-limite histórico e só é alcançada quando o
@@ -47,12 +50,16 @@ do README e do contexto e um ou mais commits pequenos.
      nível disponível.
    - O calendário continua avançando independentemente; chegar ao ano sem
      cumprir os requisitos mantém a fase atual até cumpri-los.
-   - Anos sugeridos pelo README (1150, 1200, 1250, 1300 e 1370) e quais
-     edifícios contam como instituições aguardam confirmação.
+   - A condição considera todas as instituições disponíveis naquela fase,
+     não casas, oficinas ou demais edifícios econômicos.
+   - Marcos confirmados: Vila (1150), Mercado (1200), Cidade (1250), Hansa
+     (1300) e Auge (1370).
 
 6. **Edifícios institucionais**
    - Igreja, governo, mercado e porto.
    - Evolução dos edifícios ligada à progressão histórica.
+   - Implementar níveis e disponibilidade de modo que a fase possa conferir
+     se todas as instituições disponíveis atingiram o nível máximo da etapa.
 
 7. **Completar as cadeias econômicas**
    - Cerveja, gado, ovelhas, tecidos, couro, arenque, barris e salga.

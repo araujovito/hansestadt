@@ -37,11 +37,16 @@ tijolo), diferente da pedreira dos jogos medievais mais comuns.
 
 | Fase | Período | Marco histórico |
 |---|---|---|
-| Vila | ~1150 | *Ostsiedlung*: um *Lokator* funda a vila |
-| Mercado | ~1200 | *Marktrecht* |
-| Cidade | ~1250 | *Stadtrecht* (Direito de Lübeck) e entrada na Hansa |
-| Cidade hanseática | 1300–1350 | Grande Fome (1315–17), Peste Negra (1347–51) |
-| Auge | ~1370 | Paz de Stralsund |
+| Vila | 1150 | *Ostsiedlung*: um *Lokator* funda a vila |
+| Mercado | 1200 | *Marktrecht* |
+| Cidade | 1250 | *Stadtrecht* (Direito de Lübeck) e entrada na Hansa |
+| Cidade hanseática | 1300 | Grande Fome (1315–17), Peste Negra (1347–51) |
+| Auge | 1370 | Paz de Stralsund |
+
+As fases ocorrem no mesmo mapa. Cada marco requer alcançar o ano indicado e
+ter todas as instituições disponíveis na etapa no nível máximo; o calendário
+segue avançando enquanto esses requisitos não forem cumpridos. (Progressão e
+níveis institucionais ainda estão planejados.)
 
 ## Economia
 

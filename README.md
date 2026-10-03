@@ -224,6 +224,7 @@ Controles:
 | Edifício | botão na barra inferior, depois clicar no mapa |
 | Demolir | `X`, depois clicar ou arrastar |
 | Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
+| Ir até um edifício com problema | clicar em `ver >` no alerta, no canto esquerdo (cliques seguidos percorrem os edifícios do alerta) |
 | Salvar / carregar rápido | `F5` / `F9` (`partida.hanse`) |
 | Menu de pausa (continuar, salvar e carregar em 4 vagas, sair) | `Esc` sem ferramenta nem painel aberto, ou o botão `Menu` no canto de cima |
 | Soltar a ferramenta / fechar o painel | `Esc` |

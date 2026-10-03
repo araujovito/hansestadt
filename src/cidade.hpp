@@ -89,10 +89,10 @@ public:
     // está a caminho.
     int disponivel(IdEdificio id, IdItem item) const;
     int espaco_livre(IdEdificio id, IdItem item) const;
-    void reservar_saida(IdEdificio id, IdItem item) { ++edificios_[id].reservado[item]; }
-    void liberar_saida(IdEdificio id, IdItem item) { --edificios_[id].reservado[item]; }
-    void reservar_chegada(IdEdificio id, IdItem item) { ++edificios_[id].a_caminho[item]; }
-    void liberar_chegada(IdEdificio id, IdItem item) { --edificios_[id].a_caminho[item]; }
+    void reservar_saida(IdEdificio id, IdItem item, int quantidade = 1) { edificios_[id].reservado[item] += quantidade; }
+    void liberar_saida(IdEdificio id, IdItem item, int quantidade = 1) { edificios_[id].reservado[item] -= quantidade; }
+    void reservar_chegada(IdEdificio id, IdItem item, int quantidade = 1) { edificios_[id].a_caminho[item] += quantidade; }
+    void liberar_chegada(IdEdificio id, IdItem item, int quantidade = 1) { edificios_[id].a_caminho[item] -= quantidade; }
     // Falham sem mudar nada se não houver espaço ou quantidade suficiente.
     bool adicionar(IdEdificio id, IdItem item, int quantidade);
     bool retirar(IdEdificio id, IdItem item, int quantidade);

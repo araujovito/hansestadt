@@ -4,11 +4,11 @@
 
 void Simulacao::passo() {
     populacao.alojar(cidade);
-    populacao.empregar(cidade);
+    populacao.empregar(cidade, true);
     // Produção antes do transporte: o que ficou pronto neste tick já pode
     // ser pedido na mesma rodada de planejamento.
     avancar_producao(cidade, data.mes, TICKS_POR_DIA, &populacao);
-    transporte.passo(cidade);
+    transporte.passo(cidade, &populacao);
     ++tick;
     if (tick % TICKS_POR_DIA == 0) {
         populacao.consumir_comida(cidade);

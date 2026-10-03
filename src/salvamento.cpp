@@ -7,7 +7,7 @@
 
 namespace {
 
-constexpr char MAGIA[] = "HANSESTADT\2";
+constexpr char MAGIA[] = "HANSESTADT\3";
 constexpr std::uint64_t MAXIMO_VETOR = 10'000'000;
 
 template <class T>
@@ -76,6 +76,7 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
         for (Celula p : c.rota) escrever_celula(out, p);
         escrever(out, static_cast<std::uint64_t>(c.passo)); escrever(out, c.ticks_na_celula);
         escrever(out, c.tarefa); escrever(out, c.origem); escrever(out, c.destino); escrever(out, c.item);
+        escrever(out, c.quantidade);
         escrever(out, c.carregando);
     }
     escrever_vetor(out, sim.transporte.depositos_criados());
@@ -133,7 +134,8 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
         for (std::uint64_t j = 0; j < n_rota; ++j) c.rota.push_back(ler_celula(in));
         c.passo = static_cast<std::size_t>(ler<std::uint64_t>(in)); c.ticks_na_celula = ler<int>(in);
         c.tarefa = ler<Tarefa>(in); c.origem = ler<IdEdificio>(in); c.destino = ler<IdEdificio>(in);
-        c.item = ler<IdItem>(in); c.carregando = ler<bool>(in); carregadores.push_back(std::move(c));
+        c.item = ler<IdItem>(in); c.quantidade = ler<int>(in); c.carregando = ler<bool>(in);
+        carregadores.push_back(std::move(c));
     }
     auto criados = ler_vetor<std::uint8_t>(in);
     const auto tick_transporte = ler<std::uint64_t>(in), entregas = ler<std::uint64_t>(in), perdidos = ler<std::uint64_t>(in);

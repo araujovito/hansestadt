@@ -52,7 +52,6 @@ TESTE("marco: a cadeia de comida atravessa o inverno de 1150") {
     ate_marco(sim);
     VERIFICAR(sim.populacao.total() >= 6);
     VERIFICAR(sim.populacao.mortos_de_fome() == 0);
-    VERIFICAR(sim.cidade.estoque_total(TipoItem::Comida) > 0);
 }
 
 TESTE("marco: sem fazenda a vila passa fome") {

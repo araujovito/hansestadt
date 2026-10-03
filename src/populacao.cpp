@@ -86,7 +86,7 @@ void Populacao::alojar(Cidade& cidade) {
     }
 }
 
-void Populacao::empregar(const Cidade& cidade) {
+void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
     // Recalcular em ordem de id torna o resultado independente do histórico
     // de construções e libera imediatamente quem perdeu casa ou trabalho.
     for (Morador& m : moradores_) m.trabalho = SEM_EDIFICIO;
@@ -95,6 +95,21 @@ void Populacao::empregar(const Cidade& cidade) {
     // para trás do cursor já tem trabalho ou não pode trabalhar: o próximo
     // edifício continua de onde o anterior parou, sem voltar ao começo.
     std::size_t proximo = 0;
+    if (incluir_carregadores) {
+        for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
+            if (!cidade.edificio(id).ativo) continue;
+            int ocupadas = 0;
+            const int vagas = cidade.definicao(id).carregadores;
+            for (; ocupadas < vagas && proximo < moradores_.size(); ++proximo) {
+                Morador& m = moradores_[proximo];
+                if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) {
+                    m.trabalho = id;
+                    ++ocupadas;
+                }
+            }
+            trabalhadores_[id] += ocupadas;
+        }
+    }
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo) continue;
         const int vagas = cidade.definicao(id).trabalhadores;
@@ -106,7 +121,7 @@ void Populacao::empregar(const Cidade& cidade) {
                 ++ocupadas;
             }
         }
-        trabalhadores_[id] = ocupadas;
+        trabalhadores_[id] += ocupadas;
     }
 }
 

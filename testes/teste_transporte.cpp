@@ -38,6 +38,23 @@ TESTE("carregadores: sem depósito não há carregador") {
     VERIFICAR(t.carregadores().empty());
 }
 
+TESTE("carregadores: vêm dos adultos empregados no depósito") {
+    Cidade c = campo_aberto();
+    c.construir_edificio(tipo("casa"), { 4, 4 });
+    const IdEdificio d = *c.construir_edificio(tipo("deposito"), { 1, 1 });
+    Populacao p(1);
+    p.alojar(c);
+    p.empregar(c, true);
+    Transporte t;
+    t.passo(c, &p);
+    VERIFICAR(t.carregadores().size() == 1);
+    VERIFICAR(p.trabalhadores_em(d) == 1);
+    for (int dia = 0; dia < Populacao::DIAS_ATE_MORRER_DE_FOME; ++dia) p.consumir_comida(c);
+    p.empregar(c, true);
+    t.passo(c, &p);
+    VERIFICAR(t.carregadores().empty());
+}
+
 TESTE("carregadores: depósito demolido, mudam para o outro andando pela estrada") {
     Cidade c = campo_aberto();
     const IdEdificio a = *c.construir_edificio(tipo("deposito"), { 1, 1 });  // porta (1,2)

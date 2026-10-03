@@ -106,19 +106,19 @@ mortes, estoque total de comida e autonomia em dias. A autonomia fica
 amarela abaixo de 90 dias e vermelha abaixo de 30.
 
 A partida começa pausada no tempo, com apenas o armazém disponível. Ao
-posicioná-lo, os colonos descarregam 480 porções de pão e o restante da barra
+posicioná-lo, os colonos descarregam 600 porções de pão e o restante da barra
 de construção é liberado.
 
 ## Balanceamento
 
-`make balance` roda três anos da economia sem abrir a janela, lendo as mesmas
+`make balance` roda o primeiro ano da economia sem abrir a janela, lendo as mesmas
 receitas e sazonalidades dos TOMLs. O cenário-base usa os 6 moradores e uma
 fazenda, um moinho, uma padaria, um pescador e uma pocilga. O resultado fica
 em `build/balanceamento/economia.csv`, com totais mensais, e
 `economia.svg`, com produção e consumo acumulados.
 
-O primeiro ajuste produz 6.804 porções, consome 6.222 e não registra falta
-em três anos. A simulação é deliberadamente agregada: transporte, distância
+O cenário atual produz 1.864 porções, consome 1.836 e não registra falta
+no primeiro ano. A simulação é deliberadamente agregada: transporte, distância
 e limites físicos também são cobertos pelo teste integrado do marco. Com a
 cadeia completa, os seis moradores atravessam o inverno de 1150–51; sem a
 fazenda, há refeições perdidas.
@@ -171,8 +171,8 @@ próxima em campo ao produzir toras e para quando não resta mata ao alcance.
    caminho é o A* mais curto entre as portas, guardado em cache até a
    próxima mudança nas estradas. Cada edifício tem uma porta (a célula
    abaixo do meio da borda inferior), e sem estrada nela ele fica isolado.
-3. **Transporte** (`src/transporte.cpp`). Os carregadores moram no
-   armazém. A cada 10 ticks, cada vaga na entrada de um produtor pede um
+3. **Transporte** (`src/transporte.cpp`). O armazém emprega um carregador da
+   população, que leva até 8 unidades por viagem. A cada 10 ticks, cada vaga na entrada de um produtor pede um
    item à origem mais próxima; casas fazem o mesmo para encher a despensa.
    Depois, o que sobra nas saídas vai para o depósito. Item e vaga são
    reservados na hora da atribuição. Se a

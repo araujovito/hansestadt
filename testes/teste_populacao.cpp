@@ -172,3 +172,15 @@ TESTE("população: criança não trabalha antes dos dezesseis anos") {
     for (int dia = 0; dia < Morador::IDADE_ADULTA; ++dia) p.avancar_dia(c, {1151, 2, 1});
     VERIFICAR(p.criancas() == 0);
 }
+
+TESTE("população: carregador ocupa um adulto antes das oficinas") {
+    Cidade c = cidade_para_populacao();
+    c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 5, 1 });
+    const IdEdificio serraria = *c.construir_edificio(tipo("serraria"), { 7, 1 });
+    Populacao p(2);
+    p.alojar(c);
+    p.empregar(c, true);
+    VERIFICAR(p.trabalhadores_em(deposito) == 2);
+    VERIFICAR(p.trabalhadores_em(serraria) == 0);
+}

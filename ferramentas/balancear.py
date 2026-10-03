@@ -16,10 +16,9 @@ CONFIGURACAO = {
     "moinho": 1,
     "padaria": 1,
     "pescador": 1,
-    "pocilga": 1,
 }
 POPULACAO = 6
-COMIDA_INICIAL = 480
+COMIDA_INICIAL = 600
 
 
 def carregar() -> tuple[dict[str, dict], set[str]]:
@@ -111,7 +110,7 @@ def salvar_svg(linhas: list[dict[str, int]], destino: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--anos", type=int, default=3)
+    parser.add_argument("--anos", type=int, default=1)
     parser.add_argument("--saida", type=Path, default=RAIZ / "build/balanceamento")
     args = parser.parse_args()
     linhas = simular(args.anos)

@@ -1,6 +1,9 @@
 #include "transporte.hpp"
 
+#include <algorithm>
 #include <limits>
+
+#include "populacao.hpp"
 
 Transporte Transporte::restaurar(std::vector<Carregador> carregadores,
                                   std::vector<std::uint8_t> depositos_criados, std::uint64_t tick,
@@ -14,18 +17,34 @@ Transporte Transporte::restaurar(std::vector<Carregador> carregadores,
     return t;
 }
 
-void Transporte::criar_carregadores(const Cidade& cidade) {
+void Transporte::criar_carregadores(Cidade& cidade, const Populacao* populacao) {
+    if (populacao) {
+        std::vector<int> mantidos(cidade.edificios().size(), 0);
+        for (auto it = carregadores_.begin(); it != carregadores_.end();) {
+            const int desejados = it->casa < cidade.edificios().size() ? populacao->trabalhadores_em(it->casa) : 0;
+            if (it->casa >= mantidos.size() || mantidos[it->casa] >= desejados) {
+                cancelar(cidade, *it);
+                it = carregadores_.erase(it);
+            } else {
+                ++mantidos[it->casa];
+                ++it;
+            }
+        }
+    }
     ja_criou_.resize(cidade.edificios().size(), 0);
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
-        if (ja_criou_[id] || !cidade.edificio(id).ativo) continue;
-        ja_criou_[id] = 1;
+        if (!cidade.edificio(id).ativo) continue;
         const DefinicaoEdificio& def = cidade.definicao(id);
-        for (int i = 0; i < def.carregadores; ++i) {
+        const int desejados = populacao ? populacao->trabalhadores_em(id) : def.carregadores;
+        int existentes = 0;
+        for (const Carregador& c : carregadores_) existentes += c.casa == id ? 1 : 0;
+        for (int i = existentes; i < desejados; ++i) {
             Carregador c;
             c.casa = id;
             c.posicao = cidade.porta(id);
             carregadores_.push_back(c);
         }
+        ja_criou_[id] = desejados > 0;
     }
 }
 
@@ -131,8 +150,9 @@ Carregador* Transporte::carregador_mais_proximo(const Cidade& cidade, Celula alv
 }
 
 void Transporte::atribuir(Cidade& cidade, Carregador& c, IdEdificio origem, IdEdificio destino, IdItem item) {
-    cidade.reservar_saida(origem, item);
-    cidade.reservar_chegada(destino, item);
+    c.quantidade = std::min({ CAPACIDADE, cidade.disponivel(origem, item), cidade.espaco_livre(destino, item) });
+    cidade.reservar_saida(origem, item, c.quantidade);
+    cidade.reservar_chegada(destino, item, c.quantidade);
     c.tarefa = Tarefa::Buscar;
     c.origem = origem;
     c.destino = destino;
@@ -198,12 +218,12 @@ void Transporte::cancelar(Cidade& cidade, Carregador& c) {
         case Tarefa::Nenhuma:
             return;
         case Tarefa::Buscar:
-            cidade.liberar_saida(c.origem, c.item);
-            cidade.liberar_chegada(c.destino, c.item);
+            cidade.liberar_saida(c.origem, c.item, c.quantidade);
+            cidade.liberar_chegada(c.destino, c.item, c.quantidade);
             break;
         case Tarefa::Entregar:
-            cidade.liberar_chegada(c.destino, c.item);
-            ++perdidos_;
+            cidade.liberar_chegada(c.destino, c.item, c.quantidade);
+            perdidos_ += static_cast<std::uint64_t>(c.quantidade);
             break;
     }
     c.carregando = false;
@@ -211,15 +231,15 @@ void Transporte::cancelar(Cidade& cidade, Carregador& c) {
 }
 
 void Transporte::redirecionar(Cidade& cidade, Carregador& c) {
-    cidade.liberar_chegada(c.destino, c.item);
+    cidade.liberar_chegada(c.destino, c.item, c.quantidade);
     const IdEdificio deposito = deposito_mais_proximo(cidade, c.item, c.posicao);
     if (deposito == SEM_EDIFICIO || deposito == c.destino) {
-        ++perdidos_;
+        perdidos_ += static_cast<std::uint64_t>(c.quantidade);
         c.carregando = false;
         c.tarefa = Tarefa::Nenhuma;
         return;
     }
-    cidade.reservar_chegada(deposito, c.item);
+    cidade.reservar_chegada(deposito, c.item, c.quantidade);
     c.destino = deposito;
     enviar(cidade, c, cidade.porta(deposito));
     if (!c.andando()) chegou(cidade, c);
@@ -243,8 +263,8 @@ void Transporte::chegou(Cidade& cidade, Carregador& c) {
         case Tarefa::Nenhuma:
             break;
         case Tarefa::Buscar:
-            cidade.liberar_saida(c.origem, c.item);
-            if (cidade.retirar(c.origem, c.item, 1)) {
+            cidade.liberar_saida(c.origem, c.item, c.quantidade);
+            if (cidade.retirar(c.origem, c.item, c.quantidade)) {
                 c.carregando = true;
                 c.tarefa = Tarefa::Entregar;
                 if (!cidade.edificio(c.destino).ativo || !enviar(cidade, c, cidade.porta(c.destino))) {
@@ -253,19 +273,19 @@ void Transporte::chegou(Cidade& cidade, Carregador& c) {
                     chegou(cidade, c);
                 }
             } else {
-                cidade.liberar_chegada(c.destino, c.item);
+                cidade.liberar_chegada(c.destino, c.item, c.quantidade);
                 c.tarefa = Tarefa::Nenhuma;
             }
             break;
         case Tarefa::Entregar:
-            if (!cidade.adicionar(c.destino, c.item, 1)) {
+            if (!cidade.adicionar(c.destino, c.item, c.quantidade)) {
                 // Lotou por outro caminho (produção, entrega manual):
                 // procura vaga num depósito.
                 redirecionar(cidade, c);
                 break;
             }
-            cidade.liberar_chegada(c.destino, c.item);
-            ++entregas_;
+            cidade.liberar_chegada(c.destino, c.item, c.quantidade);
+            entregas_ += static_cast<std::uint64_t>(c.quantidade);
             c.carregando = false;
             c.tarefa = Tarefa::Nenhuma;
             break;
@@ -294,8 +314,8 @@ void Transporte::mover(Cidade& cidade, Carregador& c) {
     if (++c.passo == c.rota.size()) chegou(cidade, c);
 }
 
-void Transporte::passo(Cidade& cidade) {
-    criar_carregadores(cidade);
+void Transporte::passo(Cidade& cidade, const Populacao* populacao) {
+    criar_carregadores(cidade, populacao);
     if (tick_++ % PLANEJAR_A_CADA == 0) planejar(cidade);
     for (Carregador& c : carregadores_) {
         conferir_tarefa(cidade, c);

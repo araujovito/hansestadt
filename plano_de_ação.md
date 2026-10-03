@@ -10,12 +10,12 @@ um teste integrado revelar uma dependência ou um gargalo novo.
    - Nascimentos condicionados a casal, moradia e comida.
    - Crianças passam a trabalhar aos 16 anos.
 
-2. **Integrar carregadores à população**
+2. ~~**Integrar carregadores à população**~~ — concluído
    - Carregadores deixam de surgir automaticamente no armazém.
    - Transporte disputa adultos com fazendas e oficinas.
    - Mortes e demolições liberam ou removem carregadores corretamente.
 
-3. **Custos de construção**
+3. **Custos de construção** — em andamento
    - Declarar custos de materiais no TOML.
    - Validar e consumir recursos ao construir.
    - Mostrar custos e faltas na interface.

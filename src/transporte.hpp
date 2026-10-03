@@ -6,6 +6,8 @@
 #include "cidade.hpp"
 #include "rotas.hpp"
 
+class Populacao;
+
 enum class Tarefa : std::uint8_t {
     Nenhuma,  // livre: parado em casa ou voltando para lá
     Buscar,   // indo à origem pegar um item
@@ -27,6 +29,7 @@ struct Carregador {
     IdEdificio origem = SEM_EDIFICIO;
     IdEdificio destino = SEM_EDIFICIO;
     IdItem item = 0;
+    int quantidade = 1;
     bool carregando = false;
 
     bool andando() const { return passo < rota.size(); }
@@ -47,13 +50,14 @@ struct Carregador {
 class Transporte {
 public:
     static constexpr int TICKS_POR_CELULA = 1;
+    static constexpr int CAPACIDADE = 8;
     // Planejar a cada tick gastaria buscas à toa: estoques mudam devagar.
     static constexpr int PLANEJAR_A_CADA = 10;
 
     // Um tick do transporte: cria os carregadores de depósitos novos,
     // distribui pedidos, muda a casa de quem perdeu o depósito e move todo
     // mundo.
-    void passo(Cidade& cidade);
+    void passo(Cidade& cidade, const Populacao* populacao = nullptr);
 
     const std::vector<Carregador>& carregadores() const { return carregadores_; }
     CacheDeRotas& rotas() { return rotas_; }
@@ -75,7 +79,7 @@ private:
     Carregador* carregador_mais_proximo(const Cidade& cidade, Celula alvo);
     void atribuir(Cidade& cidade, Carregador& c, IdEdificio origem, IdEdificio destino, IdItem item);
 
-    void criar_carregadores(const Cidade& cidade);
+    void criar_carregadores(Cidade& cidade, const Populacao* populacao);
     void mudar_de_casa(const Cidade& cidade, Carregador& c);
     // Põe o carregador a caminho de `alvo`. Falso se não há rota.
     bool enviar(const Cidade& cidade, Carregador& c, Celula alvo);

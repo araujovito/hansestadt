@@ -26,7 +26,7 @@ public:
     explicit Populacao(int quantidade_inicial = 6);
 
     void alojar(Cidade& cidade);
-    void empregar(const Cidade& cidade);
+    void empregar(const Cidade& cidade, bool incluir_carregadores = false);
     void consumir_comida(Cidade& cidade);
     void avancar_dia(Cidade& cidade, Data data);
 

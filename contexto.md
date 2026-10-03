@@ -127,7 +127,6 @@ as de implementação, que o README não explica.
 
 ## Problemas conhecidos e limitações
 
-- **Os 12 carregadores do armazém surgem do nada**, fora da população.
 - **Os 6 moradores iniciais ainda não nascem nem envelhecem**; nesta etapa
   apenas procuram vagas nas casas.
 - **Faixa de floresta na borda esquerda do mapa** é coincidência da semente
@@ -166,9 +165,6 @@ as de implementação, que o README não explica.
 
 ## Em aberto
 
-- **De onde vêm os carregadores?** Com a vila começando em 3 casais, faz
-  sentido saírem da população, mas aí quase todos seriam carregadores no
-  início. Decidir antes de implementar os moradores.
 - Formato dos eventos históricos: TOML ou Lua (sol2 está sem versão nova
   desde 2022).
 - Quando trocar a arte provisória pelos sprites da Kenney.
@@ -193,7 +189,7 @@ agora, estamentos depois):
    certa e passa fome sem a fazenda.~~ Concluído.
 
 **Primeiro marco concluído.** Salvar/carregar também está pronto. Próxima
-ordem: carregadores vindos da população, custos de construção, eventos
+ordem: custos de construção, eventos
 históricos, evolução de fase, arte,
 estamentos e mapa histórico.
 
@@ -214,6 +210,10 @@ estamentos e mapa histórico.
 
 ### 2026-10-03
 
+- **Carregadores na população**: a vaga do armazém ocupa um adulto e disputa
+  mão de obra com a produção. Um carregador leva até 8 unidades por viagem;
+  morte ou perda do emprego remove o agente e libera reservas. O salvamento
+  passou para a versão 3.
 - **Crescimento populacional**: moradores têm idade e sexo, tornam-se aptos
   ao trabalho aos 16 anos e casais alojados com comida e vaga têm uma criança
   no primeiro dia do ano. O salvamento passou para a versão 2.
@@ -246,8 +246,8 @@ estamentos e mapa histórico.
   moradia, emprego, mortes, comida total e autonomia; a cor avisa abaixo de
   90 e 30 dias. 90 testes.
 - **Balanceamento agregado**: `make balance` lê os TOMLs, simula a economia
-  diária e gera CSV e SVG mensais. O cenário-base de três anos produz 6.804
-  porções para 6.222 consumidas, sem falta; padaria, pesca, pocilga, estoques
+  diária e gera CSV e SVG mensais. O cenário-base do primeiro ano produz
+  1.864 porções para 1.836 consumidas, sem falta; padaria, pesca, estoques
   e provisões iniciais foram ajustados a partir do resultado. A confirmação
   com distâncias e transporte fica para o teste integrado.
 - **Fundação escolhida pelo jogador**: o tempo aguarda o posicionamento do

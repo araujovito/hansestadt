@@ -1,8 +1,10 @@
+#include <array>
 #include <cstdio>
 #include <string>
 
 #include "raylib.h"
 
+#include "alertas.hpp"
 #include "calendario.hpp"
 #include "camera.hpp"
 #include "cidade.hpp"
@@ -156,6 +158,10 @@ int main() {
     std::string aviso;
     int aviso_quadros = 0;
     MenuDePausa menu;
+    std::vector<Alerta> alertas;
+    // Por tipo de alerta, qual edifício da lista o próximo clique mostra:
+    // cliques seguidos percorrem os edifícios um a um.
+    std::array<std::size_t, 6> proximo_do_alerta{};
     const std::string& arquivo_rapido = vagas_de_partida().front().arquivo;
     bool sair = false;
 
@@ -209,13 +215,28 @@ int main() {
                 aviso_quadros = 180;
             }
             ler_atalhos(ferramenta);
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                const int i = alerta_sob_mouse(alertas);
+                if (i >= 0 && !alertas[static_cast<std::size_t>(i)].edificios.empty()) {
+                    const Alerta& a = alertas[static_cast<std::size_t>(i)];
+                    std::size_t& proximo = proximo_do_alerta[static_cast<std::size_t>(a.tipo)];
+                    const IdEdificio id = a.edificios[proximo++ % a.edificios.size()];
+                    const Edificio& e = cidade.edificio(id);
+                    const DefinicaoEdificio& def = cidade.definicao(id);
+                    camera.centralizar({ (static_cast<float>(e.origem.x) + def.largura_total() / 2.0f) * TAMANHO_CELULA,
+                                         (static_cast<float>(e.origem.y) + def.altura_total() / 2.0f) * TAMANHO_CELULA });
+                    ferramenta.ativa = Ferramenta::Nenhuma;
+                    ferramenta.selecionado = id;
+                }
+            }
             const bool painel_aberto = ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo;
             // Clique sobre a barra, o painel ou o botão do menu não pode
             // atravessar para o mapa.
             mouse_na_barra = atualizar_barra(ferramenta) ||
                              (painel_aberto && CheckCollisionPointRec(GetMousePosition(),
                                                                       area_do_painel_edificio())) ||
-                             CheckCollisionPointRec(GetMousePosition(), area_do_botao_menu());
+                             CheckCollisionPointRec(GetMousePosition(), area_do_botao_menu()) ||
+                             mouse_sobre_alertas(alertas);
             camera.atualizar(GetFrameTime());
             sob_cursor = celula_em(camera.mouse_no_mundo());
             if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
@@ -226,6 +247,9 @@ int main() {
                 for (int i = 0; i < passos; ++i) sim.passo();
             }
         }
+        // Antes da fundação não há vila para ter problema.
+        if (fundacao.concluida()) alertas = levantar_alertas(sim);
+        else alertas.clear();
 
         BeginDrawing();
         ClearBackground(Color{ 20, 26, 34, 255 });
@@ -245,6 +269,7 @@ int main() {
         if (aviso_quadros > 0) { dica = aviso; --aviso_quadros; }
         desenhar_painel(sim, relogio, mapa, sob_cursor, dica);
         desenhar_botao_menu();
+        desenhar_alertas(alertas);
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
             desenhar_painel_edificio(cidade, sim.populacao, *ferramenta.selecionado, sim.data.mes,

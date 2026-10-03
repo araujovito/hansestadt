@@ -13,6 +13,10 @@ public:
     // arrastando (pan).
     void atualizar(float dt);
 
+    // Põe o ponto do mundo no centro da tela, respeitando a borda do mapa.
+    // Usado pelos alertas para levar o jogador até um edifício.
+    void centralizar(Vector2 ponto_mundo);
+
     const Camera2D& camera2d() const { return camera_; }
     Vector2 mouse_no_mundo() const;
     // Retângulo do mundo visível na tela, usado para desenhar só o necessário.

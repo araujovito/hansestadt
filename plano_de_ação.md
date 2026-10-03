@@ -40,7 +40,8 @@ do README e do contexto e um ou mais commits pequenos.
    - Outros eventos de chuva e clima ainda precisam ser escolhidos/modelados.
    - Começar em TOML para datas e modificadores simples.
    - Só introduzir Lua se um evento real exigir lógica que o TOML não expresse.
-   - Registrar acontecimentos e seus efeitos para o jogador.
+   - ~~Registrar acontecimentos e seus efeitos para o jogador~~ — concluído
+     na interface: aba História do relatório e aviso quando um evento começa.
 
 5. **Evolução das fases**
    - Implementado na `codex/simulacao`: os cinco anos fixos e a condição de
@@ -61,8 +62,9 @@ do README e do contexto e um ou mais commits pequenos.
 6. **Edifícios institucionais**
    - Primeiro corte implementado: igreja, governo, mercado e porto são
      únicos; níveis, disponibilidade por fase e custos ficam no TOML.
-   - A UI provisória usa U para evoluir a instituição selecionada; painel com
-     nível e custo explicados permanece na tarefa de interface.
+   - ~~Painel com nível e custo~~ — concluído na interface: botão de
+     melhoria no painel da instituição (U ficou como atalho) e aba Fase no
+     relatório.
 
 7. **Completar as cadeias econômicas**
    - Implementado primeiro corte dos ramos: cevada → malte → cerveja;
@@ -121,9 +123,13 @@ do README e do contexto e um ou mais commits pequenos.
    - ~~Painel das instituições~~ — concluído: o painel da instituição mostra
      nível, materiais da próxima melhoria e botão de melhorar (U vira atalho);
      a aba Fase do relatório lista o que falta para a próxima fase.
-   - Explicar por que uma construção, produção ou entrega está bloqueada:
-     os alertas e o painel do edifício já explicam a produção; faltam
-     construção e entrega.
+   - Explicar por que uma construção, produção ou entrega está bloqueada —
+     **próximo bloco do Claude** (detalhes na divisão de trabalho): os
+     alertas e o painel já explicam a produção; faltam construção (qual
+     material falta e quanto a vila tem) e entrega (edifício com estrada na
+     porta, mas sem ligação pela estrada com um armazém).
+   - Acompanhar a simulação nova: despensa da igreja no painel da
+     instituição e mortes por evento separadas das mortes por fome.
 
 10. **Arte e áudio**
     - Em andamento na `claude/interface`: o mundo já é desenhado em pixel art
@@ -166,6 +172,8 @@ do README e do contexto e um ou mais commits pequenos.
 - Regras operacionais de carregadores e trilhas listadas no item 7a.
 - Detalhes das melhorias de tecnologia e da comida dos sem-teto (item 7b).
 - Escopo exato dos estamentos sociais após a economia básica estar completa.
+- Se a aba História deve anunciar eventos antes de começarem (hoje só mostra
+  os já iniciados, escolha provisória registrada no contexto.md).
 - Formato definitivo dos eventos depois do primeiro conjunto em TOML.
 
 ## Divisão de trabalho em paralelo
@@ -193,37 +201,63 @@ compartilhados e alterações simultâneas poderiam se misturar.
 
 ### Codex — simulação e regras do jogo
 
-- Implementar o modelo de eventos históricos e climáticos em TOML, incluindo
-  efeitos na simulação e testes de regras.
-- Depois, implementar progressão de fases, requisitos e edifícios
-  institucionais.
-- Completar cadeias econômicas e ajustar custos, trabalho e transporte.
-- Atualizar testes, README e contexto para cada bloco.
+Arquivos: tudo o que é regra (`src/simulacao.*`, `populacao.*`,
+`producao.*`, `transporte.*`, `cidade.*`, `campanha.*`, `eventos.*`,
+`conteudo.*`, `salvamento.*`), `dados/*.toml` e `ferramentas/balanceamento`.
+
+Feito: eventos em TOML com mortalidade (item 4), fases por ano e
+instituições (itens 5 e 6), primeiro corte das cadeias (item 7), comida de
+crianças e sem-teto (parte do 7b, `de33955`).
+
+**Próximo bloco do Codex** (atualizado em 2026-10-03; o Vitor confirma ou
+troca): as frentes abaixo não dependem de decisão nova; as outras esperam
+o Vitor.
+- Sem decisão pendente, em ordem sugerida:
+  1. Item 7: fechar a cadeia de argila, combustível e tijolo e rodar o
+     rebalanceamento integrado de mão de obra, transporte e custos, com
+     `make balance` e o teste do inverno.
+  2. Item 13: teste longo sem janela (1150–1370) para medir desempenho e
+     conferir que nada quebra ao longo da campanha.
+- Esperando o Vitor:
+  - 7b: melhorias de tecnologia (por edifício ou por tipo, níveis, ganho,
+    custo, quais edifícios) e quem come primeiro quando falta comida.
+  - 7a: as seis regras de carregadores e trilhas.
+  - 4: efeitos demográficos de longo prazo (fecundidade, recuperação).
+- Ao terminar cada parte: avisar no recado qual API nova a interface pode
+  mostrar (como foi com `mortos_por_eventos()`).
 
 ### Claude — interface, apresentação e conteúdo visual
 
-- Implementar menus de pausa e telas de salvar/carregar usando as funções
-  existentes de salvamento.
-- Melhorar alertas, histórico visível de acontecimentos e painéis de
-  emprego, fome, produção e logística.
-- Integrar sprites e animações, avaliando primeiro os recursos Kenney CC0;
-  acrescentar áudio quando o fluxo visual estiver estável.
-- Trabalhar em `src/main.cpp`, `src/painel.*`, `src/desenho.*` e novos
-  arquivos de interface/recursos. Combinar previamente qualquer mudança em
-  cabeçalhos centrais da simulação.
-- Para os painéis institucionais, a API da simulação expõe
-  `sim.fase`, `cidade.edificio(id).nivel`,
-  `nivel_maximo_disponivel(cidade.definicao(id), sim.fase)`,
-  `cidade.validar_melhoria(id, sim.fase)` e
-  `cidade.melhorar_edificio(id, sim.fase)`. A tecla U é apenas um acesso
-  provisório enquanto o painel não oferece o botão de melhoria.
+Arquivos: `src/main.cpp`, `src/painel.*`, `src/menu.*`, `src/relatorio*`,
+`src/alertas.*`, `src/ferramentas.*`, `src/historico.*`, `src/melhorias.*`,
+`src/arte.*`, `src/pedacos.*`, `src/desenho.*`, `src/assinatura_desenho.*`
+e `ferramentas/gerar_pecas.py`. A interface só lê a simulação; qualquer
+mudança em cabeçalho de regra é combinada antes pelo recado.
 
-**Próximo bloco do Claude** (registrado em 2026-10-03, passo 1 do protocolo):
-histórico de acontecimentos e painel das instituições, do item 9.
+Feito: menu e partidas, alertas clicáveis, relatório (emprego, comida,
+produção, transporte, fase e história), painel das instituições com botão
+de melhoria, visual em pixel art.
+
+**Próximo bloco do Claude** (registrado em 2026-10-03, passo 1 do
+protocolo): explicar bloqueios de construção e entrega, e acompanhar a
+simulação nova (item 9).
 - Ramo: `claude/interface`, worktree `hansestadt-claude`.
-- Arquivos: `src/main.cpp`, `src/painel.*`, um arquivo novo para o histórico
-  (lógica sem raylib, com testes) e a tela dele. Só lê a simulação, pelas
-  APIs já listadas acima; nenhuma mudança em cabeçalhos da simulação.
+- Construção: a dica da ferramenta diz qual material falta e quanto a vila
+  tem ("faltam 3 tora: tem 5 de 8"), e por que uma instituição não pode ser
+  construída de novo.
+- Entrega: alerta novo para edifício com estrada na porta mas sem ligação
+  pela estrada com nenhum armazém, calculado com `DistanciasPelaEstrada`
+  (já existe em `rotas.hpp`) e só refeito quando as estradas mudam.
+- Painel da instituição volta a mostrar o estoque (a igreja agora guarda
+  comida para os sem-teto).
+- Relatório e barra de cima: mortes por evento (`mortos_por_eventos()`)
+  separadas das mortes por fome.
+- Arquivos: `src/ferramentas.cpp`, `src/alertas.*`, `src/painel.cpp`,
+  `src/relatorio*`, `src/main.cpp`. Nenhuma mudança em cabeçalho da
+  simulação. `alertas.cpp` foi tocado pelo Codex em `de33955` (dias de
+  comida); este bloco parte dessa versão.
+- Depois deste: animações (água, fumaça, roda d'água, caminhada) e prévia
+  de construção no estilo novo, do item 10.
 
 ### Vitor — direção e integração
 
@@ -262,3 +296,7 @@ histórico de acontecimentos e painel das instituições, do item 9.
 - Menu de pausa com vagas de partida, alertas clicáveis e relatório.
 - Visual em pixel art no jogo, com o cenário guardado em pedaços.
 - Primeira integração dos dois ramos no `main` (032695e).
+- Crianças comem meia porção; sem-teto comem no armazém ou na igreja
+  (`de33955`, parte do item 7b).
+- Histórico de acontecimentos e painel das instituições na interface
+  (`09b7b1e`..`06c73df`, ainda no ramo `claude/interface`).

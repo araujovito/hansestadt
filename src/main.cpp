@@ -67,11 +67,17 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     escrever(TextFormat("mortos %d", sim.populacao.mortos_de_fome()), LIGHTGRAY);
 
     const int comida = sim.cidade.estoque_total(TipoItem::Comida);
-    const int dias = sim.populacao.total() > 0 ? comida / sim.populacao.total() : 0;
-    const Color cor_comida = dias < 30 ? Color{ 240, 110, 90, 255 }
-                           : dias < 90 ? GOLD
-                                      : LIGHTGRAY;
-    escrever(TextFormat("comida %d (%d dias)", comida, dias), cor_comida);
+    // Sem moradores não há reserva em dias para medir: "0 dias" em vermelho
+    // com o armazém cheio dava a impressão de fome.
+    if (sim.populacao.total() == 0) {
+        escrever(TextFormat("comida %d", comida), LIGHTGRAY);
+    } else {
+        const int dias = comida / sim.populacao.total();
+        const Color cor_comida = dias < 30 ? Color{ 240, 110, 90, 255 }
+                               : dias < 90 ? GOLD
+                                          : LIGHTGRAY;
+        escrever(TextFormat("comida %d (%d dias)", comida, dias), cor_comida);
+    }
     escrever(TextFormat("carregadores %d/%d", ocupados, static_cast<int>(sim.transporte.carregadores().size())),
              LIGHTGRAY);
     const char* fps = TextFormat("%d fps", GetFPS());

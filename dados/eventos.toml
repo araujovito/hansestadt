@@ -20,3 +20,11 @@ inicio = [1347, 1, 1]
 fim = [1351, 12, 31]
 multiplicador_geral = 0.65
 mortalidade_anual = 0.10
+
+[[evento]]
+id = "inverno_baltico_1322"
+nome = "Inverno rigoroso do Báltico"
+descricao = "O gelo dificulta a navegação e reduz a pesca e a moagem d'água."
+inicio = [1322, 11, 30]
+fim = [1323, 3, 6]
+producao = { moinho = 0.6, pescador = 0.35, pescador_arenque = 0.35 }

@@ -153,6 +153,13 @@ sistema normal de fome quando falta comida. O contador de mortes por evento
 é persistido em saves versão 5; versões 3 e 4 continuam carregáveis. A
 interface pode ler o histórico pelas APIs de eventos.
 
+O catálogo também inclui o inverno excepcional de 1322–1323, que reduz pesca
+e moagem entre 30 de novembro e 6 de março. O intervalo segue um relato
+medieval sobre gelo no Báltico e rotas de mercadores; reconstruções do gelo
+histórico destacam a escassez e a incerteza das fontes para o século XIV
+([relato e estudo](https://link.springer.com/article/10.1007/s00704-015-1524-9),
+[reconstrução do gelo no Báltico](https://rmets.onlinelibrary.wiley.com/doi/10.1002/joc.2337)).
+
 O percentual da peste é um parâmetro agregado de jogo, não uma previsão para
 cada vila: estudos estimam mortalidade de 30–50% na Europa durante a pandemia
 ([estudo bioarqueológico de Londres](https://pmc.ncbi.nlm.nih.gov/articles/PMC3094018/)).

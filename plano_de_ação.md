@@ -28,15 +28,16 @@ do README e do contexto e um ou mais commits pequenos.
 ## Próximos blocos, em ordem
 
 4. **Eventos históricos e climáticos**
-   - Primeiro corte em TOML implementado: Grande Fome e Peste Negra, datas
-     julianas inclusivas, modificadores de produção e mortalidade determinística
-     da peste; a Grande Fome causa morte por falta de comida no sistema atual.
+   - TOML implementado: Grande Fome, Peste Negra e inverno rigoroso de
+     1322–1323; datas julianas inclusivas, modificadores de produção e
+     mortalidade determinística da peste. A Grande Fome pode causar morte
+     por falta de comida no sistema atual.
    - Ainda falta modelar efeitos demográficos de longo prazo, como fecundidade
      e recuperação após as crises.
    - API para a interface: `sim.eventos.ativos(sim.data)` e
      `sim.eventos.ocorridos(sim.data)`; a lista inclui definições com nome,
      descrição e intervalo.
-   - Chuvas e invernos rigorosos ainda precisam de eventos próprios.
+   - Outros eventos de chuva e clima ainda precisam ser escolhidos/modelados.
    - Começar em TOML para datas e modificadores simples.
    - Só introduzir Lua se um evento real exigir lógica que o TOML não expresse.
    - Registrar acontecimentos e seus efeitos para o jogador.

@@ -206,6 +206,10 @@ documentos não voltarem a divergir.
   longo de 1347–1351); a Grande Fome continua reduzindo produção e deixa a
   fome causar mortes pelo mecanismo normal. O contador de mortes por eventos
   é persistido na versão 5; saves v3/v4 migram com zero nesse contador.
+- **Inverno de 1322–1323**: acrescentado um evento com redução temporária
+  da pesca e da moagem d'água, usando o intervalo de 30/11/1322 a 06/03/1323
+  descrito para o congelamento do Báltico. O registro histórico é raro e o
+  multiplicador é uma abstração de jogo, não uma medida climática observada.
 - **Regras novas de mobilidade decididas pelo Vitor**: cada edifício terá
   cobertura de carregador separada da mão de obra de produção, compartilhada
   quando a população for insuficiente; trajetos casa–trabalho formarão trilhas

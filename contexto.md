@@ -136,27 +136,33 @@ as de implementação, que o README não explica.
 - **Um ciclo da fazenda começado no fim de agosto fica pausado até o julho
   seguinte** (fator 0 de setembro a junho). Aceitável por ora.
 
-- **A simulação não escala além de uma vila pequena.** Tempo médio de um
-  passo em `b4435ee` (um quadro a 60 fps tem 16,7 ms; na velocidade 4× entra
-  cerca de 1,3 passo por quadro):
+- **A simulação ainda engasga em cidades grandes.** Tempo de um passo antes
+  (`b4435ee`) e depois das correções de desempenho de 2026-10-03 (um quadro
+  a 60 fps tem 16,7 ms; na velocidade 4× entra cerca de 1,3 passo por
+  quadro). Mesmo cenário, mesma assinatura do estado final nas duas versões:
 
-  | Blocos | Edifícios | Moradores | Média | p99 | Pior passo |
-  |---|---|---|---|---|---|
-  | 1 | 13 | 20 | 0,004 ms | 0,009 ms | 0,3 ms |
-  | 4 | 52 | 80 | 0,09 ms | 0,2 ms | 1,8 ms |
-  | 20 | 260 | 400 | 9,7 ms | 12,8 ms | 16 ms |
+  | Blocos | Edifícios | Moradores | Média antes | Média depois | p99 antes | p99 depois |
+  |---|---|---|---|---|---|---|
+  | 1 | 13 | 20 | 0,004 ms | 0,002 ms | 0,009 ms | 0,004 ms |
+  | 4 | 52 | 80 | 0,09 ms | 0,005 ms | 0,2 ms | 0,06 ms |
+  | 20 | 260 | 400 | 9,7 ms | 0,06 ms | 12,8 ms | 0,7 ms |
+  | 40 | 520 | 800 | 79 ms | 0,21 ms | 112 ms | 2,4 ms |
+  | 160 (mapa 256×256) | 2.080 | 3.200 | não medido* | 4,4 ms | | 42 ms |
 
-  Com 20 blocos a simulação sozinha já ocupa o quadro inteiro. O gprof aponta
-  duas causas:
-  - `Populacao::empregar` chama `trabalhadores_em`, que percorre a população
-    inteira, a cada morador examinado: edifícios × moradores² por tick. A
-    produção também chama `trabalhadores_em` para cada edifício a cada tick.
-  - `Transporte::carregador_mais_proximo` roda um A* da posição de cada
-    carregador livre até a origem do pedido. Carregadores voltando para casa
-    estão cada um numa célula, então o cache de rotas quase não acerta:
-    pedidos × carregadores × A*. Numa medição anterior (`3c06b61`, mapa
-    256×256, 160 blocos) foram 5,2 milhões de A* num ano e passos de até 4 s,
-    agravados pelo cache que se apaga inteiro ao chegar a 4.096 rotas.
+  \* Na base, um ano com 40 blocos levou 9,6 minutos para simular; 160
+  blocos levariam horas.
+
+  Até 40 blocos (o mapa 128×128 cheio) sobra folga. Com 160 a média cabe no
+  quadro, mas um passo em cada cem passa de 40 ms e engasga. O gprof nessa
+  escala aponta:
+  - `Transporte::origem_mais_proxima` percorre todos os edifícios para cada
+    vaga pedida: 3 bilhões de consultas a `disponivel` num ano, 64% do tempo.
+    Um índice "quem oferece o item X" resolveria.
+  - `Populacao::alojar` conta os moradores de cada casa percorrendo a
+    população inteira para cada morador sem teto (13%), o mesmo padrão já
+    corrigido em `trabalhadores_em`.
+  - O pior passo de todos é o primeiro (5,7 s com 160 blocos), porque o
+    cenário constrói tudo de uma vez; numa partida as obras vêm aos poucos.
 
   O desenho não é gargalo: 40 blocos no zoom mínimo levam 6,8 ms por quadro
   (Radeon 680M).
@@ -194,8 +200,9 @@ ordem: crescimento populacional, carregadores vindos da
 população, eventos históricos, evolução de fase, custos de construção, arte,
 estamentos e mapa histórico.
 
-Em paralelo: tirar a simulação do crescimento quadrático (ver Problemas
-conhecidos), medindo de novo com o mesmo cenário depois de cada mudança.
+Desempenho, quando a cidade passar de 40 blocos: índice de quem oferece
+cada item em `origem_mais_proxima` e contagem guardada de moradores por casa
+em `alojar` (ver Problemas conhecidos), medindo com o mesmo cenário.
 
 ## Como trabalhamos
 
@@ -214,6 +221,11 @@ conhecidos), medindo de novo com o mesmo cenário depois de cada mudança.
 
 ### 2026-10-03
 
+- **Correções de desempenho** (`fdb83e5`..`054f8c5`): empregos distribuídos
+  numa passada só, contagem de trabalhadores guardada por edifício e busca em
+  largura (`DistanciasPelaEstrada`) no lugar de um A* por candidato no
+  planejamento do transporte. Com 40 blocos o passo médio caiu de 79 ms
+  para 0,21 ms, com o mesmo estado final. 100 testes.
 - **Medição de desempenho**: vilas sintéticas de 1 a 160 blocos, um ano de
   jogo, gprof. O tempo do passo cresce bem mais rápido que a cidade (9,7 ms
   com 20 blocos); as causas são a contagem de trabalhadores e o A* por

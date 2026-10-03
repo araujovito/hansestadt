@@ -136,33 +136,30 @@ as de implementação, que o README não explica.
 - **Um ciclo da fazenda começado no fim de agosto fica pausado até o julho
   seguinte** (fator 0 de setembro a junho). Aceitável por ora.
 
-- **A simulação ainda engasga em cidades grandes.** Tempo de um passo antes
-  (`b4435ee`) e depois das correções de desempenho de 2026-10-03 (um quadro
-  a 60 fps tem 16,7 ms; na velocidade 4× entra cerca de 1,3 passo por
-  quadro). Mesmo cenário, mesma assinatura do estado final nas duas versões:
+- **Desempenho da simulação: folga até o mapa 128×128 cheio.** Tempo médio
+  de um passo (um quadro a 60 fps tem 16,7 ms; na velocidade 4× entra cerca
+  de 1,3 passo por quadro). Mesmo cenário e mesma assinatura do estado final
+  em todas as versões:
 
-  | Blocos | Edifícios | Moradores | Média antes | Média depois | p99 antes | p99 depois |
+  | Blocos | Edifícios | Moradores | `b4435ee` | `86e01ae` | agora | p99 agora |
   |---|---|---|---|---|---|---|
-  | 1 | 13 | 20 | 0,004 ms | 0,002 ms | 0,009 ms | 0,004 ms |
-  | 4 | 52 | 80 | 0,09 ms | 0,005 ms | 0,2 ms | 0,06 ms |
-  | 20 | 260 | 400 | 9,7 ms | 0,06 ms | 12,8 ms | 0,7 ms |
-  | 40 | 520 | 800 | 79 ms | 0,21 ms | 112 ms | 2,4 ms |
-  | 160 (mapa 256×256) | 2.080 | 3.200 | não medido* | 4,4 ms | | 42 ms |
+  | 1 | 13 | 20 | 0,004 ms | 0,002 ms | 0,002 ms | 0,006 ms |
+  | 4 | 52 | 80 | 0,09 ms | 0,006 ms | 0,006 ms | 0,07 ms |
+  | 20 | 260 | 400 | 9,7 ms | 0,06 ms | 0,024 ms | 0,3 ms |
+  | 40 | 520 | 800 | 79 ms | 0,21 ms | 0,08 ms | 1,0 ms |
+  | 160 (mapa 256×256) | 2.080 | 3.200 | não medido* | 4,1 ms | 1,6 ms | 18 ms |
 
   \* Na base, um ano com 40 blocos levou 9,6 minutos para simular; 160
   blocos levariam horas.
 
-  Até 40 blocos (o mapa 128×128 cheio) sobra folga. Com 160 a média cabe no
-  quadro, mas um passo em cada cem passa de 40 ms e engasga. O gprof nessa
-  escala aponta:
-  - `Transporte::origem_mais_proxima` percorre todos os edifícios para cada
-    vaga pedida: 3 bilhões de consultas a `disponivel` num ano, 64% do tempo.
-    Um índice "quem oferece o item X" resolveria.
-  - `Populacao::alojar` conta os moradores de cada casa percorrendo a
-    população inteira para cada morador sem teto (13%), o mesmo padrão já
-    corrigido em `trabalhadores_em`.
-  - O pior passo de todos é o primeiro (5,7 s com 160 blocos), porque o
-    cenário constrói tudo de uma vez; numa partida as obras vêm aos poucos.
+  Com 160 blocos um passo em cada cem ainda leva cerca de um quadro inteiro
+  (pior caso 73 ms, nos ticks em que planejamento e virada do dia
+  coincidem). O tempo está dividido, sem um ponto dominante: consultas de
+  estoque em `origem_mais_proxima` (22%; todo depósito entra na lista de
+  todo item), buscas em largura (18%) e A* para os caminhos (18%). Saídas
+  possíveis, se o mapa crescer além de 128×128: indexar só quem tem o item
+  disponível no momento, guardar as distâncias por porta, ou planejar uma
+  fatia dos pedidos por tick.
 
   O desenho não é gargalo: 40 blocos no zoom mínimo levam 6,8 ms por quadro
   (Radeon 680M).
@@ -200,10 +197,6 @@ ordem: crescimento populacional, carregadores vindos da
 população, eventos históricos, evolução de fase, custos de construção, arte,
 estamentos e mapa histórico.
 
-Desempenho, quando a cidade passar de 40 blocos: índice de quem oferece
-cada item em `origem_mais_proxima` e contagem guardada de moradores por casa
-em `alojar` (ver Problemas conhecidos), medindo com o mesmo cenário.
-
 ## Como trabalhamos
 
 - Commits pequenos, um assunto por commit, mensagem com o porquê; **cada
@@ -221,6 +214,11 @@ em `alojar` (ver Problemas conhecidos), medindo com o mesmo cenário.
 
 ### 2026-10-03
 
+- **Índices de busca** (`2792449`, `cd0d1bc`): `alojar` conta os moradores de
+  cada casa uma vez (o pico de 5,7 s no primeiro passo com 160 blocos vinha
+  daqui, e não do cenário construir tudo de uma vez) e o transporte mantém
+  por item a lista de quem pode cedê-lo. Com 160 blocos o passo médio caiu
+  de 4,1 ms para 1,6 ms. 102 testes.
 - **Correções de desempenho** (`fdb83e5`..`054f8c5`): empregos distribuídos
   numa passada só, contagem de trabalhadores guardada por edifício e busca em
   largura (`DistanciasPelaEstrada`) no lugar de um A* por candidato no

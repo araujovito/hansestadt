@@ -190,8 +190,8 @@ void Populacao::avancar_dia(Cidade& cidade, Data data, const Eventos* eventos) {
 
 void Populacao::consumir_comida(Cidade& cidade) {
     const Conteudo& conteudo = cidade.conteudo();
-    for (Morador& m : moradores_) {
-        if (!m.vivo) continue;
+    auto alimentar = [&](Morador& m) {
+        if (!m.vivo) return;
         // Estoques usam unidades inteiras. Uma refeição em dias alternados
         // representa exatamente a meia porção diária de uma criança.
         const bool precisa_comer = m.adulto() || m.idade_dias % 2 == 0;
@@ -225,5 +225,14 @@ void Populacao::consumir_comida(Cidade& cidade) {
             m.trabalho = SEM_EDIFICIO;
             ++mortos_de_fome_;
         }
-    }
+    };
+
+    // Em escassez, a ordem social é explícita e independente da ordem em
+    // que os moradores foram criados: crianças, adultos alojados e adultos
+    // sem casa. Dentro de cada grupo, o id do morador desempata.
+    for (Morador& m : moradores_) if (m.vivo && !m.adulto()) alimentar(m);
+    for (Morador& m : moradores_)
+        if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) alimentar(m);
+    for (Morador& m : moradores_)
+        if (m.vivo && m.adulto() && m.casa == SEM_EDIFICIO) alimentar(m);
 }

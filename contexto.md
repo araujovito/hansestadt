@@ -70,11 +70,16 @@ as de implementação, que o README não explica.
   carregadores por edifício são pessoas separadas dos trabalhadores, com
   atendimento compartilhado quando faltam adultos e cobertura crescente
   conforme há adultos disponíveis, até um por edifício.
-- **Detalhes ainda não definidos pelo Vitor**: carregadores próprios do
-  armazém, prioridade de emprego entre produção e transporte, limiares e
-  persistência da trilha, velocidades relativas, formação de trilha por
-  carregadores e passagem por floresta. Não implementar esses detalhes por
-  suposição; estão listados no plano de ação.
+- **Distribuição de mão de obra definida pelo Vitor em 2026-10-03**: o
+  armazém mantém um carregador próprio; quando faltam adultos, trabalhadores
+  de produção têm prioridade e o transporte recebe os adultos restantes,
+  compartilhando carregadores entre edifícios quando necessário.
+- **Trilhas definidas pelo Vitor em 2026-10-03**: funcionários e carregadores
+  registram uso; 30 passagens criam trilha e 200 consolidam estrada. Depois
+  de criada, a trilha perde 1 ponto a cada 7 dias sem tráfego e desaparece ao
+  chegar a zero; estradas não desaparecem. Velocidades
+  relativas: campo 50%, trilha 75%, estrada 100% e floresta 35%. Pessoas
+  atravessam floresta e podem abrir trilhas nela.
 - **Cache de rotas invalidado por inteiro** a cada estrada construída ou
   demolida. Descobrir quais rotas foram afetadas seria mais econômico, mas
   obras são raras perto do número de viagens e uma estrada nova pode criar
@@ -151,6 +156,10 @@ as de implementação, que o README não explica.
   cidade chega à fase Cidade), não a época em que foram construídas: o jogo
   não guarda quando cada casa foi erguida. Decisão de Claude ao portar o
   visual; pode ser revista.
+- **Editor visual aprovado pelo Vitor em 2026-10-03**: será aberto pelo menu
+  principal e permitirá pintar terreno e recursos, posicionar construções e
+  estradas, editar propriedades e salvar mapas/cenários próprios. Recarga de
+  dados e arte sem recompilar fica para depois do primeiro corte.
 
 ### Conteúdo
 - **TOML lido com toml++**: um cabeçalho só, TOML 1.0 completo, erros com
@@ -159,6 +168,12 @@ as de implementação, que o README não explica.
   ignorada em silêncio.
 - **Testes usam conteúdo próprio**, escrito no teste, para não quebrarem com
   mudanças de balanceamento.
+- **Estamentos entram pelos edifícios**, decisão do Vitor em 2026-10-03:
+  camponeses, artesãos, mercadores e clero surgem conforme a cidade constrói
+  os edifícios associados, sem uma data fixa nem liberação conjunta. Como em
+  *Knights and Merchants*, a função nasce do edifício e o morador assume o
+  estamento ao ocupar o trabalho; não existe promoção manual separada. Sem
+  emprego especializado, permanece no grupo básico. Falta o mapeamento exato.
 
 ### Convenções de código
 - Identificadores em português, como nos outros projetos do portfólio.
@@ -196,8 +211,8 @@ as de implementação, que o README não explica.
   a põe em déficit. O gargalo é a fazenda (colhe só em julho e agosto: 31
   sacos de centeio, 868 pães por ano; a padaria daria conta de 3.400). Medido
   em 2026-10-03, igual no ramo do Codex e na integração. O Vitor decidiu
-  medidas (ver plano, bloco 7b); crianças agora consomem meia porção, mas as
-  melhorias de produtividade ainda não foram definidas nem implementadas.
+  medidas (ver plano, bloco 7b); crianças agora consomem meia porção. As
+  melhorias de produtividade foram definidas, mas ainda não implementadas.
 - **Faixa de floresta na borda esquerda do mapa** é coincidência da semente
   1150, não defeito do ruído (média do hash por coluna conferida). Some
   quando o mapa da campanha for desenhado à mão.
@@ -263,6 +278,16 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Entrada dos estamentos definida pelo Vitor**: cada estamento é introduzido
+  pela construção de seus edifícios associados. A ocupação do trabalho muda
+  o estamento do morador, seguindo a lógica de *Knights and Merchants*. O
+  plano deixa como pendência apenas o mapeamento entre trabalhos e estamentos.
+- **Regras restantes aprovadas pelo Vitor**: melhorias globais por tipo, em
+  três níveis de cerca de 15%, liberadas por fase e com custos progressivos;
+  o primeiro corte cobre fazendas, pesca, moinho e padaria. Na escassez,
+  crianças comem primeiro, depois adultos alojados e por fim adultos sem casa.
+  O editor visual também entrou no plano oficial. As regras numéricas de
+  trilhas e movimento estão registradas na seção Construção e rotas.
 - **Aba Fase no relatório**: fase atual, a próxima e o ano em que abre, e
   cada instituição exigida com nível e o que falta (construir, ou os
   materiais da melhoria). A janela passou de 640 para 720 px de largura
@@ -288,7 +313,7 @@ documentos não voltarem a divergir.
   diretamente em edifícios marcados com `alimenta_sem_teto`; o armazém e a
   igreja têm essa função, e a igreja ganhou despensa abastecida pela logística.
   Os dias de autonomia da barra, dos alertas e do relatório usam o consumo
-  reduzido das crianças. A prioridade quando faltar comida segue em aberto.
+  reduzido das crianças.
 
 ### 2026-10-03
 

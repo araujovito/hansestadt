@@ -145,6 +145,22 @@ TESTE("população: sem-teto come no armazém ou no abrigo") {
     VERIFICAR(c.edificio(abrigo).estoque[item("pao")] == 0);
 }
 
+TESTE("população: criança come antes do adulto quando falta comida") {
+    Cidade c = cidade_para_populacao();
+    const IdEdificio abrigo = *c.construir_edificio(tipo("abrigo"), { 1, 1 });
+    Morador adulto;
+    Morador crianca;
+    crianca.idade_dias = 0;
+    // O adulto vem primeiro de propósito: a prioridade não pode depender do id.
+    Populacao p = Populacao::restaurar({ adulto, crianca }, 0, 0);
+    c.adicionar(abrigo, item("pao"), 1);
+
+    p.consumir_comida(c);
+    VERIFICAR(p.moradores()[0].dias_sem_comida == 1);
+    VERIFICAR(p.moradores()[1].dias_sem_comida == 0);
+    VERIFICAR(p.refeicoes_perdidas() == 1);
+}
+
 TESTE("população: trinta dias sem comida matam e liberam casa e trabalho") {
     Cidade c = cidade_para_populacao();
     const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });

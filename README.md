@@ -1,5 +1,11 @@
 # Hansestadt
 
+> **Projeto pausado em 3 de outubro de 2026.** O `main` tem o estado
+> integrado de tudo o que foi feito. O ramo `codex/rascunho-7a` guarda um
+> trabalho não terminado (carregadores por edifício e trilhas). Para
+> retomar, comece pelo [`plano_de_ação.md`](plano_de_ação.md) e pelos
+> Problemas conhecidos do [`contexto.md`](contexto.md).
+
 Jogo de construção de cidade (*city builder*) ambientado na região da Liga
 Hanseática, entre a fundação de uma vila na colonização do leste (~1150) e o
 auge da Hansa (~1370). Não há adversários: a dificuldade vem da economia, do

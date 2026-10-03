@@ -201,6 +201,12 @@ pele, ovelheiro produz lã e carne; na fase Cidade, tecelagem converte lã em
 tecido e curtume converte pele em couro. Rebanho, pastagem e abate são
 agregados por enquanto, sem consumo de ração ou esgotamento de pasto.
 
+Os rendimentos de carne do curral e do ovelheiro foram ajustados para não
+ficarem muito abaixo da pocilga por trabalhador; a pesca de arenque entrega
+uma quantidade de comida próxima à pesca de rio. Isso é só um primeiro
+alinhamento de produtividade: mão de obra, transporte e custos ainda precisam
+ser reavaliados com as novas regras de carregadores.
+
 Na fase Cidade, a salina fornece sal de forma abstrata. Na Hansa, o pescador
 de arenque, o tanoeiro e a salgadeira fecham a cadeia de conservação:
 arenque + sal + barril → arenque salgado, que conta como alimento. A salina

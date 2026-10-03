@@ -217,6 +217,10 @@ documentos não voltarem a divergir.
 - **Pesca e conservação**: salina abstrata, pesca de arenque, tanoeiro e
   salgadeira completam arenque + sal + barril → alimento conservado. A pesca
   ainda não distingue água doce de mar, e o sal ainda não usa recurso do mapa.
+- **Primeiro ajuste de produtividade**: rendimentos de carne do curral e do
+  ovelheiro e de arenque foram aproximados aos alimentos existentes por
+  trabalhador. Não é o rebalanceamento final: a mão de obra e o transporte
+  serão recalculados quando as regras de carregadores forem fechadas.
 
 ### 2026-10-03
 

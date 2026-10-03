@@ -73,8 +73,15 @@ TESTE("conteúdo: os arquivos reais do jogo carregam sem erros") {
                 return std::any_of(receita.saidas.begin(), receita.saidas.end(),
                     [id](const Quantidade& q) { return q.item == id; });
             };
+            const auto quantidade = [](const Receita& receita, IdItem id) {
+                for (const Quantidade& q : receita.saidas)
+                    if (q.item == id) return q.quantidade;
+                return 0;
+            };
             VERIFICAR(c.edificio(*curral).receitas[0].saidas.size() == 2);
+            VERIFICAR(quantidade(c.edificio(*curral).receitas[0], *c.buscar_item("carne")) == 12);
             VERIFICAR(produz(c.edificio(*ovelheiro).receitas[0], *c.buscar_item("la")));
+            VERIFICAR(quantidade(c.edificio(*ovelheiro).receitas[0], *c.buscar_item("carne")) == 12);
             VERIFICAR(c.edificio(*tecelagem).receitas[0].entradas[0].item == *c.buscar_item("la"));
             VERIFICAR(c.edificio(*tecelagem).receitas[0].saidas[0].item == *c.buscar_item("tecido"));
             VERIFICAR(c.edificio(*curtume).receitas[0].entradas[0].item == *c.buscar_item("pele"));
@@ -89,6 +96,7 @@ TESTE("conteúdo: os arquivos reais do jogo carregam sem erros") {
             VERIFICAR(c.edificio(*salina).receitas[0].saidas[0].item == *c.buscar_item("sal"));
             VERIFICAR(c.edificio(*tanoeiro).receitas[0].saidas[0].item == *c.buscar_item("barril"));
             VERIFICAR(c.edificio(*pescador).receitas[0].saidas[0].item == *c.buscar_item("arenque"));
+            VERIFICAR(c.edificio(*pescador).receitas[0].saidas[0].quantidade == 16);
             VERIFICAR(tem_entrada("arenque") && tem_entrada("sal") && tem_entrada("barril"));
             VERIFICAR(salga.saidas[0].item == *c.buscar_item("arenque_salgado"));
             VERIFICAR(c.itens[*c.buscar_item("arenque_salgado")].tipo == TipoItem::Comida);

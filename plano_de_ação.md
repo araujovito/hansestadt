@@ -66,7 +66,9 @@ do README e do contexto e um ou mais commits pequenos.
      gado/ovelhas → carne, pele e lã → tecido/couro; arenque + sal + barril
      → arenque salgado (alimento).
    - O combustível/argila/tijolo já tem cadeia de carvoaria/turfa → olaria.
-   - Rebalanceamento integrado ainda pendente; valores atuais são provisórios.
+   - Primeiro ajuste de produtividade: carne de gado/ovelha e arenque
+     aproximados às taxas de comida existentes por trabalhador; rebalanceamento
+     integrado de mão de obra, transporte e custos ainda pendente.
    - Cadeia completa de argila, combustível e tijolos.
    - Rebalancear mão de obra, transporte e custos após cada ramo.
 

@@ -395,8 +395,10 @@ custo = { tora = 10 }
 
 [[edificio.receita]]
 # Rebanho e pastagem são agregados nesta primeira versão.
-dias = 10
-saidas = { carne = 4, pele = 2 }
+# O rendimento de carne por trabalhador fica próximo ao da pocilga; a pele é
+# um subproduto mais lento da criação.
+dias = 4
+saidas = { carne = 12, pele = 2 }
 
 [[edificio]]
 id = "ovelheiro"
@@ -411,7 +413,7 @@ custo = { tora = 8 }
 
 [[edificio.receita]]
 dias = 8
-saidas = { la = 4, carne = 1 }
+saidas = { la = 4, carne = 12 }
 
 [[edificio]]
 id = "tecelagem"
@@ -493,7 +495,7 @@ requer = { terreno = "agua", distancia = 1 }
 
 [[edificio.receita]]
 dias = 4
-saidas = { arenque = 8 }
+saidas = { arenque = 16 }
 # Gelo e frio reduzem a pesca no inverno.
 sazonalidade = [0.3, 0.3, 0.6, 1, 1, 1, 1, 1, 1, 0.8, 0.5, 0.3]
 

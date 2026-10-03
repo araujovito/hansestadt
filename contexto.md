@@ -201,6 +201,15 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Integração local dos ramos**: `integracao/plano-de-acao` agora inclui os
+  commits atuais de `codex/simulacao` e `claude/interface` (merges
+  `ce7996b` e `fcdf3fc`). Os ramos de trabalho continuam separados; portanto,
+  a resposta é: o Codex e o Claude não estão mesclados diretamente um no
+  outro, mas seus trabalhos estão juntos nesta branch de integração. Os dois
+  merges foram automáticos, sem conflitos de texto. Build release e
+  `make balance` passaram; 137 testes passaram com ASan/UBSan e
+  `ASAN_OPTIONS=detect_leaks=0` (o LeakSanitizer falha neste ambiente). A
+  integração é local e ainda não foi enviada ao GitHub.
 - **Efeitos demográficos de eventos**: a Peste Negra agora tem mortalidade
   determinística configurável por ano (10% por ano ativo, cerca de 41% ao
   longo de 1347–1351); a Grande Fome continua reduzindo produção e deixa a

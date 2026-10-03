@@ -198,6 +198,9 @@ documentos não voltarem a divergir.
   não participa das necessidades da população ou de comércio. Saves antigos
   com menos itens ganham slots vazios no fim dos vetores, sem mudar IDs
   existentes. Teste de carga de conteúdo e migração incluídos.
+- **Pecuária e ofícios**: curral e ovelheiro abastecem carne, pele e lã;
+  tecelagem e curtume completam tecido e couro. Rebanhos/pastagem estão
+  agregados, sem ração nem esgotamento do terreno nesta etapa.
 
 ### 2026-10-03
 

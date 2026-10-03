@@ -379,3 +379,68 @@ custo = { tora = 10 }
 dias = 3
 entradas = { malte = 1 }
 saidas = { cerveja = 2 }
+
+# ---------------------------------------------------- pecuária e ofícios
+
+[[edificio]]
+id = "curral"
+nome = "curral de gado"
+fase = "mercado"
+tamanho = [3, 2]
+terreno = "campo"
+cor = "#9b7650"
+trabalhadores = 2
+estoque = 12
+custo = { tora = 10 }
+
+[[edificio.receita]]
+# Rebanho e pastagem são agregados nesta primeira versão.
+dias = 10
+saidas = { carne = 4, pele = 2 }
+
+[[edificio]]
+id = "ovelheiro"
+nome = "ovelheiro"
+fase = "mercado"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#d0c8a8"
+trabalhadores = 1
+estoque = 12
+custo = { tora = 8 }
+
+[[edificio.receita]]
+dias = 8
+saidas = { la = 4, carne = 1 }
+
+[[edificio]]
+id = "tecelagem"
+nome = "tecelagem"
+fase = "cidade"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#9c7890"
+trabalhadores = 2
+estoque = 8
+custo = { tora = 10, tijolo = 2 }
+
+[[edificio.receita]]
+dias = 4
+entradas = { la = 2 }
+saidas = { tecido = 1 }
+
+[[edificio]]
+id = "curtume"
+nome = "curtume"
+fase = "cidade"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#805c44"
+trabalhadores = 2
+estoque = 8
+custo = { tora = 10, tijolo = 2 }
+
+[[edificio.receita]]
+dias = 5
+entradas = { pele = 2 }
+saidas = { couro = 1 }

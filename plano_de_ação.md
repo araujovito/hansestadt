@@ -64,7 +64,9 @@ do README e do contexto e um ou mais commits pequenos.
 7. **Completar as cadeias econômicas**
    - Primeiro corte concluído: cevada → malte → cerveja, disponível no
      Mercado; cerveja ainda não é consumida nem vendida.
-   - Próximas fatias: gado/ovelhas, tecidos/couro e arenque/barris/salga.
+   - Segundo corte concluído: gado/ovelhas → carne, pele e lã; tecelagem e
+     curtume transformam lã em tecido e pele em couro.
+   - Próxima fatia: arenque, barris e salga.
    - Cadeia completa de argila, combustível e tijolos.
    - Rebalancear mão de obra, transporte e custos após cada ramo.
 

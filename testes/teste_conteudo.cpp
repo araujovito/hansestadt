@@ -1,4 +1,5 @@
 #include <string>
+#include <algorithm>
 
 #include "conteudo.hpp"
 #include "verificar.hpp"
@@ -49,13 +50,30 @@ TESTE("conteúdo: os arquivos reais do jogo carregam sem erros") {
         const auto fazenda = c.buscar_edificio("fazenda_cevada");
         const auto malteria = c.buscar_edificio("malteria");
         const auto cervejaria = c.buscar_edificio("cervejaria");
+        const auto curral = c.buscar_edificio("curral");
+        const auto ovelheiro = c.buscar_edificio("ovelheiro");
+        const auto tecelagem = c.buscar_edificio("tecelagem");
+        const auto curtume = c.buscar_edificio("curtume");
         VERIFICAR(fazenda && malteria && cervejaria);
+        VERIFICAR(curral && ovelheiro && tecelagem && curtume);
         if (fazenda && malteria && cervejaria) {
             VERIFICAR(c.edificio(*fazenda).receitas[0].saidas[0].item == *c.buscar_item("cevada"));
             VERIFICAR(c.edificio(*malteria).receitas[0].entradas[0].item == *c.buscar_item("cevada"));
             VERIFICAR(c.edificio(*malteria).receitas[0].saidas[0].item == *c.buscar_item("malte"));
             VERIFICAR(c.edificio(*cervejaria).receitas[0].entradas[0].item == *c.buscar_item("malte"));
             VERIFICAR(c.edificio(*cervejaria).receitas[0].saidas[0].item == *c.buscar_item("cerveja"));
+        }
+        if (curral && ovelheiro && tecelagem && curtume) {
+            const auto produz = [](const Receita& receita, IdItem id) {
+                return std::any_of(receita.saidas.begin(), receita.saidas.end(),
+                    [id](const Quantidade& q) { return q.item == id; });
+            };
+            VERIFICAR(c.edificio(*curral).receitas[0].saidas.size() == 2);
+            VERIFICAR(produz(c.edificio(*ovelheiro).receitas[0], *c.buscar_item("la")));
+            VERIFICAR(c.edificio(*tecelagem).receitas[0].entradas[0].item == *c.buscar_item("la"));
+            VERIFICAR(c.edificio(*tecelagem).receitas[0].saidas[0].item == *c.buscar_item("tecido"));
+            VERIFICAR(c.edificio(*curtume).receitas[0].entradas[0].item == *c.buscar_item("pele"));
+            VERIFICAR(c.edificio(*curtume).receitas[0].saidas[0].item == *c.buscar_item("couro"));
         }
     }
 }

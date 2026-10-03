@@ -69,3 +69,23 @@ tipo = "insumo"
 id = "cerveja"
 nome = "cerveja"
 tipo = "insumo"
+
+[[item]]
+id = "pele"
+nome = "pele"
+tipo = "insumo"
+
+[[item]]
+id = "la"
+nome = "lã"
+tipo = "insumo"
+
+[[item]]
+id = "tecido"
+nome = "tecido"
+tipo = "insumo"
+
+[[item]]
+id = "couro"
+nome = "couro"
+tipo = "insumo"

@@ -59,7 +59,7 @@ Quatro ramos, liberados aos poucos pelas fases:
 |---|---|---|---|
 | Construção | lenhador, toras | carvoaria, turfa | poço de argila, olaria (tijolo) |
 | Agricultura | fazenda de centeio, moinho d'água, padaria | cevada → malte → cerveja | lúpulo, linho |
-| Pecuária | pocilga (porcos na floresta) | gado, ovelhas, açougue, tecelão | curtume |
+| Pecuária e ofícios | pocilga (porcos na floresta) | curral (carne e pele), ovelheiro (lã e carne) | tecelagem (lã → tecido), curtume (pele → couro) |
 | Pesca | pescador de rio | | pescador de mar (arenque), tanoeiro, salgadeira |
 
 Duas regras de projeto:
@@ -188,6 +188,11 @@ fazenda de cevada (colheita de verão) → malteria → cervejaria. A cerveja é
 por enquanto, um insumo produzido e transportado; ainda não é consumida pelos
 moradores nem negociada por um sistema de mercado. Os valores de produção e
 custos continuam provisórios.
+
+O primeiro corte de pecuária também está disponível: curral produz carne e
+pele, ovelheiro produz lã e carne; na fase Cidade, tecelagem converte lã em
+tecido e curtume converte pele em couro. Rebanho, pastagem e abate são
+agregados por enquanto, sem consumo de ração ou esgotamento de pasto.
 
 ## Como a economia funciona
 

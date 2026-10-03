@@ -82,6 +82,22 @@ as de implementação, que o README não explica.
 - **Carga com destino perdido vai para o depósito**; só se perde quando não
   há depósito alcançável.
 
+### Desempenho
+- **Medir antes de otimizar, e algoritmo antes de assembly.** Em 2026-10-03
+  o Vitor perguntou se valia escrever partes em assembly. A medição (abaixo,
+  em Problemas conhecidos) mostrou que o custo vinha do *número* de buscas e
+  contagens, que crescia mais rápido que a cidade, e não da velocidade de
+  cada uma. Assembly deixaria cada busca talvez 1,5–2× mais rápida sem mudar
+  essa curva, e ficaria fora do alcance do ASan/UBSan e preso a x86-64.
+  Decisão: corrigir o algoritmo e medir de novo; SIMD ou assembly só se um
+  laço medido continuar dominando depois disso.
+- **Como medir**: programa auxiliar fora do repositório que monta vilas
+  sintéticas em blocos de 24×16 células (armazém, 2 fazendas, moinho,
+  padaria, pescador, lenhador, pocilga, 5 casas, 20 moradores por bloco),
+  roda um ano de jogo sem janela e cronometra cada `Simulacao::passo()`.
+  Uma assinatura do estado final (população, cargas perdidas, soma dos
+  estoques, entregas) confere que uma otimização não mudou o resultado.
+
 ### Conteúdo
 - **TOML lido com toml++**: um cabeçalho só, TOML 1.0 completo, erros com
   linha e coluna. Só `conteudo.cpp` o inclui (são 18 mil linhas).
@@ -120,6 +136,31 @@ as de implementação, que o README não explica.
 - **Um ciclo da fazenda começado no fim de agosto fica pausado até o julho
   seguinte** (fator 0 de setembro a junho). Aceitável por ora.
 
+- **A simulação não escala além de uma vila pequena.** Tempo médio de um
+  passo em `b4435ee` (um quadro a 60 fps tem 16,7 ms; na velocidade 4× entra
+  cerca de 1,3 passo por quadro):
+
+  | Blocos | Edifícios | Moradores | Média | p99 | Pior passo |
+  |---|---|---|---|---|---|
+  | 1 | 13 | 20 | 0,004 ms | 0,009 ms | 0,3 ms |
+  | 4 | 52 | 80 | 0,09 ms | 0,2 ms | 1,8 ms |
+  | 20 | 260 | 400 | 9,7 ms | 12,8 ms | 16 ms |
+
+  Com 20 blocos a simulação sozinha já ocupa o quadro inteiro. O gprof aponta
+  duas causas:
+  - `Populacao::empregar` chama `trabalhadores_em`, que percorre a população
+    inteira, a cada morador examinado: edifícios × moradores² por tick. A
+    produção também chama `trabalhadores_em` para cada edifício a cada tick.
+  - `Transporte::carregador_mais_proximo` roda um A* da posição de cada
+    carregador livre até a origem do pedido. Carregadores voltando para casa
+    estão cada um numa célula, então o cache de rotas quase não acerta:
+    pedidos × carregadores × A*. Numa medição anterior (`3c06b61`, mapa
+    256×256, 160 blocos) foram 5,2 milhões de A* num ano e passos de até 4 s,
+    agravados pelo cache que se apaga inteiro ao chegar a 4.096 rotas.
+
+  O desenho não é gargalo: 40 blocos no zoom mínimo levam 6,8 ms por quadro
+  (Radeon 680M).
+
 ## Em aberto
 
 - **De onde vêm os carregadores?** Com a vila começando em 3 casais, faz
@@ -153,6 +194,9 @@ ordem: crescimento populacional, carregadores vindos da
 população, eventos históricos, evolução de fase, custos de construção, arte,
 estamentos e mapa histórico.
 
+Em paralelo: tirar a simulação do crescimento quadrático (ver Problemas
+conhecidos), medindo de novo com o mesmo cenário depois de cada mudança.
+
 ## Como trabalhamos
 
 - Commits pequenos, um assunto por commit, mensagem com o porquê; **cada
@@ -170,6 +214,10 @@ estamentos e mapa histórico.
 
 ### 2026-10-03
 
+- **Medição de desempenho**: vilas sintéticas de 1 a 160 blocos, um ano de
+  jogo, gprof. O tempo do passo cresce bem mais rápido que a cidade (9,7 ms
+  com 20 blocos); as causas são a contagem de trabalhadores e o A* por
+  carregador. O desenho tem folga. Assembly descartado por ora.
 - **Desmatamento**: `extrai` tornou o consumo de terreno uma regra de dados;
   cada ciclo do lenhador converte uma célula de floresta próxima em campo e
   a produção para quando o recurso acaba. O mapa alterado já é preservado

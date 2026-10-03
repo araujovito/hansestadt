@@ -40,9 +40,10 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     DrawText(ritmo, 340, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
     int ocupados = 0;
     for (const Carregador& c : sim.transporte.carregadores()) ocupados += c.livre() ? 0 : 1;
-    DrawText(TextFormat("carregadores %d/%d  |  %d fps", ocupados,
+    DrawText(TextFormat("população %d (%d sem casa)  |  carregadores %d/%d  |  %d fps",
+                        sim.populacao.total(), sim.populacao.sem_casa(), ocupados,
                         static_cast<int>(sim.transporte.carregadores().size()), GetFPS()),
-             GetScreenWidth() - 300, 12, 16, LIGHTGRAY);
+             GetScreenWidth() - 580, 12, 16, LIGHTGRAY);
 
     if (mapa.dentro(sob_cursor.x, sob_cursor.y)) {
         DrawText(TextFormat("(%d, %d) %s", sob_cursor.x, sob_cursor.y,
@@ -117,7 +118,8 @@ int main() {
                         mouse_na_barra ? std::string{} : dica_da_ferramenta(ferramenta, cidade, sob_cursor));
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
-            desenhar_painel_edificio(cidade, *ferramenta.selecionado, sim.data.mes, Simulacao::TICKS_POR_DIA);
+            desenhar_painel_edificio(cidade, sim.populacao, *ferramenta.selecionado, sim.data.mes,
+                                     Simulacao::TICKS_POR_DIA);
         }
         EndDrawing();
     }

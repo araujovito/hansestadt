@@ -49,7 +49,8 @@ Rectangle area_do_painel_edificio() {
     return { static_cast<float>(GetScreenWidth()) - LARGURA - 8.0f, 48.0f, LARGURA, ALTURA };
 }
 
-void desenhar_painel_edificio(const Cidade& cidade, IdEdificio id, int mes, int ticks_por_dia) {
+void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, IdEdificio id, int mes,
+                              int ticks_por_dia) {
     const Rectangle area = area_do_painel_edificio();
     DrawRectangleRec(area, FUNDO);
     DrawRectangleLinesEx(area, 1.0f, Color{ 90, 72, 52, 255 });
@@ -62,6 +63,12 @@ void desenhar_painel_edificio(const Cidade& cidade, IdEdificio id, int mes, int 
 
     DrawText(def.nome.c_str(), x, y, 22, CLARO);
     y += 30;
+
+    if (def.moradores > 0) {
+        DrawText(TextFormat("moradores %d/%d", populacao.moradores_na_casa(id), def.moradores), x, y, TEXTO,
+                 CLARO);
+        y += LINHA;
+    }
 
     if (!cidade.tem_acesso(id)) {
         DrawText("sem estrada na entrada", x, y, TEXTO, Color{ 235, 130, 110, 255 });

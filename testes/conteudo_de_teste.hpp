@@ -87,6 +87,15 @@ deposito = true
 carregadores = 2
 
 [[edificio]]
+id = "casa"
+nome = "casa"
+fase = "vila"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#808080"
+moradores = 4
+
+[[edificio]]
 id = "serraria"
 nome = "serraria"
 fase = "vila"

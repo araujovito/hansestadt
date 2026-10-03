@@ -117,6 +117,8 @@ as de implementação, que o README não explica.
 - **Trabalhadores ainda não limitam nada**: todo edifício funciona com
   equipe completa.
 - **Os 6 carregadores do armazém surgem do nada**, fora da população.
+- **Os 6 moradores iniciais ainda não nascem nem envelhecem**; nesta etapa
+  apenas procuram vagas nas casas.
 - **Não há salvar/carregar**: fechar o jogo perde a partida.
 - **Faixa de floresta na borda esquerda do mapa** é coincidência da semente
   1150, não defeito do ruído (média do hash por coluna conferida). Some
@@ -139,8 +141,8 @@ Tarefa 10, nesta ordem (decisões do Vitor em 2026-10-01: 3 casais que se
 reproduzem, jogador escolhe onde fundar, fome mata, balanceamento em Python
 agora, estamentos depois):
 
-1. Moradores nas casas e população na barra do topo.
-2. Trabalhadores limitam a produção.
+1. ~~Moradores nas casas e população na barra do topo.~~ Concluído.
+2. **Agora:** trabalhadores limitam a produção.
 3. Casas pedem comida pelo sistema de pedidos; consumo diário.
 4. Fome mata.
 5. Início da partida: jogador posiciona o primeiro armazém; estoque inicial.
@@ -167,6 +169,12 @@ de fase, arte, estamentos.
 ---
 
 ## Histórico
+
+### 2026-10-03
+
+- **População nas casas**: a simulação começa com 3 casais, moradores ocupam
+  vagas livres, voltam a ficar sem teto após demolição e aparecem na barra
+  superior e no painel da casa. 82 testes.
 
 ### 2026-10-01
 

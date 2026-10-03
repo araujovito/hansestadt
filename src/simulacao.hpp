@@ -4,6 +4,7 @@
 
 #include "calendario.hpp"
 #include "cidade.hpp"
+#include "populacao.hpp"
 #include "transporte.hpp"
 
 // Estado do mundo, avançado em passos de duração fixa. Nada aqui depende do
@@ -18,6 +19,7 @@ struct Simulacao {
     explicit Simulacao(Cidade c) : cidade(std::move(c)) {}
 
     Cidade cidade;
+    Populacao populacao;
     Transporte transporte;
     std::uint64_t tick = 0;
     // Primavera de 1150: início da estação de desmatamento e plantio, quando

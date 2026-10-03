@@ -9,7 +9,8 @@ clima e dos acontecimentos históricos.
 > ficam em [`contexto.md`](contexto.md).
 
 > Status: protótipo. Dá para construir a vila, e os edifícios produzem
-> e trocam mercadorias por carregadores; ainda não há moradores nem eventos.
+> e trocam mercadorias por carregadores. A vila começa com 3 casais, que
+> ocupam as casas construídas; ainda não há trabalho, consumo nem eventos.
 
 ## Ideia central
 
@@ -83,6 +84,10 @@ Decisões tomadas para o primeiro marco jogável:
 - **Estamentos ficam para depois.** A divisão da sociedade medieval
   (camponeses, artesãos, mercadores, clero) muda as necessidades e a
   economia, e entra como um passo próprio depois do primeiro marco.
+
+Os moradores já existem como entidades da simulação. Eles ocupam as vagas
+das casas em ordem de construção e ficam sem teto se a moradia for demolida;
+a barra superior mostra a população total e quantos estão sem casa.
 
 ## Tecnologia
 

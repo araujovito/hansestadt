@@ -183,6 +183,13 @@ nos estoques da cidade e os consome em ordem de edifício, sem tomar cargas já
 reservadas pelo transporte. A expedição inicial traz 40 toras para erguer o
 primeiro conjunto de casas e oficinas.
 
+As estradas podem ser construídas manualmente. Pela regra definida para a
+próxima etapa, os trajetos diários de casa ao trabalho também formarão trilhas
+que se tornam estradas pelo uso. Carregadores serão pessoas separadas dos
+trabalhadores e poderão atender vários edifícios quando faltarem adultos.
+Os detalhes de movimento e de distribuição de vagas ainda estão em decisão;
+até serem implementados, vale o comportamento atual da simulação.
+
 A cadeia inicial de cerveja já pode ser construída na fase Mercado:
 fazenda de cevada (colheita de verão) → malteria → cervejaria. A cerveja é,
 por enquanto, um insumo produzido e transportado; ainda não é consumida pelos

@@ -70,6 +70,18 @@ do README e do contexto e um ou mais commits pequenos.
    - Cadeia completa de argila, combustível e tijolos.
    - Rebalancear mão de obra, transporte e custos após cada ramo.
 
+7a. **Carregadores por edifício e trilhas** — decisão registrada; regras
+     operacionais pendentes antes de implementar
+   - Cada edifício deve ter um carregador separado de seus trabalhadores;
+     quando faltarem adultos, um carregador atende vários edifícios; adultos
+     que sobrarem aumentam essa cobertura até um por edifício.
+   - O percurso casa–trabalho dos funcionários cria trilhas que, com o uso,
+     viram estradas automaticamente. Estradas manuais continuam disponíveis.
+   - Falta decidir: se o armazém mantém carregadores próprios; prioridade
+     entre vagas de produção e transporte; limiares e desgaste das trilhas;
+     velocidade em campo/trilha/estrada; se carregadores também criam trilhas;
+     e se trilhas atravessam floresta.
+
 8. **Agricultura, clima e recursos**
    - Plantio e colheita mais visíveis.
    - Esgotamento ou regeneração de recursos.
@@ -115,6 +127,7 @@ do README e do contexto e um ou mais commits pequenos.
 
 ## Decisões ainda abertas
 
+- Regras operacionais de carregadores e trilhas listadas no item 7a.
 - Momento de substituir a arte provisória pelos sprites.
 - Escopo exato dos estamentos sociais após a economia básica estar completa.
 - Formato definitivo dos eventos depois do primeiro conjunto em TOML.

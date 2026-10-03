@@ -64,9 +64,17 @@ as de implementação, que o README não explica.
 - **Porta fixa** em cada edifício: a célula abaixo do meio da borda inferior
   da área total. Um ponto único dá às rotas um início claro e ao jogador um
   lugar visível para ligar a estrada.
-- **Carregadores andam só na estrada.** Andar fora dela, mais devagar, foi
-  considerado e deixado de lado: daria menos peso ao traçado da vila. Decisão
-  tomada por Claude na ausência de resposta; pode ser revista.
+- **Regra anterior de locomoção foi superada** pela decisão do Vitor de
+  2026-10-03: funcionários percorrem casa–trabalho e deixam trilhas que se
+  tornam estradas pelo uso; estradas manuais continuam existindo. Os
+  carregadores por edifício são pessoas separadas dos trabalhadores, com
+  atendimento compartilhado quando faltam adultos e cobertura crescente
+  conforme há adultos disponíveis, até um por edifício.
+- **Detalhes ainda não definidos pelo Vitor**: carregadores próprios do
+  armazém, prioridade de emprego entre produção e transporte, limiares e
+  persistência da trilha, velocidades relativas, formação de trilha por
+  carregadores e passagem por floresta. Não implementar esses detalhes por
+  suposição; estão listados no plano de ação.
 - **Cache de rotas invalidado por inteiro** a cada estrada construída ou
   demolida. Descobrir quais rotas foram afetadas seria mais econômico, mas
   obras são raras perto do número de viagens e uma estrada nova pode criar
@@ -193,6 +201,11 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Regras novas de mobilidade decididas pelo Vitor**: cada edifício terá
+  cobertura de carregador separada da mão de obra de produção, compartilhada
+  quando a população for insuficiente; trajetos casa–trabalho formarão trilhas
+  que viram estradas, sem remover a construção manual. Detalhes de prioridade,
+  velocidade, limiar de conversão, desgaste e terreno seguem em aberto.
 - **Cadeia da cerveja**: adicionados cevada, malte e cerveja e as oficinas
   de cultivo, maltagem e produção de cerveja na fase Mercado. A cerveja ainda
   não participa das necessidades da população ou de comércio. Saves antigos

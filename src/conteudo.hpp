@@ -66,6 +66,7 @@ struct DefinicaoEdificio {
     // Recurso do terreno consumido a cada ciclo (ex.: floresta do lenhador).
     std::optional<Terreno> extrai;
     std::vector<Receita> receitas;
+    std::vector<Quantidade> custo;
 
     bool usa_item(IdItem item) const;
 

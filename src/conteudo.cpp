@@ -201,7 +201,7 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         const std::string ctx = "edificios.toml, '" + (*t)["id"].value_or(std::string("?")) + "'";
         conferir_chaves(*t,
                         { "id", "nome", "fase", "tamanho", "terreno", "cor", "trabalhadores", "estoque", "moradores",
-                          "campos", "deposito", "carregadores", "requer", "extrai", "receita" },
+                          "campos", "deposito", "carregadores", "requer", "extrai", "custo", "receita" },
                         ctx, erros);
 
         DefinicaoEdificio d{};
@@ -257,6 +257,7 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
             if (!extraido) erros.adicionar(ctx, "extrai precisa ser um terreno válido");
             else d.extrai = *extraido;
         }
+        d.custo = ler_quantidades(*t, "custo", c, ctx + ", custo", erros);
 
         if (const toml::array* receitas = (*t)["receita"].as_array()) {
             for (std::size_t i = 0; i < receitas->size(); ++i) {

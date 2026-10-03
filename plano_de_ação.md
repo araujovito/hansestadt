@@ -15,7 +15,7 @@ um teste integrado revelar uma dependência ou um gargalo novo.
    - Transporte disputa adultos com fazendas e oficinas.
    - Mortes e demolições liberam ou removem carregadores corretamente.
 
-3. **Custos de construção** — em andamento
+3. ~~**Custos de construção**~~ — concluído
    - Declarar custos de materiais no TOML.
    - Validar e consumir recursos ao construir.
    - Mostrar custos e faltas na interface.

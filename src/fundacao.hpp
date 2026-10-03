@@ -8,8 +8,10 @@
 class Fundacao {
 public:
     static constexpr int COMIDA_INICIAL = 600;
+    static constexpr int TORAS_INICIAIS = 40;
 
-    explicit Fundacao(const Conteudo& conteudo, int comida_inicial = COMIDA_INICIAL);
+    explicit Fundacao(const Conteudo& conteudo, int comida_inicial = COMIDA_INICIAL,
+                      int toras_iniciais = TORAS_INICIAIS);
 
     bool concluir_se_possivel(Cidade& cidade);
     bool concluida() const { return concluida_; }
@@ -18,7 +20,9 @@ public:
 
 private:
     IdItem comida_;
+    IdItem tora_;
     int comida_inicial_;
+    int toras_iniciais_;
     bool concluida_ = false;
     IdEdificio armazem_ = SEM_EDIFICIO;
 };

@@ -98,6 +98,15 @@ estoque = 8
 moradores = 4
 
 [[edificio]]
+id = "com_custo"
+nome = "com custo"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+custo = { tora = 2 }
+
+[[edificio]]
 id = "serraria"
 nome = "serraria"
 fase = "vila"

@@ -38,6 +38,7 @@ enum class Validacao : std::uint8_t {
     Ocupado,
     LongeDoRecurso,  // faltou o terreno exigido em `requer` por perto
     PortaBloqueada,  // a entrada cairia em água ou floresta
+    SemRecursos,
     JaExiste,  // estrada sobre estrada: não é erro, só não muda nada
 };
 
@@ -98,6 +99,7 @@ public:
     bool retirar(IdEdificio id, IdItem item, int quantidade);
     int estoque_total(IdItem item) const;
     int estoque_total(TipoItem tipo) const;
+    bool tem_recursos_para(IdTipoEdificio tipo) const;
     bool tem_recurso_proximo(IdEdificio id) const;
     bool extrair_recurso_proximo(IdEdificio id);
 
@@ -108,6 +110,7 @@ public:
                             std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas);
 
 private:
+    void consumir_custo(const DefinicaoEdificio& def);
     bool atende_requisito(const Requisito& r, Celula origem, int largura, int altura) const;
 
     std::size_t indice(Celula c) const {

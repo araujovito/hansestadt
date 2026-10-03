@@ -17,6 +17,8 @@ Simulacao vila_do_marco(bool com_fazenda) {
     Cidade cidade(std::move(mapa), conteudo);
 
     cidade.construir_edificio(*conteudo.buscar_edificio("armazem"), { 1, 1 });
+    Fundacao fundacao(conteudo);
+    fundacao.concluir_se_possivel(cidade);
     cidade.construir_edificio(*conteudo.buscar_edificio("casa"), { 5, 1 });
     cidade.construir_edificio(*conteudo.buscar_edificio("casa"), { 8, 1 });
     if (com_fazenda) cidade.construir_edificio(*conteudo.buscar_edificio("fazenda"), { 5, 6 });
@@ -36,8 +38,6 @@ Simulacao vila_do_marco(bool com_fazenda) {
     estrada(cidade, { 16, 8 }, { 16, 10 });
     estrada(cidade, { 20, 8 }, { 20, 10 });
 
-    Fundacao fundacao(conteudo);
-    fundacao.concluir_se_possivel(cidade);
     return Simulacao(std::move(cidade));
 }
 

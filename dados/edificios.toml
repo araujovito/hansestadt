@@ -19,6 +19,7 @@
 #   requer          { terreno, distancia }: pelo menos uma célula desse
 #                   terreno a até `distancia` células da borda do edifício
 #   extrai          terreno consumido por ciclo e convertido em campo
+#   custo           materiais retirados dos estoques ao construir
 #
 # [[edificio.receita]]: o que o edifício transforma. Mais de uma receita
 # significa alternativas (a olaria aceita carvão ou turfa).
@@ -37,7 +38,7 @@ tamanho = [3, 3]
 terreno = "campo"
 cor = "#96764e"
 trabalhadores = 0
-estoque = 600
+estoque = 800
 deposito = true
 carregadores = 1
 
@@ -51,6 +52,7 @@ cor = "#d6be96"   # enxaimel caiado
 trabalhadores = 0
 estoque = 12
 moradores = 4
+custo = { tora = 4 }
 
 [[edificio]]
 id = "lenhador"
@@ -61,6 +63,7 @@ terreno = "campo"
 cor = "#7a5834"
 trabalhadores = 1
 estoque = 6
+custo = { tora = 4 }
 requer = { terreno = "floresta", distancia = 3 }
 extrai = "floresta"
 
@@ -82,6 +85,7 @@ cor = "#b8925a"
 trabalhadores = 2
 estoque = 12
 campos = 1
+custo = { tora = 6 }
 
 [[edificio.receita]]
 dias = 2
@@ -100,6 +104,7 @@ terreno = "campo"
 cor = "#a08c6e"
 trabalhadores = 1
 estoque = 8
+custo = { tora = 8 }
 # Moinho de roda d'água; o de vento só se espalha pelo norte a partir do
 # fim do século XII.
 requer = { terreno = "agua", distancia = 1 }
@@ -120,6 +125,7 @@ terreno = "campo"
 cor = "#c88c50"
 trabalhadores = 1
 estoque = 32
+custo = { tora = 6 }
 
 [[edificio.receita]]
 dias = 3
@@ -135,6 +141,7 @@ terreno = "campo"
 cor = "#6e8ca0"
 trabalhadores = 1
 estoque = 16
+custo = { tora = 4 }
 requer = { terreno = "agua", distancia = 1 }
 
 [[edificio.receita]]
@@ -152,6 +159,7 @@ terreno = "campo"
 cor = "#8c6e5a"
 trabalhadores = 1
 estoque = 16
+custo = { tora = 6 }
 # Os porcos engordavam soltos na floresta, comendo bolota (Waldweide).
 requer = { terreno = "floresta", distancia = 3 }
 
@@ -173,6 +181,7 @@ terreno = "campo"
 cor = "#483e38"
 trabalhadores = 1
 estoque = 8
+custo = { tora = 8 }
 
 [[edificio.receita]]
 dias = 6
@@ -188,6 +197,7 @@ terreno = "turfa"
 cor = "#70603e"
 trabalhadores = 1
 estoque = 8
+custo = { tora = 6 }
 
 [[edificio.receita]]
 dias = 4
@@ -207,6 +217,7 @@ terreno = "barreiro"
 cor = "#ba744c"
 trabalhadores = 1
 estoque = 8
+custo = { tora = 8 }
 
 [[edificio.receita]]
 dias = 3
@@ -223,6 +234,7 @@ terreno = "campo"
 cor = "#a84834"   # tijolo
 trabalhadores = 2
 estoque = 12
+custo = { tora = 12 }
 
 [[edificio.receita]]
 dias = 8

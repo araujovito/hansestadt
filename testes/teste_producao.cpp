@@ -101,6 +101,8 @@ TESTE("produção: lenhador transforma uma floresta em tora e campo") {
     Mapa mapa(10, 10);
     mapa.definir_terreno(4, 2, Terreno::Floresta);
     Cidade c(std::move(mapa), real);
+    const IdEdificio armazem = *c.construir_edificio(*real.buscar_edificio("armazem"), { 6, 5 });
+    c.adicionar(armazem, *real.buscar_item("tora"), 4);
     const IdEdificio lenhador = *c.construir_edificio(*real.buscar_edificio("lenhador"), { 2, 2 });
     for (int i = 0; i < 4 * TICKS_POR_DIA; ++i) avancar_producao(c, 3, TICKS_POR_DIA);
     VERIFICAR(c.edificio(lenhador).estoque[*real.buscar_item("tora")] == 1);

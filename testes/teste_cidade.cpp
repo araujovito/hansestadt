@@ -28,6 +28,19 @@ TESTE("cidade: constrói em campo livre e ocupa todas as células") {
     VERIFICAR(c.edificio_em({ 4, 4 }) == SEM_EDIFICIO);
 }
 
+TESTE("cidade: construção exige e consome materiais da cidade") {
+    Cidade c = cidade_de_teste();
+    const IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 1, 1 });
+    VERIFICAR(c.validar_edificio(tipo("com_custo"), { 4, 1 }) == Validacao::SemRecursos);
+    c.adicionar(deposito, item("tora"), 2);
+    c.reservar_saida(deposito, item("tora"));
+    VERIFICAR(c.validar_edificio(tipo("com_custo"), { 4, 1 }) == Validacao::SemRecursos);
+    c.liberar_saida(deposito, item("tora"));
+    VERIFICAR(c.validar_edificio(tipo("com_custo"), { 4, 1 }) == Validacao::Ok);
+    VERIFICAR(c.construir_edificio(tipo("com_custo"), { 4, 1 }).has_value());
+    VERIFICAR(c.estoque_total(item("tora")) == 0);
+}
+
 TESTE("cidade: recusa sobreposição, terreno errado e borda do mapa") {
     Cidade c = cidade_de_teste();
     c.construir_edificio(tipo("grande"), { 1, 1 });
@@ -165,4 +178,3 @@ TESTE("porta: entrada em água ou floresta bloqueia a construção") {
     // Porta abaixo da última linha fica fora do mapa.
     VERIFICAR(c.validar_edificio(tipo("deposito"), { 3, 9 }) == Validacao::ForaDoMapa);
 }
-

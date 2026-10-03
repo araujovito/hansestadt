@@ -2,8 +2,9 @@
 
 #include <stdexcept>
 
-Fundacao::Fundacao(const Conteudo& conteudo, int comida_inicial)
-    : comida_(conteudo.buscar_item("pao").value_or(0)), comida_inicial_(comida_inicial) {
+Fundacao::Fundacao(const Conteudo& conteudo, int comida_inicial, int toras_iniciais)
+    : comida_(conteudo.buscar_item("pao").value_or(0)), tora_(conteudo.buscar_item("tora").value_or(0)),
+      comida_inicial_(comida_inicial), toras_iniciais_(toras_iniciais) {
     if (!conteudo.buscar_item("pao")) throw std::runtime_error("a fundação precisa do item 'pao'");
 }
 
@@ -12,6 +13,7 @@ bool Fundacao::concluir_se_possivel(Cidade& cidade) {
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo || !cidade.definicao(id).deposito) continue;
         if (!cidade.adicionar(id, comida_, comida_inicial_)) return false;
+        if (!cidade.adicionar(id, tora_, toras_iniciais_)) return false;
         armazem_ = id;
         concluida_ = true;
         return true;

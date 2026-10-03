@@ -189,7 +189,7 @@ agora, estamentos depois):
    certa e passa fome sem a fazenda.~~ Concluído.
 
 **Primeiro marco concluído.** Salvar/carregar também está pronto. Próxima
-ordem: custos de construção, eventos
+ordem: eventos
 históricos, evolução de fase, arte,
 estamentos e mapa histórico.
 
@@ -210,6 +210,10 @@ estamentos e mapa histórico.
 
 ### 2026-10-03
 
+- **Custos de construção**: edifícios declaram materiais no TOML; a cidade
+  valida e consome estoques disponíveis sem violar reservas do transporte.
+  A fundação traz 40 toras e a interface mostra custo ou material ausente.
+  107 testes.
 - **Carregadores na população**: a vaga do armazém ocupa um adulto e disputa
   mão de obra com a produção. Um carregador leva até 8 unidades por viagem;
   morte ou perda do emprego remove o agente e libera reservas. O salvamento

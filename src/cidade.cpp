@@ -10,6 +10,7 @@ const char* descrever(Validacao v) {
         case Validacao::Ocupado: return "lugar ocupado";
         case Validacao::LongeDoRecurso: return "longe do recurso";
         case Validacao::PortaBloqueada: return "entrada bloqueada";
+        case Validacao::SemRecursos: return "faltam materiais";
         case Validacao::JaExiste: return "já existe";
     }
     return "?";
@@ -71,6 +72,7 @@ Validacao Cidade::validar_edificio(IdTipoEdificio tipo, Celula origem) const {
     if (def.requer && !atende_requisito(*def.requer, origem, def.largura_total(), def.altura_total())) {
         return Validacao::LongeDoRecurso;
     }
+    if (!tem_recursos_para(tipo)) return Validacao::SemRecursos;
     return Validacao::Ok;
 }
 
@@ -100,6 +102,7 @@ std::optional<IdEdificio> Cidade::construir_edificio(IdTipoEdificio tipo, Celula
         }
     }
     portas_[indice(porta_de(def, origem))] = 1;
+    consumir_custo(def);
     return id;
 }
 
@@ -215,6 +218,28 @@ int Cidade::estoque_total(TipoItem tipo) const {
         if (conteudo_->itens[item].tipo == tipo) total += estoque_total(item);
     }
     return total;
+}
+
+bool Cidade::tem_recursos_para(IdTipoEdificio tipo) const {
+    for (const Quantidade& q : conteudo_->edificio(tipo).custo) {
+        int total = 0;
+        for (IdEdificio id = 0; id < edificios_.size(); ++id) total += disponivel(id, q.item);
+        if (total < q.quantidade) return false;
+    }
+    return true;
+}
+
+void Cidade::consumir_custo(const DefinicaoEdificio& def) {
+    for (const Quantidade& q : def.custo) {
+        int restante = q.quantidade;
+        for (IdEdificio id = 0; id < edificios_.size() && restante > 0; ++id) {
+            Edificio& e = edificios_[id];
+            if (!e.ativo) continue;
+            const int retirado = std::min(restante, disponivel(id, q.item));
+            e.estoque[q.item] -= retirado;
+            restante -= retirado;
+        }
+    }
 }
 
 bool Cidade::tem_recurso_proximo(IdEdificio id) const {

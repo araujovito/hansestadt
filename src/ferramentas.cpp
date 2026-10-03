@@ -213,6 +213,14 @@ std::string dica_da_ferramenta(const EstadoFerramenta& estado, const Cidade& cid
     const Validacao v = cidade.validar_edificio(estado.tipo, origem_centrada(def, cursor));
     std::string dica = def.nome + " (" + std::to_string(def.largura_total()) + "x" +
                        std::to_string(def.altura_total()) + (def.campos > 0 ? " com campos" : "") + ")";
+    if (!def.custo.empty()) {
+        dica += " custa ";
+        for (std::size_t i = 0; i < def.custo.size(); ++i) {
+            if (i > 0) dica += " + ";
+            dica += std::to_string(def.custo[i].quantidade) + " " +
+                    cidade.conteudo().itens[def.custo[i].item].nome;
+        }
+    }
     if (v == Validacao::TerrenoErrado) {
         dica += ": precisa de " + std::string(nome_do_terreno(def.terreno));
     } else if (v == Validacao::LongeDoRecurso) {

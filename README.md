@@ -160,6 +160,12 @@ Edifícios extratores podem declarar `extrai`: a cada ciclo, uma célula do
 terreno exigido é consumida. O lenhador transforma gradualmente a floresta
 próxima em campo ao produzir toras e para quando não resta mata ao alcance.
 
+Cada edifício também pode declarar `custo` no TOML. A prévia mostra os
+materiais necessários; a construção só é aceita quando há itens disponíveis
+nos estoques da cidade e os consome em ordem de edifício, sem tomar cargas já
+reservadas pelo transporte. A expedição inicial traz 40 toras para erguer o
+primeiro conjunto de casas e oficinas.
+
 ## Como a economia funciona
 
 1. **Produção** (`src/producao.cpp`). Um edifício começa a primeira

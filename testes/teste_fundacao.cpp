@@ -4,7 +4,7 @@
 
 TESTE("fundação: o primeiro depósito recebe provisões uma única vez") {
     Cidade c(Mapa(8, 8), conteudo_de_teste());
-    Fundacao f(conteudo_de_teste(), 6);
+    Fundacao f(conteudo_de_teste(), 6, 3);
     VERIFICAR(!f.concluir_se_possivel(c));
 
     const IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 1, 1 });
@@ -12,6 +12,7 @@ TESTE("fundação: o primeiro depósito recebe provisões uma única vez") {
     VERIFICAR(f.concluida());
     VERIFICAR(f.armazem() == deposito);
     VERIFICAR(c.edificio(deposito).estoque[item("pao")] == 6);
+    VERIFICAR(c.edificio(deposito).estoque[item("tora")] == 3);
     VERIFICAR(!f.concluir_se_possivel(c));
     VERIFICAR(c.edificio(deposito).estoque[item("pao")] == 6);
 }

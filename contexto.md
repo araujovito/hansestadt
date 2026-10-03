@@ -265,6 +265,10 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Aba Fase no relatório**: fase atual, a próxima e o ano em que abre, e
+  cada instituição exigida com nível e o que falta (construir, ou os
+  materiais da melhoria). A janela passou de 640 para 720 px de largura
+  para caberem seis abas.
 - **Botão de melhoria no painel da instituição**: o painel mostra nível,
   quando o próximo nível libera, os materiais (pedido/disponível, em
   vermelho se faltar) e um botão no pé do painel, com o motivo em versão

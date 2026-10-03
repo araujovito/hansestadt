@@ -8,7 +8,7 @@
 
 namespace {
 
-constexpr float LARGURA = 640.0f;
+constexpr float LARGURA = 720.0f;
 constexpr float ALTURA = 440.0f;
 constexpr float TOPO = 80.0f;
 constexpr float MARGEM = 16.0f;
@@ -28,7 +28,7 @@ constexpr Color VERDE{ 150, 210, 120, 255 };
 constexpr Color AMARELO{ 230, 196, 100, 255 };
 constexpr Color VERMELHO{ 235, 110, 90, 255 };
 
-constexpr const char* NOMES_DAS_ABAS[] = { "Emprego", "Comida", "Produção", "Transporte", "História" };
+constexpr const char* NOMES_DAS_ABAS[] = { "Emprego", "Comida", "Produção", "Transporte", "Fase", "História" };
 constexpr int N_ABAS = static_cast<int>(std::size(NOMES_DAS_ABAS));
 
 Rectangle area_da_aba(const Rectangle& janela, int i) {
@@ -128,6 +128,7 @@ void JanelaDeRelatorio::desenhar(const Relatorio& r) const {
         case Aba::Comida: desenhar_comida(r.comida, cx, cy); break;
         case Aba::Producao: desenhar_producao(r.producao, cx, cy); break;
         case Aba::Transporte: desenhar_transporte(r.transporte, cx, cy); break;
+        case Aba::Fase: desenhar_fase(r.fase, r.rumo, cx, cy); break;
         case Aba::Historia: desenhar_historia(r.historico, cx, cy); break;
     }
     texto("V ou X fecha. O jogo continua andando.", cx, janela.y + janela.height - MARGEM - 14.0f, APAGADO, 14);
@@ -284,5 +285,50 @@ void JanelaDeRelatorio::desenhar_historia(const std::vector<EntradaDoHistorico>&
     if (mostrados < h.size()) {
         texto(TextFormat("e mais %d acontecimentos antigos", static_cast<int>(h.size() - mostrados)), x, y,
               APAGADO, 14);
+    }
+}
+
+void JanelaDeRelatorio::desenhar_fase(Fase fase, const std::optional<RumoAProximaFase>& rumo, float x,
+                                      float y) const {
+    texto(TextFormat("fase atual: %s", nome_da_fase(fase)), x, y);
+    y += LINHA;
+    if (!rumo) {
+        texto("Última fase da campanha.", x, y, APAGADO);
+        return;
+    }
+    texto(TextFormat("próxima: %s, a partir de %d", nome_da_fase(rumo->fase), rumo->ano), x, y);
+    texto(rumo->ano_chegou ? "o ano já chegou" : "o ano ainda não chegou", x + 330, y,
+          rumo->ano_chegou ? VERDE : APAGADO);
+    y += LINHA + 8;
+    texto("Cada instituição precisa estar construída e no maior nível desta fase:", x, y, APAGADO, 14);
+    y += LINHA;
+    texto("instituição", x, y, APAGADO);
+    texto("nível", x + 200, y, APAGADO);
+    texto("situação", x + 290, y, APAGADO);
+    y += LINHA;
+    for (const FichaDaInstituicao& f : rumo->instituicoes) {
+        texto(f.nome, x, y);
+        texto(TextFormat("%d de %d", f.nivel, f.nivel_da_fase), x + 200, y, f.pronta_para_a_fase() ? CLARO : AMARELO);
+        std::string situacao;
+        Color cor = AMARELO;
+        if (!f.edificio) {
+            situacao = "falta construir";
+        } else if (f.pronta_para_a_fase()) {
+            situacao = "pronta";
+            cor = VERDE;
+        } else {
+            // Abaixo do nível da fase, a próxima melhoria já está liberada.
+            situacao = "melhorar:";
+            for (const MaterialDaMelhoria& m : f.materiais)
+                situacao += TextFormat(" %s %d/%d", m.nome.c_str(), m.tem, m.precisa);
+        }
+        texto(situacao, x + 290, y, cor);
+        y += LINHA;
+    }
+    y += 8;
+    if (rumo->ano_chegou && rumo->instituicoes_prontas()) {
+        texto("Tudo pronto: a fase avança na virada do dia.", x, y, VERDE, 14);
+    } else if (rumo->instituicoes_prontas()) {
+        texto(TextFormat("Instituições prontas; falta chegar %d.", rumo->ano), x, y, APAGADO, 14);
     }
 }

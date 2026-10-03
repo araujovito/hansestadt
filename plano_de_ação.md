@@ -118,8 +118,9 @@ do README e do contexto e um ou mais commits pequenos.
    - ~~Histórico de acontecimentos~~ — concluído: aba História no relatório
      (só eventos já iniciados, com período, dias restantes e efeitos) e aviso
      na barra quando um evento começa.
-   - Painel das instituições com nível, custo e botão de melhoria (hoje só a
-     tecla U provisória).
+   - ~~Painel das instituições~~ — concluído: o painel da instituição mostra
+     nível, materiais da próxima melhoria e botão de melhorar (U vira atalho);
+     a aba Fase do relatório lista o que falta para a próxima fase.
    - Explicar por que uma construção, produção ou entrega está bloqueada:
      os alertas e o painel do edifício já explicam a produção; faltam
      construção e entrega.

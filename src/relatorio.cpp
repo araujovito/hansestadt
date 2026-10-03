@@ -106,6 +106,7 @@ RelatorioTransporte montar_transporte(const Simulacao& sim) {
 
 Relatorio montar_relatorio(const Simulacao& sim) {
     return { montar_emprego(sim), montar_comida(sim), montar_producao(sim), montar_transporte(sim),
+             sim.fase, rumo_a_proxima_fase(sim.cidade, sim.fase, sim.data),
              montar_historico(sim.eventos, sim.data, sim.cidade.conteudo()) };
 }
 

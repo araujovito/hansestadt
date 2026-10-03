@@ -36,7 +36,7 @@ tamanho = [3, 3]
 terreno = "campo"
 cor = "#96764e"
 trabalhadores = 0
-estoque = 200
+estoque = 600
 deposito = true
 carregadores = 6
 
@@ -116,12 +116,12 @@ tamanho = [2, 2]
 terreno = "campo"
 cor = "#c88c50"
 trabalhadores = 1
-estoque = 8
+estoque = 32
 
 [[edificio.receita]]
 dias = 3
 entradas = { farinha = 1 }
-saidas = { pao = 2 }
+saidas = { pao = 28 }
 
 [[edificio]]
 id = "pescador"
@@ -131,12 +131,12 @@ tamanho = [2, 2]
 terreno = "campo"
 cor = "#6e8ca0"
 trabalhadores = 1
-estoque = 6
+estoque = 16
 requer = { terreno = "agua", distancia = 1 }
 
 [[edificio.receita]]
 dias = 3
-saidas = { peixe = 1 }
+saidas = { peixe = 12 }
 # Pesca de rio rende pouco com o frio e o gelo.
 sazonalidade = [0.3, 0.3, 0.6, 1, 1, 1, 1, 1, 1, 0.8, 0.5, 0.3]
 
@@ -148,13 +148,13 @@ tamanho = [2, 2]
 terreno = "campo"
 cor = "#8c6e5a"
 trabalhadores = 1
-estoque = 6
+estoque = 16
 # Os porcos engordavam soltos na floresta, comendo bolota (Waldweide).
 requer = { terreno = "floresta", distancia = 3 }
 
 [[edificio.receita]]
 dias = 8
-saidas = { carne = 1 }
+saidas = { carne = 12 }
 # Abate no fim do outono, depois da engorda com a bolota e antes de faltar
 # comida para os animais no inverno.
 sazonalidade = [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.5, 1, 2, 2]

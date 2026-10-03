@@ -144,10 +144,11 @@ agora, estamentos depois):
 3. ~~Casas pedem comida pelo sistema de pedidos; consumo diário.~~ Concluído.
 4. ~~Fome mata.~~ Concluído: 30 dias consecutivos sem comida.
 5. ~~Início da partida: jogador posiciona o primeiro armazém; estoque
-   inicial.~~ Concluído, com 120 pães provisórios.
-6. **Agora:** ferramenta de balanceamento em Python (simula anos sem janela, plota
-   produção × consumo por mês) e ajuste do TOML.
-7. Interface de acompanhamento: estoque total, "comida para N dias", avisos.
+   inicial.~~ Concluído, com 480 porções de pão após o balanceamento.
+6. ~~Ferramenta de balanceamento em Python (simula anos sem janela, plota
+   produção × consumo por mês) e ajuste do TOML.~~ Concluído.
+7. **Agora:** interface de acompanhamento: estoque total, "comida para N
+   dias", avisos.
 8. Teste do marco: a vila atravessa o inverno 1150–51 com a configuração
    certa e passa fome sem a fazenda.
 
@@ -171,8 +172,13 @@ de fase, arte, estamentos.
 
 ### 2026-10-03
 
+- **Balanceamento agregado**: `make balance` lê os TOMLs, simula a economia
+  diária e gera CSV e SVG mensais. O cenário-base de três anos produz 6.804
+  porções para 6.222 consumidas, sem falta; padaria, pesca, pocilga, estoques
+  e provisões iniciais foram ajustados a partir do resultado. A confirmação
+  com distâncias e transporte fica para o teste integrado.
 - **Fundação escolhida pelo jogador**: o tempo aguarda o posicionamento do
-  primeiro armazém, que recebe 120 pães provisórios e libera a barra normal
+  primeiro armazém, que recebe provisões e libera a barra normal
   de construção. 89 testes.
 - **Morte por fome**: cada morador acumula dias sem alimentação e morre ao
   completar 30; a morte libera casa e emprego e aparece na barra. 88 testes.

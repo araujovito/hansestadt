@@ -34,7 +34,7 @@ TESTE_FLAGS   := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -Itestes -is
 TESTE_FONTES  := $(wildcard testes/*.cpp) $(LOGICA:%=src/%.cpp)
 TESTE_BINARIO := build/testes/testes
 
-.PHONY: all run debug test clean
+.PHONY: all run debug test balance clean
 
 all: $(BINARIO)
 
@@ -64,6 +64,9 @@ $(TESTE_BINARIO): $(TESTE_FONTES) $(wildcard src/*.hpp testes/*.hpp) | $(TOMLHPP
 
 test: $(TESTE_BINARIO)
 	./$(TESTE_BINARIO)
+
+balance:
+	python3 ferramentas/balancear.py
 
 clean:
 	rm -rf build

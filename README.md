@@ -98,9 +98,20 @@ morador a cada dia. Após 30 dias consecutivos sem comer, o morador morre e
 libera sua vaga na casa e no trabalho.
 
 A partida começa pausada no tempo, com apenas o armazém disponível. Ao
-posicioná-lo, os colonos descarregam 120 unidades provisórias de pão e o
-restante da barra de construção é liberado. Essa quantidade será revista
-pelo balanceamento econômico.
+posicioná-lo, os colonos descarregam 480 porções de pão e o restante da barra
+de construção é liberado.
+
+## Balanceamento
+
+`make balance` roda três anos da economia sem abrir a janela, lendo as mesmas
+receitas e sazonalidades dos TOMLs. O cenário-base usa os 6 moradores e uma
+fazenda, um moinho, uma padaria, um pescador e uma pocilga. O resultado fica
+em `build/balanceamento/economia.csv`, com totais mensais, e
+`economia.svg`, com produção e consumo acumulados.
+
+O primeiro ajuste produz 6.804 porções, consome 6.222 e não registra falta
+em três anos. A simulação é deliberadamente agregada: transporte, distância
+e limites físicos precisam ser confirmados no teste integrado do marco.
 
 ## Tecnologia
 

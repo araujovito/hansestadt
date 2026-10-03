@@ -7,7 +7,7 @@
 // uma única vez e a construção normal pode ser liberada.
 class Fundacao {
 public:
-    static constexpr int COMIDA_INICIAL = 120;
+    static constexpr int COMIDA_INICIAL = 480;
 
     explicit Fundacao(const Conteudo& conteudo, int comida_inicial = COMIDA_INICIAL);
 

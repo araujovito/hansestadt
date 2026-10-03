@@ -206,6 +206,10 @@ documentos não voltarem a divergir.
   longo de 1347–1351); a Grande Fome continua reduzindo produção e deixa a
   fome causar mortes pelo mecanismo normal. O contador de mortes por eventos
   é persistido na versão 5; saves v3/v4 migram com zero nesse contador.
+- **Inverno de 1322–1323**: acrescentado um evento com redução temporária
+  da pesca e da moagem d'água, usando o intervalo de 30/11/1322 a 06/03/1323
+  descrito para o congelamento do Báltico. O registro histórico é raro e o
+  multiplicador é uma abstração de jogo, não uma medida climática observada.
 - **Regras novas de mobilidade decididas pelo Vitor**: cada edifício terá
   cobertura de carregador separada da mão de obra de produção, compartilhada
   quando a população for insuficiente; trajetos casa–trabalho formarão trilhas
@@ -224,8 +228,11 @@ documentos não voltarem a divergir.
   ainda não distingue água doce de mar, e o sal ainda não usa recurso do mapa.
 - **Primeiro ajuste de produtividade**: rendimentos de carne do curral e do
   ovelheiro e de arenque foram aproximados aos alimentos existentes por
-  trabalhador. Não é o rebalanceamento final: a mão de obra e o transporte
-  serão recalculados quando as regras de carregadores forem fechadas.
+  trabalhador. A ferramenta estima 1,50; 1,50; e 1,47 porções por
+  trabalhador/dia, ante 2,94 no peixe de rio e 0,99 no porco. É capacidade
+  bruta das receitas sem insumos, transporte ou limite de estoque, não o
+  resultado de uma cidade. A mão de obra e o transporte serão recalculados
+  quando as regras de carregadores forem fechadas.
 
 ### 2026-10-03
 

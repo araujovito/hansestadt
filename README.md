@@ -133,6 +133,12 @@ e limites físicos também são cobertos pelo teste integrado do marco. Com a
 cadeia completa, os seis moradores atravessam o inverno de 1150–51; sem a
 fazenda, há refeições perdidas.
 
+O balanceador também compara a capacidade bruta de receitas que produzem
+comida sem insumos, em porções por trabalhador/dia. No catálogo atual, peixe
+de rio rende 2,94; porco, 0,99; gado, 1,50; ovelha, 1,50; arenque, 1,47.
+Essa conta usa as sazonalidades e não limita transporte, estoque nem entradas
+de outras cadeias; serve para achar discrepâncias, não substitui a simulação.
+
 ## Tecnologia
 
 | Parte | Escolha | Motivo |
@@ -152,6 +158,13 @@ efeitos da Grande Fome reduzem colheitas e pesca, e mortes acontecem pelo
 sistema normal de fome quando falta comida. O contador de mortes por evento
 é persistido em saves versão 5; versões 3 e 4 continuam carregáveis. A
 interface pode ler o histórico pelas APIs de eventos.
+
+O catálogo também inclui o inverno excepcional de 1322–1323, que reduz pesca
+e moagem entre 30 de novembro e 6 de março. O intervalo segue um relato
+medieval sobre gelo no Báltico e rotas de mercadores; reconstruções do gelo
+histórico destacam a escassez e a incerteza das fontes para o século XIV
+([relato e estudo](https://link.springer.com/article/10.1007/s00704-015-1524-9),
+[reconstrução do gelo no Báltico](https://rmets.onlinelibrary.wiley.com/doi/10.1002/joc.2337)).
 
 O percentual da peste é um parâmetro agregado de jogo, não uma previsão para
 cada vila: estudos estimam mortalidade de 30–50% na Europa durante a pandemia

@@ -9,11 +9,28 @@ TESTE("eventos: conteúdo histórico carrega do TOML") {
     const ResultadoEventos r = carregar_eventos("dados", *carga.conteudo);
     VERIFICAR(r.eventos.has_value());
     if (!r.eventos) return;
-    VERIFICAR(r.eventos->size() == 2);
+    VERIFICAR(r.eventos->size() == 3);
     VERIFICAR((*r.eventos)[0].id == "grande_fome");
-    VERIFICAR((*r.eventos)[1].id == "peste_negra");
+    VERIFICAR((*r.eventos)[1].id == "inverno_baltico_1322");
+    VERIFICAR((*r.eventos)[2].id == "peste_negra");
     VERIFICAR((*r.eventos)[0].mortalidade_anual == 0.0f);
-    VERIFICAR((*r.eventos)[1].mortalidade_anual == 0.10f);
+    VERIFICAR((*r.eventos)[2].mortalidade_anual == 0.10f);
+}
+
+TESTE("eventos: inverno rigoroso afeta água e moagem no intervalo histórico") {
+    const ResultadoCarga carga = carregar_conteudo("dados");
+    if (!carga.conteudo) { VERIFICAR(false); return; }
+    const ResultadoEventos r = carregar_eventos("dados", *carga.conteudo);
+    if (!r.eventos) { VERIFICAR(false); return; }
+    const auto moinho = carga.conteudo->buscar_edificio("moinho");
+    const auto pescador = carga.conteudo->buscar_edificio("pescador");
+    VERIFICAR(moinho.has_value() && pescador.has_value());
+    if (!moinho || !pescador) return;
+    const Eventos eventos(*r.eventos);
+    VERIFICAR(eventos.multiplicador_producao({1322, 11, 29}, *moinho) == 1.0f);
+    VERIFICAR(eventos.multiplicador_producao({1322, 11, 30}, *moinho) == 0.6f);
+    VERIFICAR(eventos.multiplicador_producao({1323, 3, 6}, *pescador) == 0.35f);
+    VERIFICAR(eventos.multiplicador_producao({1323, 3, 7}, *pescador) == 1.0f);
 }
 
 TESTE("eventos: mortalidade anual vira risco diário só no intervalo ativo") {

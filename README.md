@@ -60,7 +60,7 @@ Quatro ramos, liberados aos poucos pelas fases:
 | Construção | lenhador, toras | carvoaria, turfa | poço de argila, olaria (tijolo) |
 | Agricultura | fazenda de centeio, moinho d'água, padaria | cevada → malte → cerveja | lúpulo, linho |
 | Pecuária e ofícios | pocilga (porcos na floresta) | curral (carne e pele), ovelheiro (lã e carne) | tecelagem (lã → tecido), curtume (pele → couro) |
-| Pesca | pescador de rio | | pescador de mar (arenque), tanoeiro, salgadeira |
+| Pesca e conservação | pescador de rio | salina (sal) | pesca de arenque → tanoeiro (barril) → salgadeira (arenque salgado) |
 
 Duas regras de projeto:
 
@@ -193,6 +193,12 @@ O primeiro corte de pecuária também está disponível: curral produz carne e
 pele, ovelheiro produz lã e carne; na fase Cidade, tecelagem converte lã em
 tecido e curtume converte pele em couro. Rebanho, pastagem e abate são
 agregados por enquanto, sem consumo de ração ou esgotamento de pasto.
+
+Na fase Cidade, a salina fornece sal de forma abstrata. Na Hansa, o pescador
+de arenque, o tanoeiro e a salgadeira fecham a cadeia de conservação:
+arenque + sal + barril → arenque salgado, que conta como alimento. A salina
+ainda não depende de um terreno de sal, e a pesca usa a água próxima sem
+distinguir rio de mar; isso fica para o bloco de recursos e mapa histórico.
 
 ## Como a economia funciona
 

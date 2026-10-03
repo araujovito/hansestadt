@@ -62,11 +62,11 @@ do README e do contexto e um ou mais commits pequenos.
      nível e custo explicados permanece na tarefa de interface.
 
 7. **Completar as cadeias econômicas**
-   - Primeiro corte concluído: cevada → malte → cerveja, disponível no
-     Mercado; cerveja ainda não é consumida nem vendida.
-   - Segundo corte concluído: gado/ovelhas → carne, pele e lã; tecelagem e
-     curtume transformam lã em tecido e pele em couro.
-   - Próxima fatia: arenque, barris e salga.
+   - Implementado primeiro corte dos ramos: cevada → malte → cerveja;
+     gado/ovelhas → carne, pele e lã → tecido/couro; arenque + sal + barril
+     → arenque salgado (alimento).
+   - O combustível/argila/tijolo já tem cadeia de carvoaria/turfa → olaria.
+   - Rebalanceamento integrado ainda pendente; valores atuais são provisórios.
    - Cadeia completa de argila, combustível e tijolos.
    - Rebalancear mão de obra, transporte e custos após cada ramo.
 

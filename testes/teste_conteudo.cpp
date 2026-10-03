@@ -54,8 +54,13 @@ TESTE("conteúdo: os arquivos reais do jogo carregam sem erros") {
         const auto ovelheiro = c.buscar_edificio("ovelheiro");
         const auto tecelagem = c.buscar_edificio("tecelagem");
         const auto curtume = c.buscar_edificio("curtume");
+        const auto salina = c.buscar_edificio("salina");
+        const auto tanoeiro = c.buscar_edificio("tanoeiro");
+        const auto pescador = c.buscar_edificio("pescador_arenque");
+        const auto salgadeira = c.buscar_edificio("salgadeira");
         VERIFICAR(fazenda && malteria && cervejaria);
         VERIFICAR(curral && ovelheiro && tecelagem && curtume);
+        VERIFICAR(salina && tanoeiro && pescador && salgadeira);
         if (fazenda && malteria && cervejaria) {
             VERIFICAR(c.edificio(*fazenda).receitas[0].saidas[0].item == *c.buscar_item("cevada"));
             VERIFICAR(c.edificio(*malteria).receitas[0].entradas[0].item == *c.buscar_item("cevada"));
@@ -74,6 +79,19 @@ TESTE("conteúdo: os arquivos reais do jogo carregam sem erros") {
             VERIFICAR(c.edificio(*tecelagem).receitas[0].saidas[0].item == *c.buscar_item("tecido"));
             VERIFICAR(c.edificio(*curtume).receitas[0].entradas[0].item == *c.buscar_item("pele"));
             VERIFICAR(c.edificio(*curtume).receitas[0].saidas[0].item == *c.buscar_item("couro"));
+        }
+        if (salina && tanoeiro && pescador && salgadeira) {
+            const Receita& salga = c.edificio(*salgadeira).receitas[0];
+            const auto tem_entrada = [&salga, &c](const char* id) {
+                return std::any_of(salga.entradas.begin(), salga.entradas.end(),
+                    [&c, id](const Quantidade& q) { return q.item == *c.buscar_item(id); });
+            };
+            VERIFICAR(c.edificio(*salina).receitas[0].saidas[0].item == *c.buscar_item("sal"));
+            VERIFICAR(c.edificio(*tanoeiro).receitas[0].saidas[0].item == *c.buscar_item("barril"));
+            VERIFICAR(c.edificio(*pescador).receitas[0].saidas[0].item == *c.buscar_item("arenque"));
+            VERIFICAR(tem_entrada("arenque") && tem_entrada("sal") && tem_entrada("barril"));
+            VERIFICAR(salga.saidas[0].item == *c.buscar_item("arenque_salgado"));
+            VERIFICAR(c.itens[*c.buscar_item("arenque_salgado")].tipo == TipoItem::Comida);
         }
     }
 }

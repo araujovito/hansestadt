@@ -201,6 +201,9 @@ documentos não voltarem a divergir.
 - **Pecuária e ofícios**: curral e ovelheiro abastecem carne, pele e lã;
   tecelagem e curtume completam tecido e couro. Rebanhos/pastagem estão
   agregados, sem ração nem esgotamento do terreno nesta etapa.
+- **Pesca e conservação**: salina abstrata, pesca de arenque, tanoeiro e
+  salgadeira completam arenque + sal + barril → alimento conservado. A pesca
+  ainda não distingue água doce de mar, e o sal ainda não usa recurso do mapa.
 
 ### 2026-10-03
 

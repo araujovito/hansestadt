@@ -89,3 +89,23 @@ tipo = "insumo"
 id = "couro"
 nome = "couro"
 tipo = "insumo"
+
+[[item]]
+id = "sal"
+nome = "sal"
+tipo = "insumo"
+
+[[item]]
+id = "barril"
+nome = "barril"
+tipo = "insumo"
+
+[[item]]
+id = "arenque"
+nome = "arenque"
+tipo = "comida"
+
+[[item]]
+id = "arenque_salgado"
+nome = "arenque salgado"
+tipo = "comida"

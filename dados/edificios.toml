@@ -444,3 +444,71 @@ custo = { tora = 10, tijolo = 2 }
 dias = 5
 entradas = { pele = 2 }
 saidas = { couro = 1 }
+
+# ---------------------------------------------------- pesca e conservação
+
+[[edificio]]
+id = "salina"
+nome = "salina"
+fase = "cidade"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#d0c8a0"
+trabalhadores = 1
+estoque = 8
+custo = { tora = 8, tijolo = 2 }
+
+[[edificio.receita]]
+# Produção abstrata: o mapa ainda não define jazidas ou salinas costeiras.
+dias = 8
+saidas = { sal = 1 }
+
+[[edificio]]
+id = "tanoeiro"
+nome = "tanoeiro"
+fase = "hansa"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#806044"
+trabalhadores = 1
+estoque = 8
+custo = { tora = 8, tijolo = 2 }
+
+[[edificio.receita]]
+dias = 4
+entradas = { tora = 2 }
+saidas = { barril = 1 }
+
+[[edificio]]
+id = "pescador_arenque"
+nome = "pesca de arenque"
+fase = "hansa"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#64899c"
+trabalhadores = 2
+estoque = 16
+custo = { tora = 8, tijolo = 2 }
+requer = { terreno = "agua", distancia = 1 }
+
+[[edificio.receita]]
+dias = 4
+saidas = { arenque = 8 }
+# Gelo e frio reduzem a pesca no inverno.
+sazonalidade = [0.3, 0.3, 0.6, 1, 1, 1, 1, 1, 1, 0.8, 0.5, 0.3]
+
+[[edificio]]
+id = "salgadeira"
+nome = "salgadeira"
+fase = "hansa"
+tamanho = [2, 2]
+terreno = "campo"
+cor = "#b49a70"
+trabalhadores = 1
+estoque = 24
+custo = { tora = 10, tijolo = 2 }
+
+[[edificio.receita]]
+dias = 3
+entradas = { arenque = 4, sal = 1, barril = 1 }
+saidas = { arenque_salgado = 16 }

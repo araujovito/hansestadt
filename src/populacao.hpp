@@ -4,6 +4,7 @@
 
 #include "calendario.hpp"
 #include "cidade.hpp"
+#include "eventos.hpp"
 
 struct Morador {
     static constexpr int DIAS_POR_ANO = 365;
@@ -28,7 +29,7 @@ public:
     void alojar(Cidade& cidade);
     void empregar(const Cidade& cidade, bool incluir_carregadores = false);
     void consumir_comida(Cidade& cidade);
-    void avancar_dia(Cidade& cidade, Data data);
+    void avancar_dia(Cidade& cidade, Data data, const Eventos* eventos = nullptr);
 
     int total() const;
     int alojados() const;
@@ -37,10 +38,12 @@ public:
     int trabalhadores_em(IdEdificio edificio) const;
     int desempregados() const;
     int mortos_de_fome() const { return mortos_de_fome_; }
+    int mortos_por_eventos() const { return mortos_por_eventos_; }
     int refeicoes_perdidas() const { return refeicoes_perdidas_; }
     int criancas() const;
     const std::vector<Morador>& moradores() const { return moradores_; }
-    static Populacao restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas);
+    static Populacao restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas,
+                               int mortos_por_eventos = 0);
 
 private:
     std::vector<Morador> moradores_;
@@ -49,5 +52,6 @@ private:
     // contar percorrendo a população custava edifícios × moradores.
     std::vector<int> trabalhadores_;
     int mortos_de_fome_ = 0;
+    int mortos_por_eventos_ = 0;
     int refeicoes_perdidas_ = 0;
 };

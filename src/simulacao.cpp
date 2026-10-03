@@ -13,7 +13,7 @@ void Simulacao::passo() {
     if (tick % TICKS_POR_DIA == 0) {
         populacao.consumir_comida(cidade);
         data = dia_seguinte(data);
-        populacao.avancar_dia(cidade, data);
+        populacao.avancar_dia(cidade, data, &eventos);
         fase = tentar_avancar_fase(fase, data, estados_das_instituicoes(cidade, fase)).fase;
     }
 }

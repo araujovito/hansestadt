@@ -142,30 +142,51 @@ TESTE("instituições: salvamento preserva fase e níveis") {
     std::filesystem::remove(caminho);
 }
 
-TESTE("salvamento: versão 3 migra a fase para Vila") {
+TESTE("salvamento: versões 3 e 4 migram para o formato atual") {
     const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, EDIFICIOS);
     if (!r.conteudo) { VERIFICAR(false); return; }
     Simulacao sim(Cidade(Mapa(2, 2), *r.conteudo));
     sim.fase = Fase::Hansa;
+    sim.populacao = Populacao::restaurar({}, 0, 0, 123);
     const std::string caminho = "/tmp/hansestadt-teste-v3.hanse";
     const std::string caminho_legado = "/tmp/hansestadt-teste-v3-legado.hanse";
+    const std::string caminho_v4 = "/tmp/hansestadt-teste-v4-legado.hanse";
     std::string erro;
     VERIFICAR(salvar_partida(sim, caminho, erro));
+    const ResultadoSalvamento carga_v5 = carregar_partida(caminho, *r.conteudo);
+    VERIFICAR(carga_v5.simulacao.has_value());
+    if (carga_v5.simulacao)
+        VERIFICAR(carga_v5.simulacao->populacao.mortos_por_eventos() == 123);
     std::ifstream entrada(caminho, std::ios::binary);
     std::string bytes{ std::istreambuf_iterator<char>(entrada), std::istreambuf_iterator<char>() };
     entrada.close();
-    // A fase foi inserida depois da data no cabeçalho v4; o save de teste não
-    // tem edifícios, logo não contém ainda os campos de nível novos.
-    if (bytes.size() > 32) {
-        bytes.erase(32, 1);
-        bytes[10] = '\3';
+    // O save mínimo tem dois contadores de população antes do novo contador
+    // de mortes por evento, cujo offset é 89 bytes (sem edifícios/moradores).
+    constexpr std::size_t OFFSET_MORTES_EVENTOS = 89;
+    std::string bytes_v4 = bytes;
+    bytes_v4.erase(OFFSET_MORTES_EVENTOS, sizeof(int));
+    bytes_v4[10] = '\4';
+    std::ofstream saida_v4(caminho_v4, std::ios::binary | std::ios::trunc);
+    saida_v4.write(bytes_v4.data(), static_cast<std::streamsize>(bytes_v4.size()));
+    saida_v4.close();
+    const ResultadoSalvamento carga_v4 = carregar_partida(caminho_v4, *r.conteudo);
+    VERIFICAR(carga_v4.simulacao.has_value());
+    if (carga_v4.simulacao) {
+        VERIFICAR(carga_v4.simulacao->fase == Fase::Hansa);
+        VERIFICAR(carga_v4.simulacao->populacao.mortos_por_eventos() == 0);
     }
+
+    bytes.erase(OFFSET_MORTES_EVENTOS, sizeof(int));
+    bytes.erase(32, 1);  // v3 ainda não tinha a fase persistida.
+    bytes[10] = '\3';
     std::ofstream saida(caminho_legado, std::ios::binary | std::ios::trunc);
     saida.write(bytes.data(), static_cast<std::streamsize>(bytes.size()));
     saida.close();
     const ResultadoSalvamento carga = carregar_partida(caminho_legado, *r.conteudo);
     VERIFICAR(carga.simulacao.has_value());
     if (carga.simulacao) VERIFICAR(carga.simulacao->fase == Fase::Vila);
+    if (carga.simulacao) VERIFICAR(carga.simulacao->populacao.mortos_por_eventos() == 0);
     std::filesystem::remove(caminho);
     std::filesystem::remove(caminho_legado);
+    std::filesystem::remove(caminho_v4);
 }

@@ -1,6 +1,7 @@
 #include "eventos.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 
@@ -51,6 +52,15 @@ std::optional<float> ler_multiplicador(const toml::node& no, const std::string& 
     return static_cast<float>(*fator);
 }
 
+std::optional<float> ler_mortalidade_anual(const toml::node& no, const std::string& contexto, Erros& erros) {
+    const auto taxa = no.value<double>();
+    if (!taxa || *taxa < 0.0 || *taxa > 1.0) {
+        erros.adicionar(contexto, "mortalidade_anual precisa ser número entre 0 e 1");
+        return std::nullopt;
+    }
+    return static_cast<float>(*taxa);
+}
+
 }  // namespace
 
 ResultadoEventos carregar_eventos(const std::string& pasta, const Conteudo& conteudo) {
@@ -99,6 +109,10 @@ ResultadoEventos carregar_eventos(const std::string& pasta, const Conteudo& cont
             if (auto fator = ler_multiplicador(*(*tabela)["multiplicador_geral"].node(), ctx, erros))
                 evento.multiplicador_geral = *fator;
         }
+        if (tabela->contains("mortalidade_anual")) {
+            if (auto taxa = ler_mortalidade_anual(*(*tabela)["mortalidade_anual"].node(), ctx, erros))
+                evento.mortalidade_anual = *taxa;
+        }
         if (const toml::table* fatores = (*tabela)["producao"].as_table()) {
             for (const auto& [id_edificio, no_fator] : *fatores) {
                 const auto tipo = conteudo.buscar_edificio(id_edificio.str());
@@ -142,4 +156,15 @@ float Eventos::multiplicador_producao(Data data, IdTipoEdificio edificio) const 
             if (tipo == edificio) total *= fator;
     }
     return total;
+}
+
+float Eventos::probabilidade_morte_diaria(Data data) const {
+    double sobrevivencia = 1.0;
+    constexpr double DIAS_POR_ANO_JULIANO = 365.25;
+    for (const EventoHistorico* evento : ativos(data)) {
+        if (evento->mortalidade_anual <= 0.0f) continue;
+        const double diaria = 1.0 - std::pow(1.0 - evento->mortalidade_anual, 1.0 / DIAS_POR_ANO_JULIANO);
+        sobrevivencia *= 1.0 - diaria;
+    }
+    return static_cast<float>(1.0 - sobrevivencia);
 }

@@ -1,16 +1,35 @@
 #include "populacao.hpp"
 
 #include <algorithm>
+#include <cstdint>
+
+namespace {
+
+double sorte_deterministica(std::size_t morador, Data data) {
+    std::uint64_t valor = (static_cast<std::uint64_t>(static_cast<std::uint32_t>(data.ano)) << 32) ^
+                          (static_cast<std::uint64_t>(static_cast<std::uint32_t>(data.mes)) << 24) ^
+                          (static_cast<std::uint64_t>(static_cast<std::uint32_t>(data.dia)) << 16) ^
+                          static_cast<std::uint64_t>(morador);
+    valor += 0x9e3779b97f4a7c15ULL;
+    valor = (valor ^ (valor >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    valor = (valor ^ (valor >> 27)) * 0x94d049bb133111ebULL;
+    valor ^= valor >> 31;
+    return static_cast<double>(valor >> 11) * (1.0 / 9007199254740992.0);
+}
+
+}  // namespace
 
 Populacao::Populacao(int quantidade_inicial)
     : moradores_(static_cast<std::size_t>(std::max(0, quantidade_inicial))) {
     for (std::size_t i = 0; i < moradores_.size(); ++i) moradores_[i].mulher = i % 2 != 0;
 }
 
-Populacao Populacao::restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas) {
+Populacao Populacao::restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas,
+                               int mortos_por_eventos) {
     Populacao p(0);
     p.moradores_ = std::move(moradores);
     p.mortos_de_fome_ = mortos_de_fome;
+    p.mortos_por_eventos_ = mortos_por_eventos;
     p.refeicoes_perdidas_ = refeicoes_perdidas;
     // A contagem por edifício não vai para o arquivo: sai dos próprios
     // moradores, que guardam onde trabalham.
@@ -125,8 +144,22 @@ void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
     }
 }
 
-void Populacao::avancar_dia(Cidade& cidade, Data data) {
+void Populacao::avancar_dia(Cidade& cidade, Data data, const Eventos* eventos) {
     for (Morador& m : moradores_) if (m.vivo) ++m.idade_dias;
+
+    const float chance_morte = eventos ? eventos->probabilidade_morte_diaria(data) : 0.0f;
+    if (chance_morte > 0.0f) {
+        for (std::size_t i = 0; i < moradores_.size(); ++i) {
+            Morador& m = moradores_[i];
+            if (!m.vivo || sorte_deterministica(i, data) >= chance_morte) continue;
+            m.vivo = false;
+            m.casa = SEM_EDIFICIO;
+            if (m.trabalho != SEM_EDIFICIO) --trabalhadores_[m.trabalho];
+            m.trabalho = SEM_EDIFICIO;
+            ++mortos_por_eventos_;
+        }
+    }
+
     if (data.mes != 1 || data.dia != 1) return;
 
     std::vector<IdEdificio> nascimentos;

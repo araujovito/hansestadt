@@ -2,6 +2,7 @@
 # As datas usam o calendário juliano; fim é inclusivo.
 # multiplicador_geral afeta toda produção durante o intervalo.
 # producao pode ajustar edifícios específicos, combinando com o fator geral.
+# mortalidade_anual é a chance de morrer por doença ao longo de um ano ativo.
 
 [[evento]]
 id = "grande_fome"
@@ -9,7 +10,7 @@ nome = "Grande Fome"
 descricao = "Anos de chuva persistente arruínam as colheitas no norte da Europa."
 inicio = [1315, 1, 1]
 fim = [1317, 12, 31]
-producao = { fazenda = 0.25, pescador = 0.75 }
+producao = { fazenda = 0.25, fazenda_cevada = 0.25, pescador = 0.75, pescador_arenque = 0.75 }
 
 [[evento]]
 id = "peste_negra"
@@ -18,3 +19,4 @@ descricao = "A peste interrompe o comércio e reduz a capacidade produtiva das c
 inicio = [1347, 1, 1]
 fim = [1351, 12, 31]
 multiplicador_geral = 0.65
+mortalidade_anual = 0.10

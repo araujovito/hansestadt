@@ -15,6 +15,8 @@ struct EventoHistorico {
     Data inicio;
     Data fim;
     float multiplicador_geral = 1.0f;
+    // Probabilidade de mortalidade acumulada em um ano juliano, enquanto ativo.
+    float mortalidade_anual = 0.0f;
     std::vector<std::pair<IdTipoEdificio, float>> producao_por_edificio;
 };
 
@@ -34,6 +36,7 @@ public:
     std::vector<const EventoHistorico*> ativos(Data data) const;
     std::vector<const EventoHistorico*> ocorridos(Data data) const;
     float multiplicador_producao(Data data, IdTipoEdificio edificio) const;
+    float probabilidade_morte_diaria(Data data) const;
 
 private:
     std::vector<EventoHistorico> definicoes_;

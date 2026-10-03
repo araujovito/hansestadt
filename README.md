@@ -144,10 +144,20 @@ fazenda, há refeições perdidas.
 
 Os eventos estão em `dados/eventos.toml`: cada `[[evento]]` tem `id`,
 `nome`, `descricao`, datas julianas inclusivas (`[ano, mês, dia]`) e
-multiplicadores opcionais. `multiplicador_geral` afeta toda produção;
-`producao` permite ajustar edifícios por id. Fatores de eventos ativos se
-combinam multiplicativamente. A primeira versão não muda população nem
-salvamentos; o histórico visual está em andamento na branch de interface.
+efeitos opcionais. `multiplicador_geral` afeta toda produção;
+`producao` permite ajustar edifícios por id; `mortalidade_anual` aplica uma
+chance diária determinística de morte enquanto o evento estiver ativo. A
+Peste Negra usa 10% ao ano durante cinco anos (cerca de 41% acumulados); os
+efeitos da Grande Fome reduzem colheitas e pesca, e mortes acontecem pelo
+sistema normal de fome quando falta comida. O contador de mortes por evento
+é persistido em saves versão 5; versões 3 e 4 continuam carregáveis. A
+interface pode ler o histórico pelas APIs de eventos.
+
+O percentual da peste é um parâmetro agregado de jogo, não uma previsão para
+cada vila: estudos estimam mortalidade de 30–50% na Europa durante a pandemia
+([estudo bioarqueológico de Londres](https://pmc.ncbi.nlm.nih.gov/articles/PMC3094018/)).
+A Grande Fome de 1315–1317 também teve crise de mortalidade associada às
+colheitas e às condições climáticas ([estudo hidroclimático](https://www.nature.com/articles/s43247-020-00016-3)).
 
 Alternativas consideradas: **Godot**, que dá o protótipo mais rápido, mas
 o GDScript limita a simulação com muitos agentes; **Rust**, que tem memória

@@ -28,13 +28,15 @@ do README e do contexto e um ou mais commits pequenos.
 ## Próximos blocos, em ordem
 
 4. **Eventos históricos e climáticos**
-   - Em andamento na `codex/simulacao`: primeiro corte em TOML com Grande
-     Fome e Peste Negra, intervalos julianos inclusivos e modificadores de
-     produção; efeitos demográficos ficam pendentes.
+   - Primeiro corte em TOML implementado: Grande Fome e Peste Negra, datas
+     julianas inclusivas, modificadores de produção e mortalidade determinística
+     da peste; a Grande Fome causa morte por falta de comida no sistema atual.
+   - Ainda falta modelar efeitos demográficos de longo prazo, como fecundidade
+     e recuperação após as crises.
    - API para a interface: `sim.eventos.ativos(sim.data)` e
      `sim.eventos.ocorridos(sim.data)`; a lista inclui definições com nome,
      descrição e intervalo.
-   - Chuvas, invernos rigorosos, Grande Fome e Peste Negra.
+   - Chuvas e invernos rigorosos ainda precisam de eventos próprios.
    - Começar em TOML para datas e modificadores simples.
    - Só introduzir Lua se um evento real exigir lógica que o TOML não expresse.
    - Registrar acontecimentos e seus efeitos para o jogador.

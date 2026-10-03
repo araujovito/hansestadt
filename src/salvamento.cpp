@@ -8,7 +8,8 @@
 namespace {
 
 constexpr char MAGIA_V3[] = "HANSESTADT\3";
-constexpr char MAGIA[] = "HANSESTADT\4";
+constexpr char MAGIA_V4[] = "HANSESTADT\4";
+constexpr char MAGIA[] = "HANSESTADT\5";
 constexpr std::uint64_t MAXIMO_VETOR = 10'000'000;
 
 template <class T>
@@ -70,6 +71,7 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
         escrever(out, m.idade_dias); escrever(out, m.mulher); escrever(out, m.vivo);
     }
     escrever(out, sim.populacao.mortos_de_fome()); escrever(out, sim.populacao.refeicoes_perdidas());
+    escrever(out, sim.populacao.mortos_por_eventos());
 
     escrever(out, static_cast<std::uint64_t>(sim.transporte.carregadores().size()));
     for (const Carregador& c : sim.transporte.carregadores()) {
@@ -90,7 +92,8 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     if (!in.read(magia, sizeof(magia))) throw std::runtime_error("formato ou versão incompatível");
     const std::string versao_arquivo(magia, sizeof(magia));
     const bool legado_v3 = versao_arquivo == std::string(MAGIA_V3, sizeof(MAGIA_V3));
-    if (!legado_v3 && versao_arquivo != std::string(MAGIA, sizeof(MAGIA)))
+    const bool legado_v4 = versao_arquivo == std::string(MAGIA_V4, sizeof(MAGIA_V4));
+    if (!legado_v3 && !legado_v4 && versao_arquivo != std::string(MAGIA, sizeof(MAGIA)))
         throw std::runtime_error("formato ou versão incompatível");
     const auto tick = ler<std::uint64_t>(in);
     const Data data{ler<int>(in), ler<int>(in), ler<int>(in)};
@@ -138,7 +141,8 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     }
     const int mortos = ler<int>(in);
     const int refeicoes_perdidas = ler<int>(in);
-    sim.populacao = Populacao::restaurar(std::move(moradores), mortos, refeicoes_perdidas);
+    const int mortos_por_eventos = legado_v3 || legado_v4 ? 0 : ler<int>(in);
+    sim.populacao = Populacao::restaurar(std::move(moradores), mortos, refeicoes_perdidas, mortos_por_eventos);
 
     const std::uint64_t n_carregadores = ler<std::uint64_t>(in);
     if (n_carregadores > MAXIMO_VETOR) throw std::runtime_error("carregadores demais");

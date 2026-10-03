@@ -233,3 +233,47 @@ TESTE("população: carregador ocupa um adulto antes das oficinas") {
     VERIFICAR(p.trabalhadores_em(deposito) == 2);
     VERIFICAR(p.trabalhadores_em(serraria) == 0);
 }
+
+TESTE("população: cada geração rende 5% a mais, até +25%, e criança rende metade") {
+    Morador fundador;
+    VERIFICAR(fundador.produtividade() == 1000);
+    Morador neto;
+    neto.geracao = 2;
+    VERIFICAR(neto.produtividade() == 1100);
+    neto.geracao = 9;
+    VERIFICAR(neto.produtividade() == 1250);
+    Morador crianca;
+    crianca.idade_dias = 12 * Morador::DIAS_POR_ANO;
+    crianca.geracao = 1;
+    VERIFICAR(crianca.produtividade() == 525);
+}
+
+TESTE("população: bebê nasce uma geração acima da mais nova da casa") {
+    Cidade c = cidade_para_populacao();
+    const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+    Morador pai;
+    Morador mae;
+    mae.mulher = true;
+    mae.geracao = 2;
+    Populacao p = Populacao::restaurar({ pai, mae }, 0, 0);
+    p.alojar(c);
+    c.adicionar(casa, item("pao"), 1);
+    p.avancar_dia(c, { 1151, 1, 1 });
+    VERIFICAR(p.total() == 3);
+    VERIFICAR(p.moradores()[2].geracao == 3);
+}
+
+TESTE("população: soma a produtividade de quem trabalha e desconta os mortos") {
+    Cidade c = cidade_para_populacao();
+    c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio serraria = *c.construir_edificio(tipo("serraria"), { 5, 1 });
+    Morador neto;
+    neto.geracao = 2;
+    Populacao p = Populacao::restaurar({ neto }, 0, 0);
+    p.alojar(c);
+    p.empregar(c);
+    VERIFICAR(p.produtividade_em(serraria) == 1100);
+    VERIFICAR(Populacao::restaurar(p.moradores(), 0, 0).produtividade_em(serraria) == 1100);
+    for (int dia = 0; dia < Populacao::DIAS_ATE_MORRER_DE_FOME; ++dia) p.consumir_comida(c);
+    VERIFICAR(p.produtividade_em(serraria) == 0);
+}

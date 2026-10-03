@@ -35,8 +35,12 @@ Populacao Populacao::restaurar(std::vector<Morador> moradores, int mortos_de_fom
     // moradores, que guardam onde trabalham.
     for (const Morador& m : p.moradores_) {
         if (!m.vivo || m.trabalho == SEM_EDIFICIO) continue;
-        if (m.trabalho >= p.trabalhadores_.size()) p.trabalhadores_.resize(m.trabalho + 1, 0);
+        if (m.trabalho >= p.trabalhadores_.size()) {
+            p.trabalhadores_.resize(m.trabalho + 1, 0);
+            p.produtividade_.resize(m.trabalho + 1, 0);
+        }
         ++p.trabalhadores_[m.trabalho];
+        p.produtividade_[m.trabalho] += m.produtividade();
     }
     return p;
 }
@@ -63,6 +67,10 @@ int Populacao::moradores_na_casa(IdEdificio casa) const {
 
 int Populacao::trabalhadores_em(IdEdificio edificio) const {
     return edificio < trabalhadores_.size() ? trabalhadores_[edificio] : 0;
+}
+
+int Populacao::produtividade_em(IdEdificio edificio) const {
+    return edificio < produtividade_.size() ? produtividade_[edificio] : 0;
 }
 
 int Populacao::desempregados() const {
@@ -110,6 +118,7 @@ void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
     // de construções e libera imediatamente quem perdeu casa ou trabalho.
     for (Morador& m : moradores_) m.trabalho = SEM_EDIFICIO;
     trabalhadores_.assign(cidade.edificios().size(), 0);
+    produtividade_.assign(cidade.edificios().size(), 0);
     // Os empregos são distribuídos em ordem de morador, então quem ficou
     // para trás do cursor já tem trabalho ou não pode trabalhar: o próximo
     // edifício continua de onde o anterior parou, sem voltar ao começo.
@@ -123,6 +132,7 @@ void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
                 Morador& m = moradores_[proximo];
                 if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) {
                     m.trabalho = id;
+                    produtividade_[id] += m.produtividade();
                     ++ocupadas;
                 }
             }
@@ -137,6 +147,7 @@ void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
             Morador& m = moradores_[proximo];
             if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) {
                 m.trabalho = id;
+                produtividade_[id] += m.produtividade();
                 ++ocupadas;
             }
         }
@@ -154,7 +165,10 @@ void Populacao::avancar_dia(Cidade& cidade, Data data, const Eventos* eventos) {
             if (!m.vivo || sorte_deterministica(i, data) >= chance_morte) continue;
             m.vivo = false;
             m.casa = SEM_EDIFICIO;
-            if (m.trabalho != SEM_EDIFICIO) --trabalhadores_[m.trabalho];
+            if (m.trabalho != SEM_EDIFICIO) {
+                --trabalhadores_[m.trabalho];
+                produtividade_[m.trabalho] -= m.produtividade();
+            }
             m.trabalho = SEM_EDIFICIO;
             ++mortos_por_eventos_;
         }
@@ -162,26 +176,31 @@ void Populacao::avancar_dia(Cidade& cidade, Data data, const Eventos* eventos) {
 
     if (data.mes != 1 || data.dia != 1) return;
 
-    std::vector<IdEdificio> nascimentos;
+    // Casa e geração do bebê: uma acima da mais nova entre os adultos da
+    // casa, para cada geração render mais que a dos pais.
+    std::vector<std::pair<IdEdificio, int>> nascimentos;
     for (IdEdificio casa = 0; casa < cidade.edificios().size(); ++casa) {
         if (!cidade.edificio(casa).ativo) continue;
         const int capacidade = cidade.definicao(casa).moradores;
         if (capacidade == 0 || moradores_na_casa(casa) >= capacidade) continue;
         bool homem = false, mulher = false;
+        int geracao_dos_pais = 0;
         for (const Morador& m : moradores_) {
             if (!m.vivo || !m.adulto() || m.casa != casa) continue;
             mulher = mulher || m.mulher;
             homem = homem || !m.mulher;
+            geracao_dos_pais = std::max(geracao_dos_pais, m.geracao);
         }
         bool tem_comida = false;
         for (IdItem item = 0; item < cidade.conteudo().itens.size(); ++item)
             tem_comida = tem_comida || (cidade.conteudo().itens[item].tipo == TipoItem::Comida &&
                                         cidade.edificio(casa).estoque[item] > 0);
-        if (homem && mulher && tem_comida) nascimentos.push_back(casa);
+        if (homem && mulher && tem_comida) nascimentos.push_back({ casa, geracao_dos_pais + 1 });
     }
-    for (IdEdificio casa : nascimentos) {
+    for (const auto& [casa, geracao] : nascimentos) {
         Morador bebe;
         bebe.casa = casa;
+        bebe.geracao = geracao;
         bebe.idade_dias = 0;
         bebe.mulher = moradores_.size() % 2 != 0;
         moradores_.push_back(bebe);
@@ -221,7 +240,10 @@ void Populacao::consumir_comida(Cidade& cidade) {
         if (m.dias_sem_comida >= DIAS_ATE_MORRER_DE_FOME) {
             m.vivo = false;
             m.casa = SEM_EDIFICIO;
-            if (m.trabalho != SEM_EDIFICIO) --trabalhadores_[m.trabalho];
+            if (m.trabalho != SEM_EDIFICIO) {
+                --trabalhadores_[m.trabalho];
+                produtividade_[m.trabalho] -= m.produtividade();
+            }
             m.trabalho = SEM_EDIFICIO;
             ++mortos_de_fome_;
         }

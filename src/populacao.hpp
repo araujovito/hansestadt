@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <vector>
 
 #include "calendario.hpp"
@@ -9,14 +10,25 @@
 struct Morador {
     static constexpr int DIAS_POR_ANO = 365;
     static constexpr int IDADE_ADULTA = 16 * DIAS_POR_ANO;
+    // Cada geração nascida na vila rende 5% a mais que a anterior, até a
+    // quinta (+25%). Os colonos fundadores são a geração 0.
+    static constexpr int GANHO_POR_GERACAO = 50;  // milésimos
+    static constexpr int GERACOES_COM_GANHO = 5;
     IdEdificio casa = SEM_EDIFICIO;
     IdEdificio trabalho = SEM_EDIFICIO;
     int dias_sem_comida = 0;
     int idade_dias = 20 * DIAS_POR_ANO;
+    int geracao = 0;
     bool mulher = false;
     bool vivo = true;
 
     bool adulto() const { return idade_dias >= IDADE_ADULTA; }
+    // Quanto rende no trabalho, em milésimos de um colono fundador adulto.
+    // Criança rende metade do que renderia adulta.
+    int produtividade() const {
+        const int adulta = 1000 + GANHO_POR_GERACAO * std::min(geracao, GERACOES_COM_GANHO);
+        return adulto() ? adulta : adulta / 2;
+    }
 };
 
 // Moradores pertencem à simulação, não aos edifícios: assim continuam
@@ -36,6 +48,9 @@ public:
     int sem_casa() const { return total() - alojados(); }
     int moradores_na_casa(IdEdificio casa) const;
     int trabalhadores_em(IdEdificio edificio) const;
+    // Soma da produtividade de quem trabalha no edifício, em milésimos
+    // (dois fundadores adultos = 2000).
+    int produtividade_em(IdEdificio edificio) const;
     int desempregados() const;
     int mortos_de_fome() const { return mortos_de_fome_; }
     int mortos_por_eventos() const { return mortos_por_eventos_; }
@@ -53,6 +68,8 @@ private:
     // ajustado nas mortes: a produção consulta todo edifício a cada tick, e
     // contar percorrendo a população custava edifícios × moradores.
     std::vector<int> trabalhadores_;
+    // Mesma ideia, somando Morador::produtividade.
+    std::vector<int> produtividade_;
     int mortos_de_fome_ = 0;
     int mortos_por_eventos_ = 0;
     int refeicoes_perdidas_ = 0;

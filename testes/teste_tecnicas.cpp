@@ -1,5 +1,6 @@
 #include "cidade.hpp"
 #include "conteudo.hpp"
+#include "populacao.hpp"
 #include "producao.hpp"
 #include "verificar.hpp"
 
@@ -146,4 +147,29 @@ TESTE("técnicas: produção fica mais rápida com a técnica pesquisada") {
     // Ciclo de 4 dias × 10 ticks: 40 ticks; a +75%, 4000/175 arredonda para 23.
     VERIFICAR(ticks_ate_o_primeiro_pao(false) == 40);
     VERIFICAR(ticks_ate_o_primeiro_pao(true) == 23);
+}
+
+TESTE("técnicas: equipe de geração mais nova acelera o ciclo junto com a técnica") {
+    const Conteudo& c = conteudo();
+    const IdItem pao = *c.buscar_item("pao");
+    Cidade cidade(Mapa(10, 10), c);
+    const IdEdificio deposito = *cidade.construir_edificio(*c.buscar_edificio("deposito"), { 1, 1 });
+    cidade.adicionar(deposito, *c.buscar_item("tora"), 10);
+    cidade.pesquisar_tecnica(*c.buscar_tecnica("forno"), Fase::Vila);
+    const IdEdificio padaria = *cidade.construir_edificio(*c.buscar_edificio("padaria"), { 4, 1 });
+    // O padeiro mora no depósito só para ter casa: o conteúdo daqui não tem
+    // casas, e empregar exige um endereço.
+    Morador neto;
+    neto.geracao = 5;
+    neto.casa = deposito;
+    Populacao p = Populacao::restaurar({ neto }, 0, 0);
+    p.empregar(cidade);
+    VERIFICAR(ritmo_da_equipe(cidade, padaria, &p) == 1250);
+    int ticks = 0;
+    while (cidade.edificio(padaria).estoque[pao] == 0 && ticks < 100) {
+        avancar_producao(cidade, 1, 10, &p);
+        ++ticks;
+    }
+    // 40000 / (1750 × 1,25 = 2187) arredonda para 19 ticks.
+    VERIFICAR(ticks == 19);
 }

@@ -48,6 +48,12 @@ void tentar_comecar(Cidade& cidade, IdEdificio id, int mes, const Eventos* event
 
 }  // namespace
 
+int ritmo_da_equipe(const Cidade& cidade, IdEdificio id, const Populacao* populacao) {
+    const int vagas = cidade.definicao(id).trabalhadores;
+    if (!populacao || vagas == 0) return PRODUTIVIDADE_NORMAL;
+    return populacao->produtividade_em(id) / vagas;
+}
+
 void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populacao* populacao,
                       const Eventos* eventos, Data data) {
     // Por índice, em ordem crescente: a ordem de atualização faz parte do
@@ -62,10 +68,11 @@ void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populaca
         if (e.receita_ativa < 0) continue;
 
         const Receita& r = cidade.definicao(id).receitas[static_cast<std::size_t>(e.receita_ativa)];
-        // Técnicas aceleram o ciclo em vez de aumentar a saída: o estoque
-        // continua em unidades inteiras e a sazonalidade segue valendo.
+        // Técnicas e equipe aceleram o ciclo em vez de aumentar a saída: o
+        // estoque continua em unidades inteiras e a sazonalidade segue valendo.
         e.progresso += static_cast<std::int64_t>(fator_efetivo(cidade, id, r, mes, eventos, data)) *
-                       cidade.produtividade_tecnica(e.tipo) / PRODUTIVIDADE_NORMAL;
+                       cidade.produtividade_tecnica(e.tipo) * ritmo_da_equipe(cidade, id, populacao) /
+                       (std::int64_t{ PRODUTIVIDADE_NORMAL } * PRODUTIVIDADE_NORMAL);
         if (e.progresso < progresso_total(r, ticks_por_dia)) continue;
 
         // O espaço foi conferido no início e só a produção põe saídas aqui,

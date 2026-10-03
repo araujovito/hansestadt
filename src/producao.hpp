@@ -27,6 +27,11 @@ std::int64_t progresso_total(const Receita& r, int ticks_por_dia);
 void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populacao* populacao = nullptr,
                       const Eventos* eventos = nullptr, Data data = { 1, 1, 1 });
 
+// Produtividade média de quem trabalha no edifício, em milésimos: 1000 com
+// fundadores adultos, mais com gerações nascidas na vila, menos com
+// crianças. Sem população (testes de produção), 1000.
+int ritmo_da_equipe(const Cidade& cidade, IdEdificio id, const Populacao* populacao);
+
 enum class Situacao : std::uint8_t {
     SemReceita,     // armazém, casa
     SemTrabalhadores,

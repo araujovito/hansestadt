@@ -5,6 +5,7 @@
 #include "raylib.h"
 
 #include "alertas.hpp"
+#include "arte.hpp"
 #include "calendario.hpp"
 #include "camera.hpp"
 #include "cidade.hpp"
@@ -16,6 +17,7 @@
 #include "menu.hpp"
 #include "painel.hpp"
 #include "partidas.hpp"
+#include "pedacos.hpp"
 #include "relatorio_tela.hpp"
 #include "relogio.hpp"
 #include "salvamento.hpp"
@@ -138,10 +140,11 @@ bool carregar(Simulacao& sim, Fundacao& fundacao, EstadoFerramenta& ferramenta, 
 
 // Rodando da raiz do projeto (make run), os dados estão em ./dados; rodando
 // o binário direto, ficam dois níveis acima dele (build/<modo>/).
-std::string pasta_de_dados() {
-    if (DirectoryExists("dados")) return "dados";
-    return std::string(GetApplicationDirectory()) + "../../dados";
+std::string pasta_raiz() {
+    if (DirectoryExists("dados")) return ".";
+    return std::string(GetApplicationDirectory()) + "../..";
 }
+std::string pasta_de_dados() { return pasta_raiz() + "/dados"; }
 
 }  // namespace
 
@@ -166,6 +169,17 @@ int main() {
     // Esc solta a ferramenta ou abre o menu; fechar o jogo fica com o botão
     // da janela ou com "Sair do jogo" no menu.
     SetExitKey(KEY_NULL);
+
+    Arte arte;
+    {
+        std::string erro;
+        if (!arte.carregar(pasta_raiz(), erro)) {
+            std::fprintf(stderr, "erro ao carregar a arte: %s\n", erro.c_str());
+            CloseWindow();
+            return 1;
+        }
+    }
+    CenarioEmPedacos cenario;
 
     Simulacao sim(Cidade(gerar_mapa(LARGURA_MAPA, ALTURA_MAPA, SEMENTE_MAPA), conteudo));
     sim.eventos = configuracao_eventos;
@@ -210,6 +224,7 @@ int main() {
                 case PedidoDoMenu::Acao::Carregar:
                     if (carregar(sim, fundacao, ferramenta, fase_da_barra, conteudo, configuracao_eventos, pedido.arquivo, aviso)) {
                         relatorio.esquecer_historico();
+                        cenario.esquecer();
                         menu.fechar();
                         aviso_quadros = 180;
                     } else {
@@ -239,7 +254,10 @@ int main() {
                 aviso_quadros = 180;
             }
             if (IsKeyPressed(KEY_F9)) {
-                if (carregar(sim, fundacao, ferramenta, fase_da_barra, conteudo, configuracao_eventos, arquivo_rapido, aviso)) relatorio.esquecer_historico();
+                if (carregar(sim, fundacao, ferramenta, fase_da_barra, conteudo, configuracao_eventos, arquivo_rapido, aviso)) {
+                    relatorio.esquecer_historico();
+                    cenario.esquecer();
+                }
                 aviso_quadros = 180;
             }
             ler_atalhos(ferramenta);
@@ -307,13 +325,17 @@ int main() {
             aviso_quadros = 240;
         }
 
+        // Pedaços do cenário que mudaram são redesenhados antes do quadro:
+        // desenhar num pedaço troca o alvo do desenho.
+        cenario.atualizar(arte, cidade, estacao_do_mes(sim.data.mes), camera.area_visivel());
+
         BeginDrawing();
         ClearBackground(Color{ 20, 26, 34, 255 });
 
         BeginMode2D(camera.camera2d());
-        desenhar_mapa(mapa, camera.area_visivel(), camera.camera2d().zoom);
-        desenhar_cidade(cidade, camera.area_visivel(), camera.camera2d().zoom, sim.data.mes);
-        desenhar_carregadores(cidade, sim.transporte, camera.area_visivel());
+        cenario.desenhar(camera.area_visivel(), camera.camera2d().zoom);
+        arte.desenhar_edificios(cidade, sim.fase, sim.data.mes, camera.area_visivel());
+        arte.desenhar_carregadores(cidade, sim.transporte, camera.area_visivel());
         if (!mouse_na_barra) {
             desenhar_previa(ferramenta, cidade, sob_cursor);
             if (mapa.dentro(sob_cursor.x, sob_cursor.y)) destacar_celula(sob_cursor);
@@ -337,6 +359,10 @@ int main() {
         EndDrawing();
     }
 
+    // As imagens da placa de vídeo saem antes de fechar a janela, que leva a
+    // placa junto.
+    cenario.esquecer();
+    arte.descarregar();
     CloseWindow();
     return 0;
 }

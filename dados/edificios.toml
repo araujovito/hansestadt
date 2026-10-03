@@ -529,3 +529,87 @@ custo = { tora = 10, tijolo = 2 }
 dias = 3
 entradas = { arenque = 4, sal = 1, barril = 1 }
 saidas = { arenque_salgado = 16 }
+
+# ---------------------------------------------------------- técnicas
+# Decisão do Vitor (2026-10-03): técnicas por tipo de edifício, como nos
+# Age of Empires; dois níveis de +75% cada (2,5× no fim), liberados por
+# fase. Custos: madeira no primeiro nível, couro, tecido ou tijolo no
+# segundo. Fases, custos e nomes são proposta inicial, a medir com
+# `python3 ferramentas/balancear.py --nivel 1` (e 2).
+
+[[tecnica]]
+id = "rotacao_trienal"
+nome = "rotação trienal"
+descricao = "um terço da terra descansa e o resto alterna grãos"
+# Já corrente nas aldeias da colonização do leste no século XII.
+fase = "vila"
+edificios = ["fazenda", "fazenda_cevada"]
+custo = { tora = 10 }
+bonus = 0.75
+
+[[tecnica]]
+id = "arado_pesado"
+nome = "arado pesado e coelheira"
+descricao = "charrua de aiveca puxada a cavalo vira o solo argiloso"
+fase = "cidade"
+edificios = ["fazenda", "fazenda_cevada"]
+requer = "rotacao_trienal"
+custo = { tora = 6, couro = 4 }
+bonus = 0.75
+
+[[tecnica]]
+id = "redes_maiores"
+nome = "nassas e redes maiores"
+descricao = "armadilhas de vime no rio e redes de arrasto no mar"
+fase = "mercado"
+edificios = ["pescador", "pescador_arenque"]
+custo = { tora = 8 }
+bonus = 0.75
+
+[[tecnica]]
+id = "barcos_de_vela"
+nome = "barcos com vela de pano"
+descricao = "a frota vai mais longe atrás dos cardumes de arenque"
+fase = "hansa"
+edificios = ["pescador", "pescador_arenque"]
+requer = "redes_maiores"
+custo = { tora = 10, tecido = 4 }
+bonus = 0.75
+
+[[tecnica]]
+id = "mos_de_basalto"
+nome = "mós de basalto do Eifel"
+descricao = "pedras de moinho trazidas do Reno moem mais e mais fino"
+fase = "mercado"
+edificios = ["moinho"]
+custo = { tora = 8 }
+bonus = 0.75
+
+[[tecnica]]
+id = "roda_de_cima"
+nome = "roda d'água de impulsão superior"
+descricao = "a água cai sobre a roda em vez de passar por baixo dela"
+fase = "cidade"
+edificios = ["moinho"]
+requer = "mos_de_basalto"
+custo = { tora = 6, tijolo = 4 }
+bonus = 0.75
+
+[[tecnica]]
+id = "forno_de_tijolo"
+nome = "forno de tijolo"
+descricao = "forno de abóbada guarda o calor entre as fornadas"
+fase = "cidade"
+edificios = ["padaria"]
+custo = { tijolo = 6 }
+bonus = 0.75
+
+[[tecnica]]
+id = "guilda_dos_padeiros"
+nome = "guilda dos padeiros"
+descricao = "aprendizes, pesos fixos e fornadas o dia inteiro"
+fase = "hansa"
+edificios = ["padaria"]
+requer = "forno_de_tijolo"
+custo = { tijolo = 6, tecido = 2 }
+bonus = 0.75

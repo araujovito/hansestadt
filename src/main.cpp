@@ -44,20 +44,35 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     DrawText(ritmo, 300, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
     int ocupados = 0;
     for (const Carregador& c : sim.transporte.carregadores()) ocupados += c.livre() ? 0 : 1;
-    DrawText(TextFormat("população %d (%d crianças) | sem casa %d | sem trabalho %d | mortos %d",
-                        sim.populacao.total(), sim.populacao.criancas(), sim.populacao.sem_casa(),
-                        sim.populacao.desempregados(), sim.populacao.mortos_de_fome()),
-             12, 40, 16, LIGHTGRAY);
+
+    // Segunda linha: cada trecho começa onde o anterior terminou. Com
+    // posições fixas, um número com mais dígitos fazia um trecho cobrir o
+    // seguinte ("mortos" ficava por baixo de "comida").
+    constexpr int TAMANHO = 16;
+    int x = 12;
+    auto escrever = [&x](const char* texto, Color cor) {
+        if (x > 12) {
+            DrawText("|", x, 40, TAMANHO, GRAY);
+            x += MeasureText("|", TAMANHO) + 8;
+        }
+        DrawText(texto, x, 40, TAMANHO, cor);
+        x += MeasureText(texto, TAMANHO) + 8;
+    };
+    escrever(TextFormat("população %d (%d crianças)", sim.populacao.total(), sim.populacao.criancas()), LIGHTGRAY);
+    escrever(TextFormat("sem casa %d", sim.populacao.sem_casa()), LIGHTGRAY);
+    escrever(TextFormat("sem trabalho %d", sim.populacao.desempregados()), LIGHTGRAY);
+    escrever(TextFormat("mortos %d", sim.populacao.mortos_de_fome()), LIGHTGRAY);
 
     const int comida = sim.cidade.estoque_total(TipoItem::Comida);
     const int dias = sim.populacao.total() > 0 ? comida / sim.populacao.total() : 0;
     const Color cor_comida = dias < 30 ? Color{ 240, 110, 90, 255 }
                            : dias < 90 ? GOLD
                                       : LIGHTGRAY;
-    DrawText(TextFormat("comida %d (%d dias)", comida, dias), 455, 40, 16, cor_comida);
-    DrawText(TextFormat("carregadores %d/%d | %d fps", ocupados,
-                        static_cast<int>(sim.transporte.carregadores().size()), GetFPS()),
-             GetScreenWidth() - 250, 40, 16, LIGHTGRAY);
+    escrever(TextFormat("comida %d (%d dias)", comida, dias), cor_comida);
+    escrever(TextFormat("carregadores %d/%d", ocupados, static_cast<int>(sim.transporte.carregadores().size())),
+             LIGHTGRAY);
+    const char* fps = TextFormat("%d fps", GetFPS());
+    DrawText(fps, GetScreenWidth() - MeasureText(fps, TAMANHO) - 12, 40, TAMANHO, GRAY);
 
     if (mapa.dentro(sob_cursor.x, sob_cursor.y)) {
         DrawText(TextFormat("(%d, %d) %s", sob_cursor.x, sob_cursor.y,

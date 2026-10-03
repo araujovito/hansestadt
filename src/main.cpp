@@ -304,6 +304,15 @@ int main() {
                             : descrever(r);
                 aviso_quadros = 180;
             }
+            if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
+                if (const auto tecnica = clicou_em_pesquisar(cidade, *ferramenta.selecionado, sim.fase)) {
+                    const ResultadoTecnica r = cidade.pesquisar_tecnica(*tecnica, sim.fase);
+                    aviso = r == ResultadoTecnica::Ok
+                                ? "técnica pesquisada: " + conteudo.tecnicas[*tecnica].nome
+                                : descrever(r);
+                    aviso_quadros = 180;
+                }
+            }
             if (fundacao.concluir_se_possivel(cidade)) {
                 ferramenta = criar_ferramentas(conteudo, sim.fase);
                 fase_da_barra = sim.fase;

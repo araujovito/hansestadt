@@ -8,8 +8,9 @@
 #include "cidade.hpp"
 #include "conteudo.hpp"
 
-// O que cada instituição precisa para melhorar e o que falta para a próxima
-// fase, para o painel do edifício e para a aba Fase do relatório. Só lê a
+// O que cada instituição precisa para melhorar, o que falta para a próxima
+// fase e as técnicas de cada tipo de edifício, para o painel do edifício e
+// para o relatório. Só lê a
 // cidade, pelas mesmas regras de validar_melhoria e tentar_avancar_fase, e
 // não depende da raylib.
 
@@ -50,3 +51,26 @@ struct RumoAProximaFase {
 
 // Vazio na última fase.
 std::optional<RumoAProximaFase> rumo_a_proxima_fase(const Cidade& cidade, Fase fase, Data hoje);
+
+// Uma técnica de produção vista do painel do edifício.
+struct FichaDaTecnica {
+    IdTecnica id = 0;
+    std::string nome;
+    std::string descricao;
+    Fase fase = Fase::Vila;
+    int bonus_porcento = 0;  // 75 para +75%
+    bool pesquisada = false;
+    std::vector<MaterialDaMelhoria> materiais;
+    ResultadoTecnica pode_pesquisar = ResultadoTecnica::JaPesquisada;
+};
+
+struct TecnicasDoEdificio {
+    // Na ordem do conteúdo, que já põe cada nível depois do anterior.
+    std::vector<FichaDaTecnica> tecnicas;
+    // A primeira ainda não pesquisada: é a que o botão do painel pesquisa.
+    std::optional<std::size_t> proxima;
+    int ritmo_porcento = 100;  // com as técnicas já pesquisadas
+};
+
+// Vazio se nenhuma técnica vale para o tipo.
+TecnicasDoEdificio tecnicas_do_edificio(const Cidade& cidade, IdTipoEdificio tipo, Fase fase);

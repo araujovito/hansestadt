@@ -9,7 +9,8 @@
 namespace {
 
 constexpr float LARGURA = 280.0f;
-constexpr float ALTURA = 330.0f;
+// Cabe uma fazenda com duas técnicas, a receita e o estoque acima do botão.
+constexpr float ALTURA = 460.0f;
 constexpr int MARGEM = 12;
 constexpr int TEXTO = 16;
 constexpr int LINHA = 22;
@@ -49,11 +50,21 @@ std::string descrever_receita(const Conteudo& conteudo, const Receita& r) {
 }
 
 // No pé do painel, numa posição fixa, para o clique ser conferido antes do
-// desenho sem depender de quantas linhas o painel tem.
+// desenho sem depender de quantas linhas o painel tem. Serve à melhoria da
+// instituição e à pesquisa de técnica, que nunca aparecem juntas.
 Rectangle area_do_botao_melhorar() {
     const Rectangle area = area_do_painel_edificio();
     return { area.x + MARGEM, area.y + area.height - MARGEM - ALTURA_BOTAO, area.width - 2.0f * MARGEM,
              ALTURA_BOTAO };
+}
+
+void desenhar_botao_do_painel(const char* rotulo, bool liberado) {
+    const Rectangle b = area_do_botao_melhorar();
+    const bool sob_mouse = liberado && CheckCollisionPointRec(GetMousePosition(), b);
+    DrawRectangleRec(b, liberado ? (sob_mouse ? Color{ 170, 128, 70, 255 } : Color{ 150, 110, 60, 255 })
+                                 : Color{ 58, 48, 38, 255 });
+    DrawText(rotulo, static_cast<int>(b.x + (b.width - static_cast<float>(MeasureText(rotulo, TEXTO))) / 2.0f),
+             static_cast<int>(b.y) + 6, TEXTO, liberado ? CLARO : APAGADO);
 }
 
 // Nível, próxima melhoria com os materiais e o botão de melhorar.
@@ -74,11 +85,6 @@ void desenhar_instituicao(const Cidade& cidade, IdEdificio id, Fase fase, int x,
         }
     }
 
-    const Rectangle b = area_do_botao_melhorar();
-    const bool pode = f.pode_melhorar == ResultadoMelhoria::Ok;
-    const bool sob_mouse = pode && CheckCollisionPointRec(GetMousePosition(), b);
-    DrawRectangleRec(b, pode ? (sob_mouse ? Color{ 170, 128, 70, 255 } : Color{ 150, 110, 60, 255 })
-                             : Color{ 58, 48, 38, 255 });
     // Os textos de descrever() não cabem no botão; aqui vão versões curtas.
     const char* rotulo = TextFormat("Melhorar para o nível %d (U)", f.nivel + 1);
     switch (f.pode_melhorar) {
@@ -91,11 +97,69 @@ void desenhar_instituicao(const Cidade& cidade, IdEdificio id, Fase fase, int x,
         case ResultadoMelhoria::EdificioInativo:
         case ResultadoMelhoria::NaoInstituicao: rotulo = descrever(f.pode_melhorar); break;
     }
-    DrawText(rotulo, static_cast<int>(b.x + (b.width - static_cast<float>(MeasureText(rotulo, TEXTO))) / 2.0f),
-             static_cast<int>(b.y) + 6, TEXTO, pode ? CLARO : APAGADO);
+    desenhar_botao_do_painel(rotulo, f.pode_melhorar == ResultadoMelhoria::Ok);
+}
+
+// Técnicas do tipo, em ordem de nível: as pesquisadas marcadas, a próxima
+// com os materiais, e o botão. Devolve o y seguinte.
+int desenhar_tecnicas(const TecnicasDoEdificio& t, Fase fase, int x, int y) {
+    y += 4;
+    DrawText(TextFormat("técnicas (ritmo %d%%)", t.ritmo_porcento), x, y, TEXTO, APAGADO);
+    y += LINHA;
+    for (std::size_t i = 0; i < t.tecnicas.size(); ++i) {
+        const FichaDaTecnica& f = t.tecnicas[i];
+        if (f.pesquisada) {
+            DrawText(TextFormat("+ %s", f.nome.c_str()), x, y, TEXTO, Color{ 150, 210, 120, 255 });
+        } else if (f.fase > fase) {
+            // Em duas linhas: nome e fase juntos passam da largura do painel.
+            DrawText(f.nome.c_str(), x, y, TEXTO, APAGADO);
+            y += LINHA;
+            DrawText(TextFormat("libera na fase %s", nome_da_fase(f.fase)), x + 12, y, TEXTO, APAGADO);
+        } else {
+            DrawText(f.nome.c_str(), x, y, TEXTO, CLARO);
+        }
+        y += LINHA;
+        if (t.proxima != i || f.fase > fase) continue;
+        for (const MaterialDaMelhoria& m : f.materiais) {
+            DrawText(TextFormat("%s %d/%d", m.nome.c_str(), m.tem, m.precisa), x + 12, y, TEXTO,
+                     m.tem >= m.precisa ? CLARO : VERMELHO);
+            y += LINHA;
+        }
+    }
+    if (!t.proxima) return y;
+
+    const FichaDaTecnica& f = t.tecnicas[*t.proxima];
+    const char* rotulo = TextFormat("Pesquisar: +%d%% de ritmo", f.bonus_porcento);
+    switch (f.pode_pesquisar) {
+        case ResultadoTecnica::Ok: break;
+        case ResultadoTecnica::FaseBloqueada: rotulo = TextFormat("aguarda a fase %s", nome_da_fase(f.fase)); break;
+        case ResultadoTecnica::SemRecursos: rotulo = "faltam materiais"; break;
+        case ResultadoTecnica::FaltaRequisito:
+        case ResultadoTecnica::JaPesquisada: rotulo = descrever(f.pode_pesquisar); break;
+    }
+    desenhar_botao_do_painel(rotulo, f.pode_pesquisar == ResultadoTecnica::Ok);
+    // A descrição não cabe no painel: aparece acima do botão com o mouse nele.
+    const Rectangle b = area_do_botao_melhorar();
+    if (!f.descricao.empty() && CheckCollisionPointRec(GetMousePosition(), b)) {
+        const int largura = MeasureText(f.descricao.c_str(), 14) + 16;
+        const int bx = static_cast<int>(b.x + b.width) - largura;
+        const int by = static_cast<int>(b.y) - 30;
+        DrawRectangle(bx, by, largura, 24, Color{ 20, 16, 12, 240 });
+        DrawText(f.descricao.c_str(), bx + 8, by + 5, 14, CLARO);
+    }
+    return y;
 }
 
 }  // namespace
+
+std::optional<IdTecnica> clicou_em_pesquisar(const Cidade& cidade, IdEdificio id, Fase fase) {
+    if (cidade.definicao(id).instituicao || !IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||
+        !CheckCollisionPointRec(GetMousePosition(), area_do_botao_melhorar()))
+        return std::nullopt;
+    const TecnicasDoEdificio t = tecnicas_do_edificio(cidade, cidade.edificio(id).tipo, fase);
+    if (!t.proxima) return std::nullopt;
+    return t.tecnicas[*t.proxima].id;
+}
 
 Rectangle area_do_painel_edificio() {
     return { static_cast<float>(GetScreenWidth()) - LARGURA - 8.0f, 72.0f, LARGURA, ALTURA };
@@ -160,6 +224,18 @@ void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, 
                  APAGADO);
         y += LINHA;
     }
+
+    if (def.trabalhadores > 0 && !def.receitas.empty() && populacao.trabalhadores_em(id) > 0) {
+        // Média de quem está lá: abaixo de 100% com crianças, acima com
+        // gerações nascidas na vila.
+        const int media = populacao.produtividade_em(id) * 100 /
+                          (populacao.trabalhadores_em(id) * PRODUTIVIDADE_NORMAL);
+        DrawText(TextFormat("rendimento da equipe: %d%%", media), x, y, TEXTO, APAGADO);
+        y += LINHA;
+    }
+
+    const TecnicasDoEdificio tecnicas = tecnicas_do_edificio(cidade, e.tipo, fase);
+    if (!tecnicas.tecnicas.empty()) y = desenhar_tecnicas(tecnicas, fase, x, y);
 
     if (!def.receitas.empty()) {
         y += 4;

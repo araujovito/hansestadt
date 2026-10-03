@@ -4,6 +4,21 @@
 
 #include "campanha.hpp"
 
+namespace {
+
+// Disponível em todos os estoques da vila, como na cobrança.
+std::vector<MaterialDaMelhoria> materiais(const Cidade& cidade, const std::vector<Quantidade>& custo) {
+    std::vector<MaterialDaMelhoria> lista;
+    for (const Quantidade& q : custo) {
+        int tem = 0;
+        for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) tem += cidade.disponivel(id, q.item);
+        lista.push_back({ cidade.conteudo().itens[q.item].nome, q.quantidade, tem });
+    }
+    return lista;
+}
+
+}  // namespace
+
 FichaDaInstituicao ficha_da_instituicao(const Cidade& cidade, IdTipoEdificio tipo, Fase fase) {
     const Conteudo& conteudo = cidade.conteudo();
     const DefinicaoEdificio& def = conteudo.edificio(tipo);
@@ -26,11 +41,7 @@ FichaDaInstituicao ficha_da_instituicao(const Cidade& cidade, IdTipoEdificio tip
     if (ficha.nivel < 1 || ficha.nivel >= ficha.nivel_final) return ficha;
     const MelhoriaEdificio& m = def.melhorias[static_cast<std::size_t>(ficha.nivel - 1)];
     ficha.fase_da_proxima = m.fase;
-    for (const Quantidade& q : m.custo) {
-        int tem = 0;
-        for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) tem += cidade.disponivel(id, q.item);
-        ficha.materiais.push_back({ conteudo.itens[q.item].nome, q.quantidade, tem });
-    }
+    ficha.materiais = materiais(cidade, m.custo);
     return ficha;
 }
 
@@ -53,4 +64,26 @@ std::optional<RumoAProximaFase> rumo_a_proxima_fase(const Cidade& cidade, Fase f
         if (def.instituicao && def.fase <= fase) rumo.instituicoes.push_back(ficha_da_instituicao(cidade, tipo, fase));
     }
     return rumo;
+}
+
+TecnicasDoEdificio tecnicas_do_edificio(const Cidade& cidade, IdTipoEdificio tipo, Fase fase) {
+    const Conteudo& conteudo = cidade.conteudo();
+    TecnicasDoEdificio t;
+    t.ritmo_porcento = cidade.produtividade_tecnica(tipo) * 100 / PRODUTIVIDADE_NORMAL;
+    for (IdTecnica id = 0; id < conteudo.tecnicas.size(); ++id) {
+        const Tecnica& tec = conteudo.tecnicas[id];
+        if (std::find(tec.edificios.begin(), tec.edificios.end(), tipo) == tec.edificios.end()) continue;
+        FichaDaTecnica f;
+        f.id = id;
+        f.nome = tec.nome;
+        f.descricao = tec.descricao;
+        f.fase = tec.fase;
+        f.bonus_porcento = tec.bonus / 10;
+        f.pesquisada = cidade.tecnica_pesquisada(id);
+        f.materiais = materiais(cidade, tec.custo);
+        f.pode_pesquisar = cidade.validar_tecnica(id, fase);
+        if (!f.pesquisada && !t.proxima) t.proxima = t.tecnicas.size();
+        t.tecnicas.push_back(std::move(f));
+    }
+    return t;
 }

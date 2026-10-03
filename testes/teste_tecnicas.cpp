@@ -4,6 +4,7 @@
 
 #include "cidade.hpp"
 #include "conteudo.hpp"
+#include "melhorias.hpp"
 #include "populacao.hpp"
 #include "producao.hpp"
 #include "salvamento.hpp"
@@ -225,4 +226,32 @@ TESTE("técnicas: salvamento guarda técnicas, gerações e a lei, e a versão 5
         VERIFICAR(v5.simulacao->populacao.moradores()[0].geracao == 0);
     }
     std::filesystem::remove(caminho);
+}
+
+TESTE("técnicas: ficha do painel lista níveis, materiais e a próxima a pesquisar") {
+    const Conteudo& c = conteudo();
+    Cidade cidade(Mapa(10, 10), c);
+    const IdEdificio deposito = *cidade.construir_edificio(*c.buscar_edificio("deposito"), { 1, 1 });
+    cidade.adicionar(deposito, *c.buscar_item("tora"), 4);
+    const IdTipoEdificio padaria = *c.buscar_edificio("padaria");
+
+    TecnicasDoEdificio t = tecnicas_do_edificio(cidade, padaria, Fase::Vila);
+    VERIFICAR(t.tecnicas.size() == 2);
+    VERIFICAR(t.proxima == std::optional<std::size_t>(0));
+    VERIFICAR(t.ritmo_porcento == 100);
+    VERIFICAR(t.tecnicas[0].bonus_porcento == 75);
+    VERIFICAR(t.tecnicas[0].materiais.size() == 1 && t.tecnicas[0].materiais[0].tem == 4);
+    VERIFICAR(t.tecnicas[0].pode_pesquisar == ResultadoTecnica::Ok);
+    VERIFICAR(t.tecnicas[1].pode_pesquisar == ResultadoTecnica::FaseBloqueada);
+
+    cidade.pesquisar_tecnica(t.tecnicas[0].id, Fase::Vila);
+    t = tecnicas_do_edificio(cidade, padaria, Fase::Vila);
+    VERIFICAR(t.tecnicas[0].pesquisada);
+    VERIFICAR(t.proxima == std::optional<std::size_t>(1));
+    VERIFICAR(t.ritmo_porcento == 175);
+    VERIFICAR(t.tecnicas[1].materiais[0].tem == 2);
+
+    // A forja só tem a segunda técnica.
+    VERIFICAR(tecnicas_do_edificio(cidade, *c.buscar_edificio("forja"), Fase::Vila).tecnicas.size() == 1);
+    VERIFICAR(tecnicas_do_edificio(cidade, *c.buscar_edificio("deposito"), Fase::Vila).tecnicas.empty());
 }

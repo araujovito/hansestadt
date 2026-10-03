@@ -10,7 +10,8 @@ namespace {
 constexpr int C = 32;                               // célula do jogo (TAMANHO_CELULA)
 constexpr int LADO = CELULAS_POR_PEDACO * C;        // pixels do pedaço, sem folga
 // Folga em volta da imagem: copas de árvore e objetos do terreno passam um
-// pouco da borda da célula. Pedaços vizinhos se sobrepõem nessa faixa.
+// pouco da borda da célula. Pedaços vizinhos se sobrepõem nessa faixa, que é
+// desenhada com o chão do vizinho.
 constexpr int FOLGA = 16;
 constexpr int IMAGEM = LADO + 2 * FOLGA;
 
@@ -47,8 +48,12 @@ void CenarioEmPedacos::refazer(Pedaco& p, int px, int py, const Arte& arte, cons
     cam.target = { static_cast<float>(px * LADO - FOLGA), static_cast<float>(py * LADO - FOLGA) };
     cam.zoom = 1.0f;
     BeginMode2D(cam);
+    // Uma célula a mais de cada vizinho, dentro da folga: com a folga vazia
+    // (preta e transparente), a imagem suavizada do zoom afastado misturava a
+    // borda com o preto e as emendas viravam linhas escuras. Com o chão do
+    // vizinho ali, a sobreposição é igual dos dois lados.
     const int x0 = px * CELULAS_POR_PEDACO, y0 = py * CELULAS_POR_PEDACO;
-    arte.desenhar_terreno(cidade, x0, y0, x0 + CELULAS_POR_PEDACO - 1, y0 + CELULAS_POR_PEDACO - 1, estacao);
+    arte.desenhar_terreno(cidade, x0 - 1, y0 - 1, x0 + CELULAS_POR_PEDACO, y0 + CELULAS_POR_PEDACO, estacao);
     EndMode2D();
     EndBlendMode();
     EndTextureMode();

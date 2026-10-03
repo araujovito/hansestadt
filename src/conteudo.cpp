@@ -201,7 +201,7 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         const std::string ctx = "edificios.toml, '" + (*t)["id"].value_or(std::string("?")) + "'";
         conferir_chaves(*t,
                         { "id", "nome", "fase", "tamanho", "terreno", "cor", "trabalhadores", "estoque", "moradores",
-                          "campos", "deposito", "carregadores", "requer", "receita" },
+                          "campos", "deposito", "carregadores", "requer", "extrai", "receita" },
                         ctx, erros);
 
         DefinicaoEdificio d{};
@@ -252,6 +252,11 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
             d.requer = Requisito{ terreno_req.value_or(Terreno::Campo),
                                   inteiro(*requer, "distancia", 1, 1, ctx + ", requer", erros) };
         }
+        if (t->contains("extrai")) {
+            auto extraido = terreno_por_id((*t)["extrai"].value_or(std::string()));
+            if (!extraido) erros.adicionar(ctx, "extrai precisa ser um terreno válido");
+            else d.extrai = *extraido;
+        }
 
         if (const toml::array* receitas = (*t)["receita"].as_array()) {
             for (std::size_t i = 0; i < receitas->size(); ++i) {
@@ -268,6 +273,9 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         if (d.deposito && d.estoque == 0) erros.adicionar(ctx, "depósito precisa de estoque > 0");
         if (!d.receitas.empty() && d.trabalhadores == 0) {
             erros.adicionar(ctx, "edifício com receita precisa de trabalhadores");
+        }
+        if (d.extrai && (!d.requer || d.requer->terreno != *d.extrai)) {
+            erros.adicionar(ctx, "extrai precisa corresponder ao terreno de requer");
         }
 
         if (erros.lista.size() == erros_antes) c.edificios.push_back(std::move(d));

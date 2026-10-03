@@ -152,6 +152,10 @@ O jogo valida os arquivos ao abrir e lista todos os erros encontrados
 (item inexistente, chave escrita errada, sazonalidade sem 12 meses) em
 vez de abrir com conteúdo pela metade.
 
+Edifícios extratores podem declarar `extrai`: a cada ciclo, uma célula do
+terreno exigido é consumida. O lenhador transforma gradualmente a floresta
+próxima em campo ao produzir toras e para quando não resta mata ao alcance.
+
 ## Como a economia funciona
 
 1. **Produção** (`src/producao.cpp`). Um edifício começa a primeira

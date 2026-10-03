@@ -217,6 +217,28 @@ int Cidade::estoque_total(TipoItem tipo) const {
     return total;
 }
 
+bool Cidade::tem_recurso_proximo(IdEdificio id) const {
+    const DefinicaoEdificio& def = definicao(id);
+    return def.extrai && def.requer && atende_requisito(*def.requer, edificios_[id].origem,
+                                                        def.largura_total(), def.altura_total());
+}
+
+bool Cidade::extrair_recurso_proximo(IdEdificio id) {
+    if (!tem_recurso_proximo(id)) return false;
+    const Edificio& e = edificios_[id];
+    const DefinicaoEdificio& def = definicao(id);
+    const Requisito& r = *def.requer;
+    for (int y = e.origem.y - r.distancia; y < e.origem.y + def.altura_total() + r.distancia; ++y) {
+        for (int x = e.origem.x - r.distancia; x < e.origem.x + def.largura_total() + r.distancia; ++x) {
+            if (mapa_.dentro(x, y) && mapa_.terreno(x, y) == *def.extrai) {
+                mapa_.definir_terreno(x, y, Terreno::Campo);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool Cidade::tem_estrada(Celula c) const {
     return mapa_.dentro(c.x, c.y) && estradas_[indice(c)] != 0;
 }

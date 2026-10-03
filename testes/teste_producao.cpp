@@ -83,6 +83,30 @@ TESTE("produção: edifício demolido para de produzir") {
     VERIFICAR(c.edificio(f).estoque[item("pao")] == 0);
 }
 
+TESTE("produção: extrator consome o recurso do terreno") {
+    Mapa mapa(8, 8);
+    mapa.definir_terreno(4, 4, Terreno::Floresta);
+    Cidade c(std::move(mapa), conteudo_de_teste());
+    const IdEdificio extrator = *c.construir_edificio(tipo("perto_mata"), { 2, 2 });
+    // O edifício de teste não tem receita: a operação de extração ainda é
+    // testada diretamente, separada do ritmo das receitas.
+    VERIFICAR(c.tem_recurso_proximo(extrator));
+    VERIFICAR(c.extrair_recurso_proximo(extrator));
+    VERIFICAR(c.mapa().terreno(4, 4) == Terreno::Campo);
+    VERIFICAR(!c.tem_recurso_proximo(extrator));
+}
+
+TESTE("produção: lenhador transforma uma floresta em tora e campo") {
+    static const Conteudo real = *carregar_conteudo("dados").conteudo;
+    Mapa mapa(10, 10);
+    mapa.definir_terreno(4, 2, Terreno::Floresta);
+    Cidade c(std::move(mapa), real);
+    const IdEdificio lenhador = *c.construir_edificio(*real.buscar_edificio("lenhador"), { 2, 2 });
+    for (int i = 0; i < 4 * TICKS_POR_DIA; ++i) avancar_producao(c, 3, TICKS_POR_DIA);
+    VERIFICAR(c.edificio(lenhador).estoque[*real.buscar_item("tora")] == 1);
+    VERIFICAR(c.mapa().terreno(4, 2) == Terreno::Campo);
+}
+
 TESTE("produção: só avança com a equipe completa") {
     Cidade c(Mapa(8, 8), conteudo_de_teste());
     const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });

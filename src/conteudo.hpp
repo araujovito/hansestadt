@@ -63,6 +63,8 @@ struct DefinicaoEdificio {
     // Carregadores que moram no depósito e fazem todo o transporte.
     int carregadores;
     std::optional<Requisito> requer;
+    // Recurso do terreno consumido a cada ciclo (ex.: floresta do lenhador).
+    std::optional<Terreno> extrai;
     std::vector<Receita> receitas;
 
     bool usa_item(IdItem item) const;

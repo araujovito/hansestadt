@@ -149,7 +149,7 @@ agora, estamentos depois):
    certa e passa fome sem a fazenda.~~ Concluído.
 
 **Primeiro marco concluído.** Salvar/carregar também está pronto. Próxima
-ordem: lenhador desmatando, crescimento populacional, carregadores vindos da
+ordem: crescimento populacional, carregadores vindos da
 população, eventos históricos, evolução de fase, custos de construção, arte,
 estamentos e mapa histórico.
 
@@ -170,6 +170,10 @@ estamentos e mapa histórico.
 
 ### 2026-10-03
 
+- **Desmatamento**: `extrai` tornou o consumo de terreno uma regra de dados;
+  cada ciclo do lenhador converte uma célula de floresta próxima em campo e
+  a produção para quando o recurso acaba. O mapa alterado já é preservado
+  pelo salvamento. 95 testes.
 - **Salvar/carregar**: `F5` grava mapa, calendário, edifícios, estoques,
   moradores e carregadores num arquivo binário versionado; `F9` restaura e
   a simulação continua deterministicamente. 93 testes.

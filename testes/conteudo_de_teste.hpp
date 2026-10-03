@@ -65,6 +65,7 @@ tamanho = [1, 1]
 terreno = "campo"
 cor = "#808080"
 requer = { terreno = "floresta", distancia = 2 }
+extrai = "floresta"
 
 [[edificio]]
 id = "fazendinha"

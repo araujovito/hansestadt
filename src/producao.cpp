@@ -17,6 +17,7 @@ namespace {
 bool pode_comecar(const Cidade& cidade, IdEdificio id, const Receita& r, int mes) {
     if (fator_do_mes(r, mes) == 0) return false;
     const Edificio& e = cidade.edificio(id);
+    if (cidade.definicao(id).extrai && !cidade.tem_recurso_proximo(id)) return false;
     for (const Quantidade& q : r.entradas) {
         if (e.estoque[q.item] < q.quantidade) return false;
     }
@@ -59,6 +60,11 @@ void avancar_producao(Cidade& cidade, int mes, int ticks_por_dia, const Populaca
 
         // O espaço foi conferido no início e só a produção põe saídas aqui,
         // então a entrega cabe.
+        if (cidade.definicao(id).extrai && !cidade.extrair_recurso_proximo(id)) {
+            e.receita_ativa = -1;
+            e.progresso = 0;
+            continue;
+        }
         for (const Quantidade& q : r.saidas) cidade.adicionar(id, q.item, q.quantidade);
         e.receita_ativa = -1;
         e.progresso = 0;

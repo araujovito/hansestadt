@@ -18,6 +18,7 @@
 #                   as células do anel precisam ser campo livre
 #   requer          { terreno, distancia }: pelo menos uma célula desse
 #                   terreno a até `distancia` células da borda do edifício
+#   extrai          terreno consumido por ciclo e convertido em campo
 #
 # [[edificio.receita]]: o que o edifício transforma. Mais de uma receita
 # significa alternativas (a olaria aceita carvão ou turfa).
@@ -61,11 +62,13 @@ cor = "#7a5834"
 trabalhadores = 1
 estoque = 6
 requer = { terreno = "floresta", distancia = 3 }
+extrai = "floresta"
 
 [[edificio.receita]]
 dias = 4
 saidas = { tora = 1 }
-# Corte no inverno: a seiva está baixa, a madeira seca melhor, e é quando
+# Cada ciclo remove uma célula de floresta próxima. Corte no inverno: a seiva
+# está baixa, a madeira seca melhor, e é quando
 # o trabalho do campo não ocupa os braços.
 sazonalidade = [1.2, 1.2, 1.0, 0.8, 0.6, 0.6, 0.6, 0.6, 0.8, 1.0, 1.2, 1.2]
 

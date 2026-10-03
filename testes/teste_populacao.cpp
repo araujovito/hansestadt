@@ -111,3 +111,18 @@ TESTE("população: trinta dias sem comida matam e liberam casa e trabalho") {
     VERIFICAR(p.moradores_na_casa(casa) == 0);
     VERIFICAR(p.trabalhadores_em(trabalho) == 0);
 }
+
+TESTE("população: restaurada do arquivo mantém a contagem de trabalhadores") {
+    Cidade c = cidade_para_populacao();
+    c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio serraria = *c.construir_edificio(tipo("serraria"), { 5, 1 });
+    Populacao p(1);
+    p.alojar(c);
+    p.empregar(c);
+    Populacao r = Populacao::restaurar(p.moradores(), p.mortos_de_fome(), p.refeicoes_perdidas());
+    VERIFICAR(r.trabalhadores_em(serraria) == 1);
+    // Morrer antes do próximo empregar também tem de atualizar a contagem.
+    for (int dia = 0; dia < Populacao::DIAS_ATE_MORRER_DE_FOME; ++dia) r.consumir_comida(c);
+    VERIFICAR(r.total() == 0);
+    VERIFICAR(r.trabalhadores_em(serraria) == 0);
+}

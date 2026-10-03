@@ -35,6 +35,10 @@ public:
 
 private:
     std::vector<Morador> moradores_;
+    // Por IdEdificio, quantos vivos trabalham lá. Montado em empregar e
+    // ajustado nas mortes: a produção consulta todo edifício a cada tick, e
+    // contar percorrendo a população custava edifícios × moradores.
+    std::vector<int> trabalhadores_;
     int mortos_de_fome_ = 0;
     int refeicoes_perdidas_ = 0;
 };

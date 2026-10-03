@@ -10,6 +10,13 @@ Populacao Populacao::restaurar(std::vector<Morador> moradores, int mortos_de_fom
     p.moradores_ = std::move(moradores);
     p.mortos_de_fome_ = mortos_de_fome;
     p.refeicoes_perdidas_ = refeicoes_perdidas;
+    // A contagem por edifício não vai para o arquivo: sai dos próprios
+    // moradores, que guardam onde trabalham.
+    for (const Morador& m : p.moradores_) {
+        if (!m.vivo || m.trabalho == SEM_EDIFICIO) continue;
+        if (m.trabalho >= p.trabalhadores_.size()) p.trabalhadores_.resize(m.trabalho + 1, 0);
+        ++p.trabalhadores_[m.trabalho];
+    }
     return p;
 }
 
@@ -29,8 +36,7 @@ int Populacao::moradores_na_casa(IdEdificio casa) const {
 }
 
 int Populacao::trabalhadores_em(IdEdificio edificio) const {
-    return static_cast<int>(std::count_if(moradores_.begin(), moradores_.end(),
-                                          [edificio](const Morador& m) { return m.vivo && m.trabalho == edificio; }));
+    return edificio < trabalhadores_.size() ? trabalhadores_[edificio] : 0;
 }
 
 int Populacao::desempregados() const {
@@ -63,6 +69,7 @@ void Populacao::empregar(const Cidade& cidade) {
     // Recalcular em ordem de id torna o resultado independente do histórico
     // de construções e libera imediatamente quem perdeu casa ou trabalho.
     for (Morador& m : moradores_) m.trabalho = SEM_EDIFICIO;
+    trabalhadores_.assign(cidade.edificios().size(), 0);
     // Os empregos são distribuídos em ordem de morador, então quem ficou
     // para trás do cursor já tem trabalho ou não pode trabalhar: o próximo
     // edifício continua de onde o anterior parou, sem voltar ao começo.
@@ -78,6 +85,7 @@ void Populacao::empregar(const Cidade& cidade) {
                 ++ocupadas;
             }
         }
+        trabalhadores_[id] = ocupadas;
     }
 }
 
@@ -100,6 +108,7 @@ void Populacao::consumir_comida(Cidade& cidade) {
         if (m.dias_sem_comida >= DIAS_ATE_MORRER_DE_FOME) {
             m.vivo = false;
             m.casa = SEM_EDIFICIO;
+            if (m.trabalho != SEM_EDIFICIO) --trabalhadores_[m.trabalho];
             m.trabalho = SEM_EDIFICIO;
             ++mortos_de_fome_;
         }

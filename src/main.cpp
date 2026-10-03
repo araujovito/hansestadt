@@ -294,7 +294,9 @@ int main() {
             camera.atualizar(GetFrameTime());
             sob_cursor = celula_em(camera.mouse_no_mundo());
             if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
-            if (IsKeyPressed(KEY_U) && ferramenta.selecionado) {
+            // Botão do painel ou tecla U, que fica como atalho.
+            if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo &&
+                (IsKeyPressed(KEY_U) || clicou_em_melhorar(cidade, *ferramenta.selecionado))) {
                 const ResultadoMelhoria r = cidade.melhorar_edificio(*ferramenta.selecionado, sim.fase);
                 aviso = r == ResultadoMelhoria::Ok
                             ? "instituição evoluiu para o nível " +
@@ -363,7 +365,7 @@ int main() {
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
             desenhar_painel_edificio(cidade, sim.populacao, *ferramenta.selecionado, sim.data.mes,
-                                     Simulacao::TICKS_POR_DIA);
+                                     Simulacao::TICKS_POR_DIA, sim.fase);
         }
         menu.desenhar();
         EndDrawing();

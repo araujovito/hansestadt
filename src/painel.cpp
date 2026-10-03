@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 
+#include "melhorias.hpp"
 #include "producao.hpp"
 
 namespace {
@@ -16,6 +17,8 @@ constexpr int LINHA = 22;
 constexpr Color FUNDO{ 30, 24, 18, 230 };
 constexpr Color CLARO{ 240, 232, 214, 255 };
 constexpr Color APAGADO{ 170, 160, 140, 255 };
+constexpr Color VERMELHO{ 235, 130, 110, 255 };
+constexpr float ALTURA_BOTAO = 28.0f;
 
 Color cor_da_situacao(Situacao s) {
     switch (s) {
@@ -45,14 +48,66 @@ std::string descrever_receita(const Conteudo& conteudo, const Receita& r) {
     return lista(conteudo, r.entradas) + " -> " + lista(conteudo, r.saidas) + " (" + dias + ")";
 }
 
+// No pé do painel, numa posição fixa, para o clique ser conferido antes do
+// desenho sem depender de quantas linhas o painel tem.
+Rectangle area_do_botao_melhorar() {
+    const Rectangle area = area_do_painel_edificio();
+    return { area.x + MARGEM, area.y + area.height - MARGEM - ALTURA_BOTAO, area.width - 2.0f * MARGEM,
+             ALTURA_BOTAO };
+}
+
+// Nível, próxima melhoria com os materiais e o botão de melhorar.
+void desenhar_instituicao(const Cidade& cidade, IdEdificio id, Fase fase, int x, int y) {
+    const FichaDaInstituicao f = ficha_da_instituicao(cidade, cidade.edificio(id).tipo, fase);
+    DrawText(TextFormat("nível %d de %d", f.nivel, f.nivel_final), x, y, TEXTO, CLARO);
+    y += LINHA;
+    if (f.fase_da_proxima) {
+        const bool liberado = *f.fase_da_proxima <= fase;
+        DrawText(liberado ? TextFormat("nível %d liberado nesta fase", f.nivel + 1)
+                          : TextFormat("nível %d libera na fase %s", f.nivel + 1, nome_da_fase(*f.fase_da_proxima)),
+                 x, y, TEXTO, liberado ? CLARO : APAGADO);
+        y += LINHA;
+        for (const MaterialDaMelhoria& m : f.materiais) {
+            DrawText(TextFormat("%s %d/%d", m.nome.c_str(), m.tem, m.precisa), x + 12, y, TEXTO,
+                     m.tem >= m.precisa ? CLARO : VERMELHO);
+            y += LINHA;
+        }
+    }
+
+    const Rectangle b = area_do_botao_melhorar();
+    const bool pode = f.pode_melhorar == ResultadoMelhoria::Ok;
+    const bool sob_mouse = pode && CheckCollisionPointRec(GetMousePosition(), b);
+    DrawRectangleRec(b, pode ? (sob_mouse ? Color{ 170, 128, 70, 255 } : Color{ 150, 110, 60, 255 })
+                             : Color{ 58, 48, 38, 255 });
+    // Os textos de descrever() não cabem no botão; aqui vão versões curtas.
+    const char* rotulo = TextFormat("Melhorar para o nível %d (U)", f.nivel + 1);
+    switch (f.pode_melhorar) {
+        case ResultadoMelhoria::Ok: break;
+        case ResultadoMelhoria::FaseBloqueada:
+            rotulo = TextFormat("aguarda a fase %s", nome_da_fase(f.fase_da_proxima.value_or(fase)));
+            break;
+        case ResultadoMelhoria::SemRecursos: rotulo = "faltam materiais"; break;
+        case ResultadoMelhoria::NivelMaximo: rotulo = "nível máximo"; break;
+        case ResultadoMelhoria::EdificioInativo:
+        case ResultadoMelhoria::NaoInstituicao: rotulo = descrever(f.pode_melhorar); break;
+    }
+    DrawText(rotulo, static_cast<int>(b.x + (b.width - static_cast<float>(MeasureText(rotulo, TEXTO))) / 2.0f),
+             static_cast<int>(b.y) + 6, TEXTO, pode ? CLARO : APAGADO);
+}
+
 }  // namespace
 
 Rectangle area_do_painel_edificio() {
     return { static_cast<float>(GetScreenWidth()) - LARGURA - 8.0f, 72.0f, LARGURA, ALTURA };
 }
 
+bool clicou_em_melhorar(const Cidade& cidade, IdEdificio id) {
+    return cidade.definicao(id).instituicao && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+           CheckCollisionPointRec(GetMousePosition(), area_do_botao_melhorar());
+}
+
 void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, IdEdificio id, int mes,
-                              int ticks_por_dia) {
+                              int ticks_por_dia, Fase fase) {
     const Rectangle area = area_do_painel_edificio();
     DrawRectangleRec(area, FUNDO);
     DrawRectangleLinesEx(area, 1.0f, Color{ 90, 72, 52, 255 });
@@ -75,6 +130,11 @@ void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, 
     if (!cidade.tem_acesso(id)) {
         DrawText("sem estrada na entrada", x, y, TEXTO, Color{ 235, 130, 110, 255 });
         y += LINHA;
+    }
+
+    if (def.instituicao) {
+        desenhar_instituicao(cidade, id, fase, x, y);
+        return;
     }
 
     const Situacao s = situacao(cidade, id, mes, &populacao);

@@ -265,6 +265,10 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Botão de melhoria no painel da instituição**: o painel mostra nível,
+  quando o próximo nível libera, os materiais (pedido/disponível, em
+  vermelho se faltar) e um botão no pé do painel, com o motivo em versão
+  curta quando está bloqueado. A tecla U continua como atalho.
 - **Lógica do painel das instituições** (`src/melhorias.*`, item 9): ficha
   de cada instituição (nível, nível liberado na fase, próxima melhoria com
   materiais pedidos e disponíveis, resultado de `validar_melhoria`) e o que

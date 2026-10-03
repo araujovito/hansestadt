@@ -10,6 +10,9 @@
 struct Morador {
     static constexpr int DIAS_POR_ANO = 365;
     static constexpr int IDADE_ADULTA = 16 * DIAS_POR_ANO;
+    // Com o trabalho infantil permitido, a partir desta idade a criança
+    // ocupa as vagas de produção que os adultos deixaram.
+    static constexpr int IDADE_TRABALHO_INFANTIL = 10 * DIAS_POR_ANO;
     // Cada geração nascida na vila rende 5% a mais que a anterior, até a
     // quinta (+25%). Os colonos fundadores são a geração 0.
     static constexpr int GANHO_POR_GERACAO = 50;  // milésimos
@@ -39,7 +42,10 @@ public:
     explicit Populacao(int quantidade_inicial = 6);
 
     void alojar(Cidade& cidade);
-    void empregar(const Cidade& cidade, bool incluir_carregadores = false);
+    // Adultos primeiro, em todas as vagas. Com `trabalho_infantil`, crianças
+    // a partir de 10 anos completam as vagas de produção que sobraram; as
+    // vagas de carregador do armazém continuam só com adultos.
+    void empregar(const Cidade& cidade, bool incluir_carregadores = false, bool trabalho_infantil = false);
     void consumir_comida(Cidade& cidade);
     void avancar_dia(Cidade& cidade, Data data, const Eventos* eventos = nullptr);
 
@@ -56,6 +62,7 @@ public:
     int mortos_por_eventos() const { return mortos_por_eventos_; }
     int refeicoes_perdidas() const { return refeicoes_perdidas_; }
     int criancas() const;
+    int criancas_trabalhando() const;
     // Consumo diário em meias porções: adulto vale 2, criança vale 1.
     int consumo_diario_x2() const { return 2 * total() - criancas(); }
     const std::vector<Morador>& moradores() const { return moradores_; }

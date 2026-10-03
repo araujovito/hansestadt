@@ -277,3 +277,33 @@ TESTE("população: soma a produtividade de quem trabalha e desconta os mortos")
     for (int dia = 0; dia < Populacao::DIAS_ATE_MORRER_DE_FOME; ++dia) p.consumir_comida(c);
     VERIFICAR(p.produtividade_em(serraria) == 0);
 }
+
+TESTE("população: com a lei, criança de 10 anos ocupa vaga de produção que sobrou") {
+    Cidade c = cidade_para_populacao();
+    c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio deposito = *c.construir_edificio(tipo("deposito"), { 5, 1 });
+    const IdEdificio serraria = *c.construir_edificio(tipo("serraria"), { 7, 1 });
+    const IdEdificio colheita = *c.construir_edificio(tipo("colheita"), { 9, 1 });
+    Morador adulto;
+    Morador nove_anos;
+    nove_anos.idade_dias = 9 * Morador::DIAS_POR_ANO;
+    Morador dez_anos;
+    dez_anos.idade_dias = Morador::IDADE_TRABALHO_INFANTIL;
+    // Criança antes do adulto: o adulto continua com a primeira vaga.
+    Populacao p = Populacao::restaurar({ dez_anos, nove_anos, adulto }, 0, 0);
+    p.alojar(c);
+
+    p.empregar(c, false, false);
+    VERIFICAR(p.criancas_trabalhando() == 0);
+    VERIFICAR(p.moradores()[2].trabalho == serraria);
+
+    p.empregar(c, true, true);
+    // O depósito tem duas vagas de carregador: o adulto vai para lá, e a
+    // criança não carrega; ela pega a primeira oficina.
+    VERIFICAR(p.moradores()[2].trabalho == deposito);
+    VERIFICAR(p.moradores()[0].trabalho == serraria);
+    VERIFICAR(p.moradores()[1].trabalho == SEM_EDIFICIO);
+    VERIFICAR(p.trabalhadores_em(colheita) == 0);
+    VERIFICAR(p.criancas_trabalhando() == 1);
+    VERIFICAR(p.produtividade_em(serraria) == 500);
+}

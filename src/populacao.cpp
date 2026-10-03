@@ -55,6 +55,12 @@ int Populacao::criancas() const {
                                           [](const Morador& m) { return m.vivo && !m.adulto(); }));
 }
 
+int Populacao::criancas_trabalhando() const {
+    return static_cast<int>(std::count_if(moradores_.begin(), moradores_.end(), [](const Morador& m) {
+        return m.vivo && !m.adulto() && m.trabalho != SEM_EDIFICIO;
+    }));
+}
+
 int Populacao::alojados() const {
     return static_cast<int>(std::count_if(moradores_.begin(), moradores_.end(),
                                           [](const Morador& m) { return m.vivo && m.casa != SEM_EDIFICIO; }));
@@ -113,12 +119,13 @@ void Populacao::alojar(Cidade& cidade) {
     }
 }
 
-void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
+void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores, bool trabalho_infantil) {
     // Recalcular em ordem de id torna o resultado independente do histórico
     // de construções e libera imediatamente quem perdeu casa ou trabalho.
     for (Morador& m : moradores_) m.trabalho = SEM_EDIFICIO;
     trabalhadores_.assign(cidade.edificios().size(), 0);
     produtividade_.assign(cidade.edificios().size(), 0);
+    std::vector<int> vagas_abertas(cidade.edificios().size(), 0);
     // Os empregos são distribuídos em ordem de morador, então quem ficou
     // para trás do cursor já tem trabalho ou não pode trabalhar: o próximo
     // edifício continua de onde o anterior parou, sem voltar ao começo.
@@ -152,6 +159,23 @@ void Populacao::empregar(const Cidade& cidade, bool incluir_carregadores) {
             }
         }
         trabalhadores_[id] += ocupadas;
+        vagas_abertas[id] = vagas - ocupadas;
+    }
+    if (!trabalho_infantil) return;
+
+    // Mesma varredura de cursor único, agora só com as crianças em idade.
+    proximo = 0;
+    for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
+        for (; vagas_abertas[id] > 0 && proximo < moradores_.size(); ++proximo) {
+            Morador& m = moradores_[proximo];
+            if (m.vivo && !m.adulto() && m.idade_dias >= Morador::IDADE_TRABALHO_INFANTIL &&
+                m.casa != SEM_EDIFICIO) {
+                m.trabalho = id;
+                ++trabalhadores_[id];
+                produtividade_[id] += m.produtividade();
+                --vagas_abertas[id];
+            }
+        }
     }
 }
 

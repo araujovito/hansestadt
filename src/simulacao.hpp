@@ -25,6 +25,9 @@ struct Simulacao {
     Transporte transporte;
     Eventos eventos;
     Fase fase = Fase::Vila;
+    // Lei escolhida pelo jogador: crianças de 10 a 15 anos podem trabalhar
+    // na produção, rendendo metade de um adulto.
+    bool trabalho_infantil = false;
     std::uint64_t tick = 0;
     // Primavera de 1150: início da estação de desmatamento e plantio, quando
     // os colonos da Ostsiedlung chegavam para fundar uma vila.

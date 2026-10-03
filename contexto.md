@@ -175,6 +175,35 @@ as de implementação, que o README não explica.
   estamento ao ocupar o trabalho; não existe promoção manual separada. Sem
   emprego especializado, permanece no grupo básico. Falta o mapeamento exato.
 
+### Técnicas, gerações e fome
+Decisões do Vitor em 2026-10-03 (noite), que substituem as de `aa1d0bc` e
+`61b3ef5` (três níveis de ~15%; crianças, alojados e sem-teto na fome):
+- **Técnicas globais por tipo, à moda de Age of Empires**: pesquisadas uma
+  vez pelo painel de qualquer edifício do tipo; **dois níveis de +75%**
+  ("poucos níveis, saltos grandes"), liberados por fase. Implementação: o
+  bônus **acelera o ciclo** em vez de multiplicar a saída. Assim o estoque
+  continua inteiro, sazonalidade e eventos seguem valendo por cima, e sem
+  técnica a conta dá exatamente o valor de antes.
+- **Fases e custos das oito técnicas são proposta de Claude**, ainda não
+  confirmada: madeira no nível 1, couro/tecido/tijolo no nível 2 (regra de
+  custo do `aa1d0bc`). A rotação trienal ficou na Vila por ser corrente na
+  colonização do leste no século XII e por ser a fazenda o gargalo.
+- **Gerações**: +5% por geração nascida na vila, até +25%. O bebê nasce uma
+  geração acima da mais nova entre os adultos da casa.
+- **Trabalho infantil como lei** (Frostpunk), desligada por padrão: crianças
+  de 10 a 15 anos, rendendo metade, numa segunda varredura de `empregar`
+  que só completa vagas de produção que sobraram. Não ocupam vaga de
+  carregador do armazém.
+- **Fome por elo da cadeia**: trabalhadores do produto final, do insumo e
+  da matéria-prima, depois crianças ociosas, depois adultos ociosos. O elo é
+  calculado das receitas ao carregar o conteúdo, para não precisar de um
+  campo novo no TOML a cada edifício. Edifício sem receita (armazém com seus
+  carregadores, instituições) fica com a matéria-prima: escolha de Claude,
+  ainda não confirmada.
+- **Salvamento versão 6 num bloco no fim do arquivo** (lei, técnicas,
+  gerações): a versão 5 é o mesmo arquivo sem o bloco, o que mantém válidos
+  os deslocamentos fixos do teste de migração das versões 3 e 4.
+
 ### Convenções de código
 - Identificadores em português, como nos outros projetos do portfólio.
 - C++20, `-Wall -Wextra -Wpedantic -Wshadow` sem avisos; build de depuração
@@ -205,14 +234,24 @@ as de implementação, que o README não explica.
   precisaria descartar os pedaços fora da tela.
 - **A prévia de construção ainda é o retângulo antigo**, por cima da arte nova.
 
-- **A vila do teste do marco morre de fome em abril de 1151**, um mês depois
-  do fim do teste (que confere 1º de março). Produção máxima da vila inteira:
-  2.303 porções por ano, o bastante para 6,3 pessoas, e o primeiro nascimento
-  a põe em déficit. O gargalo é a fazenda (colhe só em julho e agosto: 31
-  sacos de centeio, 868 pães por ano; a padaria daria conta de 3.400). Medido
-  em 2026-10-03, igual no ramo do Codex e na integração. O Vitor decidiu
-  medidas (ver plano, bloco 7b); crianças agora consomem meia porção. As
-  melhorias de produtividade foram definidas, mas ainda não implementadas.
+- **A vila do teste do marco morre de fome em 1151, mesmo com técnica.**
+  Produção máxima da vila inteira: 2.303 porções por ano, o bastante para
+  6,3 pessoas, e o primeiro nascimento a põe em déficit. O gargalo é a
+  fazenda (colhe só em julho e agosto: 31 sacos de centeio, 868 pães por
+  ano; a padaria daria conta de 3.400). Medido de novo em 2026-10-03
+  (noite), rodando a vila do marco sem janela: sem técnica os adultos
+  morrem em abril–maio de 1151; com a rotação trienal pesquisada desde o
+  início, em maio–junho (a comida de 1º de janeiro sobe de 406 para 532).
+  Com a técnica o moinho fica com a saída cheia em agosto (estoque de 8
+  farinhas) e o vão de setembro a junho sem colheita continua. Técnica,
+  gerações e trabalho infantil não resolvem sozinhos o primeiro ano.
+- **Criança não morre de fome** (simulação, `de33955`): no dia em que não
+  precisa comer (meia porção = uma refeição a cada dois dias), o contador
+  de dias sem comida volta a zero, então nunca chega a 30. Na rodada
+  acima, uma criança sozinha viveu 16 anos sem comida. Avisado ao Codex.
+- **Criança que trabalha também carrega** a produção da sua oficina, na
+  mesma velocidade de um adulto: o transporte cria um agente por
+  trabalhador e não distingue idade.
 - **Faixa de floresta na borda esquerda do mapa** é coincidência da semente
   1150, não defeito do ruído (média do hash por coluna conferida). Some
   quando o mapa da campanha for desenhado à mão.
@@ -275,6 +314,21 @@ documentos não voltarem a divergir.
 ---
 
 ## Histórico
+
+### 2026-10-03 (noite)
+
+- **Técnicas, gerações, trabalho infantil e fome por profissão**, a pedido
+  do Vitor, no ramo `claude/interface` (commits `a5847f7`..`02fd5c9`):
+  técnicas `[[tecnica]]` no TOML com fase, requisito, custo e bônus; estado
+  na cidade e ritmo por tipo; produção acelerada pela técnica e pela média
+  da equipe; geração e produtividade por morador; lei do trabalho infantil;
+  fome pelo elo da cadeia; salvamento versão 6; as oito técnicas do
+  primeiro corte; `balancear.py --nivel`; painel com técnicas e botão de
+  pesquisar; botão da lei na aba Emprego. Antes, `61b3ef5` do Codex foi
+  trazido para o ramo (merge `2796d21`).
+- **Medição**: a rotação trienal adia em cerca de um mês a fome da vila do
+  marco, mas não a evita (ver Problemas conhecidos). Achado de passagem:
+  criança não morre de fome.
 
 ### 2026-10-03
 

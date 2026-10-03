@@ -97,24 +97,31 @@ do README e do contexto e um ou mais commits pequenos.
    - Velocidade relativa: campo 50%, trilha 75%, estrada 100% e floresta 35%.
      Pessoas podem atravessar floresta e formar trilhas nela.
 
-7b. **Comida para a vila crescer** — em andamento na `codex/simulacao`
+7b. **Comida para a vila crescer** — primeiro corte implementado
    - Motivo: a vila inicial produz no máximo 2.303 porções por ano (6,3
      pessoas) e passa fome no primeiro ano; e morador sem casa morre de fome
      com o armazém cheio (ver contexto.md, Problemas conhecidos).
-   - Implementado: moradores sem casa comem no armazém ou na igreja; a igreja
-     guarda comida e é abastecida pelos carregadores.
-   - Implementado: criança (menos de 16 anos) come meia porção; autonomia,
-     alertas e relatório consideram esse consumo.
-   - Edifícios podem receber melhorias de tecnologia que aumentam a
-     produtividade, para a comida acompanhar o crescimento da vila.
-   - Decidido: melhorias são globais por tipo de edifício, com três níveis e
-     aproximadamente 15% de produtividade adicional por nível.
-   - Os níveis são liberados conforme as fases e têm custos crescentes: madeira
-     primeiro; tecido e couro nas fases intermediárias; tijolos nas posteriores.
-     A compra é instantânea e não reserva trabalhadores nem exige tempo de obra.
-   - O primeiro corte abrange fazendas, pesca, moinho e padaria.
-   - Quando falta comida, a prioridade é: crianças, adultos alojados e, por
-     último, adultos sem casa.
+   - Implementado (`codex/simulacao`): moradores sem casa comem no armazém
+     ou na igreja; criança (menos de 16 anos) come meia porção.
+   - Decidido pelo Vitor em 2026-10-03 (noite), substituindo os três níveis
+     de ~15% e a ordem crianças/alojados/sem-teto, e implementado na
+     `claude/interface`:
+     - técnicas globais por tipo de edifício, como nos Age of Empires, em
+       **dois níveis de +75%** liberados por fase; primeiro corte com
+       fazendas, pesca, moinho e padaria;
+     - cada geração nascida na vila rende +5%, até +25%;
+     - lei de **trabalho infantil** (Frostpunk): crianças de 10 a 15 anos
+       ocupam vagas que sobraram, rendendo 50%;
+     - na fome comem primeiro os trabalhadores, do produto final à
+       matéria-prima; depois crianças; por último adultos sem trabalho.
+   - Falta confirmar: fases e custos das oito técnicas (proposta de Claude
+     no `edificios.toml`) e o grupo dos carregadores e instituições na fila
+     da fome (hoje junto da matéria-prima).
+   - Falta decidir: como a vila atravessa o primeiro ano. A rotação trienal
+     só adia a fome em cerca de um mês (contexto.md, Problemas conhecidos).
+   - Direção do Vitor: com população grande, a comida precisa vir também de
+     outras fontes de renda (comércio), não só de técnica.
+   - Corrigir na simulação: criança não morre de fome (contexto.md).
 
 8. **Agricultura, clima e recursos**
    - Plantio e colheita mais visíveis.

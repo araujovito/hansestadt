@@ -20,7 +20,9 @@ clima e dos acontecimentos históricos.
 > já vividos, com aviso quando um começa). O equilíbrio da comida ainda está
 > em ajuste: sem expandir a produção, a vila inicial passa fome no primeiro
 > ano; crianças já consomem meia porção e sem-teto comem no armazém ou na
-> igreja (ver `contexto.md`).
+> igreja (ver `contexto.md`). Técnicas de produção por tipo de edifício,
+> gerações mais produtivas e uma lei de trabalho infantil já existem, mas
+> sozinhas não tiram a vila inicial da fome de 1151.
 
 ## Ideia central
 
@@ -82,6 +84,25 @@ Duas regras de projeto:
   Grande Fome de 1315–17, causada por anos seguidos de chuva que
   arruinaram as colheitas.
 
+### Técnicas
+
+Como nos *Age of Empires*, uma técnica é pesquisada uma vez, pelo painel de
+um edifício, e vale para todos os edifícios daquele tipo, inclusive os
+construídos depois. Cada linha de produção tem dois níveis de +75% de ritmo
+(2,5× no fim), liberados por fase. A técnica encurta o ciclo em vez de
+aumentar a saída, então a estação continua mandando: a fazenda de centeio
+mais rápida ainda só colhe em julho e agosto, mas colhe mais vezes.
+
+| Edifícios | Nível 1 | Nível 2 |
+|---|---|---|
+| fazendas de centeio e cevada | rotação trienal (vila, 10 toras) | arado pesado e coelheira (cidade, toras e couro) |
+| pescador e pesca de arenque | nassas e redes maiores (mercado, 8 toras) | barcos com vela de pano (hansa, toras e tecido) |
+| moinho | mós de basalto do Eifel (mercado, 8 toras) | roda d'água de impulsão superior (cidade, toras e tijolo) |
+| padaria | forno de tijolo (cidade, 6 tijolos) | guilda dos padeiros (hansa, tijolo e tecido) |
+
+As técnicas ficam em `dados/edificios.toml`, em `[[tecnica]]` (formato no
+cabeçalho do arquivo). Fases e custos ainda são proposta.
+
 O tijolo fica para a fase de cidade porque, historicamente, o gótico de
 tijolo começa no Báltico a partir da década de 1160 (catedral de Lübeck,
 1173). Uma vila recém-fundada era de madeira.
@@ -115,9 +136,22 @@ pelo mesmo sistema de transporte das oficinas e consomem uma unidade por
 morador a cada dia. Após 30 dias consecutivos sem comer, o morador morre e
 libera sua vaga na casa e no trabalho.
 
-Cada morador tem idade e sexo. Crianças consomem comida, mas só entram no
+Cada morador tem idade e sexo. Crianças comem meia porção e só entram no
 mercado de trabalho aos 16 anos. No primeiro dia de cada ano, uma casa com
 um casal adulto, comida na despensa e vaga disponível recebe uma criança.
+
+Cada geração nascida na vila rende 5% a mais no trabalho que a dos pais,
+até +25% na quinta geração; os colonos fundadores são a geração 0. Na aba
+Emprego do relatório o jogador pode permitir o **trabalho infantil**, como
+as leis de *Frostpunk*: crianças de 10 a 15 anos passam a ocupar as vagas
+de produção que os adultos deixaram, rendendo metade de um adulto. Uma
+oficina trabalha no ritmo médio da sua equipe, multiplicado pelas técnicas.
+
+Quando a comida não dá para todos, comem primeiro os que trabalham, do
+produto final à matéria-prima (padeiro antes do moleiro, moleiro antes do
+lavrador); depois as crianças que não trabalham; por último os adultos sem
+trabalho, o que inclui os sem-teto. O elo de cada ofício sai das receitas.
+Ainda não há humor nem reação dos moradores a essas escolhas.
 
 A segunda linha da barra superior resume população, crianças, sem-casa, desempregados,
 mortes, estoque total de comida e autonomia em dias. A autonomia fica
@@ -140,6 +174,11 @@ no primeiro ano. A simulação é deliberadamente agregada: transporte, distânc
 e limites físicos também são cobertos pelo teste integrado do marco. Com a
 cadeia completa, os seis moradores atravessam o inverno de 1150–51; sem a
 fazenda, há refeições perdidas.
+
+`python3 ferramentas/balancear.py --nivel N` repete a conta com as técnicas
+pesquisadas até o nível N. No mesmo cenário, a produção do primeiro ano vai
+de 1.864 porções (nível 0) a 3.264 (nível 1) e 4.652 (nível 2): comida para
+5,1, 8,9 e 12,7 pessoas.
 
 O balanceador também compara a capacidade bruta de receitas que produzem
 comida sem insumos, em porções por trabalhador/dia. No catálogo atual, peixe

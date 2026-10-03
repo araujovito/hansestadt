@@ -60,6 +60,24 @@ TESTE("população: moradores alojados ocupam empregos em ordem") {
     VERIFICAR(p.trabalhadores_em(colheita) == 1);
 }
 
+TESTE("população: empregos seguem a ordem dos moradores de um edifício ao outro") {
+    Cidade c = cidade_para_populacao();
+    c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio serraria = *c.construir_edificio(tipo("serraria"), { 5, 1 });
+    c.construir_edificio(tipo("deposito"), { 7, 1 });  // sem vagas de trabalho
+    const IdEdificio colheita = *c.construir_edificio(tipo("colheita"), { 9, 1 });
+    const IdEdificio forno = *c.construir_edificio(tipo("forno"), { 5, 4 });
+    Populacao p(6);  // 4 cabem na casa, 2 ficam sem teto e não trabalham
+    p.alojar(c);
+    p.empregar(c);
+    VERIFICAR(p.moradores()[0].trabalho == serraria);
+    VERIFICAR(p.moradores()[1].trabalho == colheita);
+    VERIFICAR(p.moradores()[2].trabalho == forno);
+    VERIFICAR(p.moradores()[3].trabalho == SEM_EDIFICIO);
+    VERIFICAR(p.moradores()[4].trabalho == SEM_EDIFICIO);
+    VERIFICAR(p.desempregados() == 1);
+}
+
 TESTE("população: cada morador consome uma comida por dia") {
     Cidade c = cidade_para_populacao();
     const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });

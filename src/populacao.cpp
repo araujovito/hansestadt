@@ -63,12 +63,20 @@ void Populacao::empregar(const Cidade& cidade) {
     // Recalcular em ordem de id torna o resultado independente do histórico
     // de construções e libera imediatamente quem perdeu casa ou trabalho.
     for (Morador& m : moradores_) m.trabalho = SEM_EDIFICIO;
+    // Os empregos são distribuídos em ordem de morador, então quem ficou
+    // para trás do cursor já tem trabalho ou não pode trabalhar: o próximo
+    // edifício continua de onde o anterior parou, sem voltar ao começo.
+    std::size_t proximo = 0;
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.edificio(id).ativo) continue;
         const int vagas = cidade.definicao(id).trabalhadores;
-        for (Morador& m : moradores_) {
-            if (trabalhadores_em(id) >= vagas) break;
-            if (m.vivo && m.casa != SEM_EDIFICIO && m.trabalho == SEM_EDIFICIO) m.trabalho = id;
+        int ocupadas = 0;
+        for (; ocupadas < vagas && proximo < moradores_.size(); ++proximo) {
+            Morador& m = moradores_[proximo];
+            if (m.vivo && m.casa != SEM_EDIFICIO) {
+                m.trabalho = id;
+                ++ocupadas;
+            }
         }
     }
 }

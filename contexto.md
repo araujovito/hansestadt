@@ -70,11 +70,14 @@ as de implementação, que o README não explica.
   carregadores por edifício são pessoas separadas dos trabalhadores, com
   atendimento compartilhado quando faltam adultos e cobertura crescente
   conforme há adultos disponíveis, até um por edifício.
-- **Detalhes ainda não definidos pelo Vitor**: carregadores próprios do
-  armazém, prioridade de emprego entre produção e transporte, limiares e
-  persistência da trilha, velocidades relativas, formação de trilha por
-  carregadores e passagem por floresta. Não implementar esses detalhes por
-  suposição; estão listados no plano de ação.
+- **Distribuição de mão de obra definida pelo Vitor em 2026-10-03**: o
+  armazém mantém um carregador próprio; quando faltam adultos, trabalhadores
+  de produção têm prioridade e o transporte recebe os adultos restantes,
+  compartilhando carregadores entre edifícios quando necessário.
+- **Detalhes ainda não definidos pelo Vitor**: limiares e persistência da
+  trilha, velocidades relativas, formação de trilha por carregadores e
+  passagem por floresta. Não implementar esses detalhes por suposição; estão
+  listados no plano de ação.
 - **Cache de rotas invalidado por inteiro** a cada estrada construída ou
   demolida. Descobrir quais rotas foram afetadas seria mais econômico, mas
   obras são raras perto do número de viagens e uma estrada nova pode criar

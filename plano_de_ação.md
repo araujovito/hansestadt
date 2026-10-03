@@ -78,15 +78,19 @@ do README e do contexto e um ou mais commits pequenos.
 
 7a. **Carregadores por edifício e trilhas** — decisão registrada; regras
      operacionais pendentes antes de implementar
+   - Decidido pelo Vitor em 2026-10-03: o armazém mantém um carregador
+     próprio, além da cobertura de transporte dos demais edifícios.
+   - Decidido pelo Vitor em 2026-10-03: quando faltarem adultos, as vagas de
+     produção têm prioridade; o transporte usa os adultos restantes e
+     compartilha carregadores entre edifícios quando necessário.
    - Cada edifício deve ter um carregador separado de seus trabalhadores;
      quando faltarem adultos, um carregador atende vários edifícios; adultos
      que sobrarem aumentam essa cobertura até um por edifício.
    - O percurso casa–trabalho dos funcionários cria trilhas que, com o uso,
      viram estradas automaticamente. Estradas manuais continuam disponíveis.
-   - Falta decidir: se o armazém mantém carregadores próprios; prioridade
-     entre vagas de produção e transporte; limiares e desgaste das trilhas;
-     velocidade em campo/trilha/estrada; se carregadores também criam trilhas;
-     e se trilhas atravessam floresta.
+   - Falta decidir: limiares e desgaste das trilhas; velocidade em
+     campo/trilha/estrada; se carregadores também criam trilhas; e se trilhas
+     atravessam floresta.
 
 7b. **Comida para a vila crescer** — em andamento na `codex/simulacao`
    - Motivo: a vila inicial produz no máximo 2.303 porções por ano (6,3

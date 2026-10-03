@@ -152,6 +152,12 @@ as de implementação, que o README não explica.
   ignorada em silêncio.
 - **Testes usam conteúdo próprio**, escrito no teste, para não quebrarem com
   mudanças de balanceamento.
+- **Estamentos entram pelos edifícios**, decisão do Vitor em 2026-10-03:
+  camponeses, artesãos, mercadores e clero surgem conforme a cidade constrói
+  os edifícios associados, sem uma data fixa nem liberação conjunta. Como em
+  *Knights and Merchants*, a função nasce do edifício e o morador assume o
+  estamento ao ocupar o trabalho; não existe promoção manual separada. Sem
+  emprego especializado, permanece no grupo básico. Falta o mapeamento exato.
 
 ### Convenções de código
 - Identificadores em português, como nos outros projetos do portfólio.
@@ -256,6 +262,10 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Entrada dos estamentos definida pelo Vitor**: cada estamento é introduzido
+  pela construção de seus edifícios associados. A ocupação do trabalho muda
+  o estamento do morador, seguindo a lógica de *Knights and Merchants*. O
+  plano deixa como pendência apenas o mapeamento entre trabalhos e estamentos.
 - **Regras restantes aprovadas pelo Vitor**: melhorias globais por tipo, em
   três níveis de cerca de 15%, liberadas por fase e com custos progressivos;
   o primeiro corte cobre fazendas, pesca, moinho e padaria. Na escassez,

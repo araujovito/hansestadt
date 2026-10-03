@@ -152,8 +152,15 @@ do README e do contexto e um ou mais commits pequenos.
       construção no estilo novo, música e sons ambientais.
 
 11. **Estamentos sociais**
-    - Camponeses, artesãos, mercadores e clero.
-    - Necessidades, trabalhos e influência diferentes.
+   - Camponeses, artesãos, mercadores e clero.
+   - Necessidades, trabalhos e influência diferentes.
+   - Os estamentos são introduzidos organicamente pela construção dos
+     edifícios associados a eles, e não por ano fixo ou liberação simultânea.
+   - Segue a lógica de *Knights and Merchants*: o edifício cria a função; ao
+     ocupar a vaga, o morador assume o estamento ligado àquele trabalho, sem
+     uma promoção manual separada. Sem função especializada, permanece no
+     grupo básico.
+   - Falta mapear quais edifícios e trabalhos correspondem a cada estamento.
 
 12. **Campanha e mapa histórico**
     - Mapa próprio no lugar do gerador provisório.
@@ -181,7 +188,7 @@ do README e do contexto e um ou mais commits pequenos.
 
 ## Decisões ainda abertas
 
-- Escopo exato dos estamentos sociais após a economia básica estar completa.
+- Mapeamento de edifícios e trabalhos para cada estamento.
 - Formato definitivo dos eventos depois do primeiro conjunto em TOML.
 
 ## Divisão de trabalho em paralelo

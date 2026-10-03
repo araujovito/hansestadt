@@ -4,6 +4,9 @@ RAYLIB  := vendor/raylib/src
 LIBRAY  := $(RAYLIB)/libraylib.a
 TOMLPP  := vendor/tomlplusplus
 TOMLHPP := $(TOMLPP)/toml.hpp
+# Arte da Kenney (CC0), baixada por script como as bibliotecas; as peças
+# próprias ficam em dados/arte, geradas por ferramentas/gerar_pecas.py.
+KENNEY  := vendor/kenney/tiny-farm/tilemap_packed.png
 
 CXX      ?= g++
 CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -isystem $(RAYLIB) -isystem $(TOMLPP)
@@ -44,7 +47,10 @@ $(LIBRAY):
 $(TOMLHPP):
 	./scripts/baixar-tomlplusplus.sh
 
-$(BINARIO): $(OBJETOS) $(LIBRAY)
+$(KENNEY):
+	./scripts/baixar-kenney.sh
+
+$(BINARIO): $(OBJETOS) $(LIBRAY) | $(KENNEY)
 	$(CXX) $(LDFLAGS) $(OBJETOS) $(LDLIBS) -o $@
 
 # -MMD gera os .d com as dependências de cabeçalho de cada .cpp

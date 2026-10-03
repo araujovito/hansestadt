@@ -193,3 +193,104 @@ cor = "vermelho"
 )");
     VERIFICAR(r.erros.size() == 4);
 }
+
+namespace {
+
+// Padaria com receita, para as técnicas terem o que acelerar.
+std::string padaria_e(const std::string& tecnicas) {
+    return edificio("[[edificio.receita]]\ndias = 3\nsaidas = { pao = 1 }\n") + tecnicas;
+}
+
+}  // namespace
+
+TESTE("conteúdo: lê técnicas com fase, edifícios, requisito, custo e bônus") {
+    const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, padaria_e(R"(
+[[tecnica]]
+id = "forno"
+nome = "forno de tijolo"
+descricao = "assa mais pão por fornada"
+fase = "vila"
+edificios = ["padaria"]
+custo = { centeio = 2 }
+bonus = 0.75
+
+[[tecnica]]
+id = "guilda"
+nome = "guilda"
+fase = "cidade"
+edificios = ["padaria"]
+requer = "forno"
+custo = { centeio = 4 }
+bonus = 0.75
+)"));
+    for (const auto& e : r.erros) std::printf("    %s\n", e.c_str());
+    VERIFICAR(r.conteudo.has_value());
+    if (!r.conteudo) return;
+    const Conteudo& c = *r.conteudo;
+    VERIFICAR(c.tecnicas.size() == 2);
+    const Tecnica& forno = c.tecnicas[0];
+    VERIFICAR(forno.nome == "forno de tijolo" && forno.descricao == "assa mais pão por fornada");
+    VERIFICAR(forno.fase == Fase::Vila && forno.bonus == 750 && !forno.requer);
+    VERIFICAR(forno.edificios.size() == 1 && forno.edificios[0] == *c.buscar_edificio("padaria"));
+    VERIFICAR(forno.custo.size() == 1 && forno.custo[0].quantidade == 2);
+    VERIFICAR(c.tecnicas[1].requer == c.buscar_tecnica("forno"));
+}
+
+TESTE("conteúdo: sem técnicas declaradas a lista fica vazia") {
+    const ResultadoCarga r = carregar_conteudo_de_texto(ITENS, padaria_e(""));
+    VERIFICAR(r.conteudo && r.conteudo->tecnicas.empty());
+}
+
+TESTE("conteúdo: recusa técnica malformada") {
+    const auto erro = [](const std::string& tecnica, const std::string& trecho) {
+        return tem_erro_com(carregar_conteudo_de_texto(ITENS, padaria_e(tecnica)), trecho);
+    };
+    const std::string base = "[[tecnica]]\nid = \"t\"\nnome = \"t\"\nfase = \"vila\"\ncusto = { centeio = 1 }\n";
+    VERIFICAR(erro(base + "edificios = [\"moinho\"]\nbonus = 0.5\n", "edifício desconhecido 'moinho'"));
+    VERIFICAR(erro(base + "bonus = 0.5\n", "precisa de 'edificios'"));
+    VERIFICAR(erro(base + "edificios = [\"padaria\"]\nbonus = 0\n", "'bonus'"));
+    VERIFICAR(erro(base + "edificios = [\"padaria\"]\nbonus = 0.5\nrequer = \"depois\"\n",
+                   "declarada antes"));
+    VERIFICAR(erro(base + "edificios = [\"padaria\"]\nbonus = 0.5\nbonsu = 1\n", "chave desconhecida 'bonsu'"));
+    // Técnica de fase posterior não pode ser requisito de uma anterior.
+    VERIFICAR(erro(R"(
+[[tecnica]]
+id = "a"
+nome = "a"
+fase = "cidade"
+edificios = ["padaria"]
+custo = { centeio = 1 }
+bonus = 0.5
+
+[[tecnica]]
+id = "b"
+nome = "b"
+fase = "vila"
+edificios = ["padaria"]
+requer = "a"
+custo = { centeio = 1 }
+bonus = 0.5
+)", "fase não pode ser anterior"));
+}
+
+TESTE("conteúdo: técnica não vale para edifício que não produz") {
+    const std::string casa = R"(
+[[edificio]]
+id = "casa"
+nome = "casa"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+moradores = 2
+
+[[tecnica]]
+id = "t"
+nome = "t"
+fase = "vila"
+edificios = ["casa"]
+custo = { centeio = 1 }
+bonus = 0.5
+)";
+    VERIFICAR(tem_erro_com(carregar_conteudo_de_texto(ITENS, casa), "não produz nada"));
+}

@@ -28,6 +28,17 @@
 #   entradas/saidas { item = quantidade }
 #   sazonalidade    fator de produção por mês, de janeiro a dezembro
 #                   (omitido = 1 o ano todo; 0 = parado)
+#
+# [[tecnica]]: melhoria de produção pesquisada uma vez e válida para todos os
+# edifícios dos tipos listados, inclusive os construídos depois.
+#   id, nome        identificador interno e nome exibido
+#   descricao       uma linha sobre a técnica, mostrada no painel
+#   fase            a partir de quando pode ser pesquisada
+#   edificios       ids dos edifícios que ela acelera (precisam ter receita)
+#   requer          id de uma técnica declarada antes (o nível anterior)
+#   custo           materiais retirados dos estoques ao pesquisar
+#   bonus           produtividade a mais (0.75 = +75%), somada às outras
+#                   técnicas já pesquisadas para o mesmo edifício
 
 # ---------------------------------------------------------------- vila
 

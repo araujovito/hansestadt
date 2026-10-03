@@ -19,6 +19,7 @@ enum class TipoItem : std::uint8_t { Insumo, Comida };
 
 using IdItem = std::uint16_t;
 using IdTipoEdificio = std::uint16_t;
+using IdTecnica = std::uint16_t;
 
 struct DefinicaoItem {
     std::string id;
@@ -89,6 +90,22 @@ struct DefinicaoEdificio {
 
 int nivel_maximo_disponivel(const DefinicaoEdificio& edificio, Fase fase);
 
+// Técnica de produção: pesquisada uma vez, vale para todos os edifícios dos
+// tipos listados, inclusive os construídos depois (como nos Age of Empires).
+struct Tecnica {
+    std::string id;
+    std::string nome;
+    std::string descricao;
+    Fase fase;  // a partir de quando pode ser pesquisada
+    std::vector<IdTipoEdificio> edificios;
+    // Técnica que precisa ter sido pesquisada antes (o nível anterior).
+    std::optional<IdTecnica> requer;
+    std::vector<Quantidade> custo;
+    // Produtividade a mais, em milésimos (750 = +75%). Somada às outras
+    // técnicas pesquisadas do mesmo tipo de edifício.
+    int bonus;
+};
+
 // Se a célula (dx, dy), relativa à origem da área total, é lavoura e não o
 // edifício em si.
 inline bool eh_lavoura(const DefinicaoEdificio& d, int dx, int dy) {
@@ -98,10 +115,12 @@ inline bool eh_lavoura(const DefinicaoEdificio& d, int dx, int dy) {
 struct Conteudo {
     std::vector<DefinicaoItem> itens;
     std::vector<DefinicaoEdificio> edificios;
+    std::vector<Tecnica> tecnicas;
 
     const DefinicaoEdificio& edificio(IdTipoEdificio id) const { return edificios[id]; }
     std::optional<IdTipoEdificio> buscar_edificio(std::string_view id) const;
     std::optional<IdItem> buscar_item(std::string_view id) const;
+    std::optional<IdTecnica> buscar_tecnica(std::string_view id) const;
 };
 
 // Todos os erros encontrados, não só o primeiro: corrigir um arquivo de

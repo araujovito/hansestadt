@@ -1,6 +1,7 @@
 #include "conteudo.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <initializer_list>
 #include <sstream>
@@ -47,6 +48,13 @@ std::optional<IdTipoEdificio> Conteudo::buscar_edificio(std::string_view id) con
 std::optional<IdItem> Conteudo::buscar_item(std::string_view id) const {
     for (std::size_t i = 0; i < itens.size(); ++i) {
         if (itens[i].id == id) return static_cast<IdItem>(i);
+    }
+    return std::nullopt;
+}
+
+std::optional<IdTecnica> Conteudo::buscar_tecnica(std::string_view id) const {
+    for (std::size_t i = 0; i < tecnicas.size(); ++i) {
+        if (tecnicas[i].id == id) return static_cast<IdTecnica>(i);
     }
     return std::nullopt;
 }
@@ -339,6 +347,67 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
     }
 }
 
+// Depois dos edifícios, que as técnicas referenciam. A lista é opcional.
+void ler_tecnicas(const toml::table& raiz, Conteudo& c, Erros& erros) {
+    const toml::node_view<const toml::node> no = raiz["tecnica"];
+    if (!no) return;
+    const toml::array* tecnicas = no.as_array();
+    if (!tecnicas) {
+        erros.adicionar("edificios.toml", "'tecnica' precisa ser uma lista de tabelas");
+        return;
+    }
+    for (const toml::node& item : *tecnicas) {
+        const toml::table* t = item.as_table();
+        if (!t) continue;
+        const std::string ctx = "edificios.toml, técnica '" + (*t)["id"].value_or(std::string("?")) + "'";
+        const std::size_t erros_antes = erros.lista.size();
+        conferir_chaves(*t, { "id", "nome", "descricao", "fase", "edificios", "requer", "custo", "bonus" }, ctx,
+                        erros);
+
+        Tecnica tec;
+        tec.id = texto_obrigatorio(*t, "id", ctx, erros).value_or("");
+        tec.nome = texto_obrigatorio(*t, "nome", ctx, erros).value_or("");
+        tec.descricao = (*t)["descricao"].value_or(std::string());
+        if (c.buscar_tecnica(tec.id)) erros.adicionar(ctx, "id repetido");
+
+        const auto fase = fase_por_id((*t)["fase"].value_or(std::string()));
+        if (!fase) erros.adicionar(ctx, "fase inválida");
+        tec.fase = fase.value_or(Fase::Vila);
+
+        if (const toml::array* lista = (*t)["edificios"].as_array()) {
+            for (const toml::node& nome : *lista) {
+                const auto tipo = c.buscar_edificio(nome.value_or(std::string()));
+                if (!tipo) {
+                    erros.adicionar(ctx, "edifício desconhecido '" + nome.value_or(std::string("?")) + "'");
+                } else if (c.edificio(*tipo).receitas.empty()) {
+                    erros.adicionar(ctx, "'" + c.edificio(*tipo).id + "' não produz nada para a técnica acelerar");
+                } else {
+                    tec.edificios.push_back(*tipo);
+                }
+            }
+        }
+        if (tec.edificios.empty()) erros.adicionar(ctx, "precisa de 'edificios' com ao menos um edifício");
+
+        if (t->contains("requer")) {
+            const std::string requer = (*t)["requer"].value_or(std::string());
+            tec.requer = c.buscar_tecnica(requer);
+            // Só técnicas anteriores: assim não há ciclo de requisitos.
+            if (!tec.requer) erros.adicionar(ctx, "'requer' precisa ser uma técnica declarada antes");
+            else if (c.tecnicas[*tec.requer].fase > tec.fase)
+                erros.adicionar(ctx, "fase não pode ser anterior à da técnica que ela requer");
+        }
+
+        if (!t->contains("custo") || !(*t)["custo"].as_table()) erros.adicionar(ctx, "falta 'custo'");
+        tec.custo = ler_quantidades(*t, "custo", c, ctx + ", custo", erros);
+
+        const auto bonus = (*t)["bonus"].value<double>();
+        if (!bonus || *bonus <= 0.0 || *bonus > 10.0) erros.adicionar(ctx, "'bonus' precisa ser número entre 0 e 10");
+        tec.bonus = static_cast<int>(std::lround(bonus.value_or(0.0) * 1000.0));
+
+        if (erros.lista.size() == erros_antes) c.tecnicas.push_back(std::move(tec));
+    }
+}
+
 std::optional<toml::table> analisar(std::string_view texto, const std::string& arquivo, Erros& erros) {
     try {
         return toml::parse(texto, arquivo);
@@ -368,7 +437,10 @@ ResultadoCarga carregar_conteudo_de_texto(std::string_view itens_toml, std::stri
     Conteudo c;
     // Itens primeiro: as receitas dos edifícios referenciam os ids deles.
     if (auto raiz = analisar(itens_toml, "itens.toml", erros)) ler_itens(*raiz, c, erros);
-    if (auto raiz = analisar(edificios_toml, "edificios.toml", erros)) ler_edificios(*raiz, c, erros);
+    if (auto raiz = analisar(edificios_toml, "edificios.toml", erros)) {
+        ler_edificios(*raiz, c, erros);
+        ler_tecnicas(*raiz, c, erros);
+    }
 
     if (!erros.lista.empty()) return { std::nullopt, std::move(erros.lista) };
     return { std::move(c), {} };

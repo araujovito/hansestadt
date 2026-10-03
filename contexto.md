@@ -249,6 +249,14 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Memória atualizada com o recado do Claude**: o plano agora tem o item
+  7b com as três decisões do Vitor sobre alimentação e as perguntas abertas;
+  problemas conhecidos registram o déficit alimentar da vila inicial e a
+  fome de moradores sem casa. O README e o plano também refletem a interface
+  e o visual já entregues. Essas atualizações estão no commit `3b693a9`.
+  Embora o recado diga que ele ainda não chegou à integração, a branch local
+  `integracao/plano-de-acao`, assim como `main`, já aponta para esse commit;
+  os remotos ainda apontam para `032695e`, então falta publicar esse avanço.
 - **Documentos em dia com o jogo**: status do README, limitações do
   contexto (achados de equilíbrio da comida, desenho) e plano (decisões do
   Vitor sobre comida, andamento da interface e do visual).

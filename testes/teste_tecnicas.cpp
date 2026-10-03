@@ -1,7 +1,12 @@
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+
 #include "cidade.hpp"
 #include "conteudo.hpp"
 #include "populacao.hpp"
 #include "producao.hpp"
+#include "salvamento.hpp"
 #include "verificar.hpp"
 
 namespace {
@@ -172,4 +177,52 @@ TESTE("técnicas: equipe de geração mais nova acelera o ciclo junto com a téc
     }
     // 40000 / (1750 × 1,25 = 2187) arredonda para 19 ticks.
     VERIFICAR(ticks == 19);
+}
+
+TESTE("técnicas: salvamento guarda técnicas, gerações e a lei, e a versão 5 migra") {
+    const Conteudo& c = conteudo();
+    Cidade cidade(Mapa(10, 10), c);
+    const IdEdificio deposito = *cidade.construir_edificio(*c.buscar_edificio("deposito"), { 1, 1 });
+    cidade.adicionar(deposito, *c.buscar_item("tora"), 10);
+    cidade.pesquisar_tecnica(*c.buscar_tecnica("forno"), Fase::Vila);
+    const IdEdificio padaria = *cidade.construir_edificio(*c.buscar_edificio("padaria"), { 4, 1 });
+    Simulacao sim(std::move(cidade));
+    sim.trabalho_infantil = true;
+    Morador neto;
+    neto.geracao = 3;
+    neto.casa = deposito;
+    neto.trabalho = padaria;
+    sim.populacao = Populacao::restaurar({ neto }, 0, 0);
+
+    const std::string caminho = "/tmp/hansestadt-teste-v6.hanse";
+    std::string erro;
+    VERIFICAR(salvar_partida(sim, caminho, erro));
+    const ResultadoSalvamento carga = carregar_partida(caminho, c);
+    VERIFICAR(carga.simulacao.has_value());
+    if (carga.simulacao) {
+        VERIFICAR(carga.simulacao->trabalho_infantil);
+        VERIFICAR(carga.simulacao->cidade.tecnica_pesquisada(*c.buscar_tecnica("forno")));
+        VERIFICAR(carga.simulacao->cidade.produtividade_tecnica(*c.buscar_edificio("padaria")) == 1750);
+        VERIFICAR(carga.simulacao->populacao.moradores()[0].geracao == 3);
+        VERIFICAR(carga.simulacao->populacao.produtividade_em(padaria) == 1150);
+    }
+
+    // A versão 5 é o mesmo arquivo sem o bloco do fim: lei (1 byte),
+    // técnicas (8 + 1 por técnica) e gerações (8 + 4 por morador).
+    std::ifstream entrada(caminho, std::ios::binary);
+    std::string bytes{ std::istreambuf_iterator<char>(entrada), std::istreambuf_iterator<char>() };
+    entrada.close();
+    bytes.resize(bytes.size() - (1 + 8 + c.tecnicas.size() + 8 + 4));
+    bytes[10] = '\5';
+    std::ofstream saida(caminho, std::ios::binary | std::ios::trunc);
+    saida.write(bytes.data(), static_cast<std::streamsize>(bytes.size()));
+    saida.close();
+    const ResultadoSalvamento v5 = carregar_partida(caminho, c);
+    VERIFICAR(v5.simulacao.has_value());
+    if (v5.simulacao) {
+        VERIFICAR(!v5.simulacao->trabalho_infantil);
+        VERIFICAR(!v5.simulacao->cidade.tecnica_pesquisada(*c.buscar_tecnica("forno")));
+        VERIFICAR(v5.simulacao->populacao.moradores()[0].geracao == 0);
+    }
+    std::filesystem::remove(caminho);
 }

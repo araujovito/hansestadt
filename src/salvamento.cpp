@@ -9,7 +9,8 @@ namespace {
 
 constexpr char MAGIA_V3[] = "HANSESTADT\3";
 constexpr char MAGIA_V4[] = "HANSESTADT\4";
-constexpr char MAGIA[] = "HANSESTADT\5";
+constexpr char MAGIA_V5[] = "HANSESTADT\5";
+constexpr char MAGIA[] = "HANSESTADT\6";
 constexpr std::uint64_t MAXIMO_VETOR = 10'000'000;
 
 template <class T>
@@ -85,6 +86,13 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
     }
     escrever_vetor(out, sim.transporte.depositos_criados());
     escrever(out, sim.transporte.tick()); escrever(out, sim.transporte.entregas()); escrever(out, sim.transporte.perdidos());
+
+    // Versão 6, num bloco no fim: a versão 5 é este arquivo sem ele.
+    escrever(out, sim.trabalho_infantil);
+    escrever_vetor(out, sim.cidade.tecnicas());
+    std::vector<int> geracoes;
+    for (const Morador& m : sim.populacao.moradores()) geracoes.push_back(m.geracao);
+    escrever_vetor(out, geracoes);
 }
 
 Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
@@ -93,7 +101,8 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     const std::string versao_arquivo(magia, sizeof(magia));
     const bool legado_v3 = versao_arquivo == std::string(MAGIA_V3, sizeof(MAGIA_V3));
     const bool legado_v4 = versao_arquivo == std::string(MAGIA_V4, sizeof(MAGIA_V4));
-    if (!legado_v3 && !legado_v4 && versao_arquivo != std::string(MAGIA, sizeof(MAGIA)))
+    const bool legado_v5 = versao_arquivo == std::string(MAGIA_V5, sizeof(MAGIA_V5));
+    if (!legado_v3 && !legado_v4 && !legado_v5 && versao_arquivo != std::string(MAGIA, sizeof(MAGIA)))
         throw std::runtime_error("formato ou versão incompatível");
     const auto tick = ler<std::uint64_t>(in);
     const Data data{ler<int>(in), ler<int>(in), ler<int>(in)};
@@ -160,6 +169,23 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     auto criados = ler_vetor<std::uint8_t>(in);
     const auto tick_transporte = ler<std::uint64_t>(in), entregas = ler<std::uint64_t>(in), perdidos = ler<std::uint64_t>(in);
     sim.transporte = Transporte::restaurar(std::move(carregadores), std::move(criados), tick_transporte, entregas, perdidos);
+
+    // Antes da versão 6: lei desligada, nenhuma técnica e todos fundadores.
+    if (legado_v3 || legado_v4 || legado_v5) return sim;
+    sim.trabalho_infantil = ler<bool>(in);
+    auto tecnicas = ler_vetor<std::uint8_t>(in);
+    if (tecnicas.size() > conteudo.tecnicas.size()) throw std::runtime_error("conteúdo incompatível");
+    sim.cidade.restaurar_tecnicas(std::move(tecnicas));
+    const auto geracoes = ler_vetor<int>(in);
+    if (geracoes.size() != sim.populacao.moradores().size()) throw std::runtime_error("gerações incompatíveis");
+    std::vector<Morador> com_geracao = sim.populacao.moradores();
+    for (std::size_t i = 0; i < geracoes.size(); ++i) {
+        if (geracoes[i] < 0) throw std::runtime_error("geração inválida");
+        com_geracao[i].geracao = geracoes[i];
+    }
+    // Restaurar de novo refaz a produtividade por edifício com as gerações.
+    sim.populacao = Populacao::restaurar(std::move(com_geracao), sim.populacao.mortos_de_fome(),
+                                         sim.populacao.refeicoes_perdidas(), sim.populacao.mortos_por_eventos());
     return sim;
 }
 

@@ -210,7 +210,7 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         const std::string ctx = "edificios.toml, '" + (*t)["id"].value_or(std::string("?")) + "'";
         conferir_chaves(*t,
                         { "id", "nome", "fase", "tamanho", "terreno", "cor", "trabalhadores", "estoque", "moradores",
-                          "campos", "deposito", "carregadores", "requer", "extrai", "custo", "receita",
+                          "campos", "deposito", "alimenta_sem_teto", "carregadores", "requer", "extrai", "custo", "receita",
                           "instituicao", "melhoria" },
                         ctx, erros);
 
@@ -253,6 +253,11 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
             auto deposito = (*t)["deposito"].value<bool>();
             if (!deposito) erros.adicionar(ctx, "'deposito' precisa ser true ou false");
             d.deposito = deposito.value_or(false);
+        }
+        if (t->contains("alimenta_sem_teto")) {
+            auto alimenta = (*t)["alimenta_sem_teto"].value<bool>();
+            if (!alimenta) erros.adicionar(ctx, "'alimenta_sem_teto' precisa ser true ou false");
+            d.alimenta_sem_teto = alimenta.value_or(false);
         }
 
         if (const toml::table* requer = (*t)["requer"].as_table()) {
@@ -313,6 +318,8 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
         if (d.carregadores > 0 && !d.deposito) erros.adicionar(ctx, "só depósito tem carregadores");
         if (d.deposito && !d.receitas.empty()) erros.adicionar(ctx, "depósito não pode ter receita");
         if (d.deposito && d.estoque == 0) erros.adicionar(ctx, "depósito precisa de estoque > 0");
+        if (d.alimenta_sem_teto && d.estoque == 0)
+            erros.adicionar(ctx, "edifício que alimenta sem-teto precisa de estoque > 0");
         if (!d.receitas.empty() && d.trabalhadores == 0) {
             erros.adicionar(ctx, "edifício com receita precisa de trabalhadores");
         }

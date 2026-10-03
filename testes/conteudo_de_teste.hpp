@@ -85,7 +85,18 @@ terreno = "campo"
 cor = "#808080"
 estoque = 10
 deposito = true
+alimenta_sem_teto = true
 carregadores = 2
+
+[[edificio]]
+id = "abrigo"
+nome = "abrigo"
+fase = "vila"
+tamanho = [1, 1]
+terreno = "campo"
+cor = "#808080"
+estoque = 10
+alimenta_sem_teto = true
 
 [[edificio]]
 id = "casa"

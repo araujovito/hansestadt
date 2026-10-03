@@ -172,7 +172,8 @@ bool Transporte::atender_demandas(Cidade& cidade) {
         const DefinicaoEdificio& def = cidade.definicao(destino);
         for (IdItem item = 0; item < conteudo.itens.size(); ++item) {
             bool consome = false;
-            if (def.moradores > 0 && conteudo.itens[item].tipo == TipoItem::Comida) consome = true;
+            if ((def.moradores > 0 || def.alimenta_sem_teto) &&
+                conteudo.itens[item].tipo == TipoItem::Comida) consome = true;
             for (const Receita& r : def.receitas)
                 for (const Quantidade& q : r.entradas) consome = consome || q.item == item;
             if (!consome) continue;

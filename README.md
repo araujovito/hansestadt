@@ -18,7 +18,8 @@ clima e dos acontecimentos históricos.
 > Há menu de pausa com quatro vagas de partida, alertas clicáveis e relatório
 > de emprego, comida, produção e transporte. O equilíbrio da comida ainda está
 > em ajuste: sem expandir a produção, a vila inicial passa fome no primeiro
-> ano (ver `contexto.md`).
+> ano; crianças já consomem meia porção e sem-teto comem no armazém ou na
+> igreja (ver `contexto.md`).
 
 ## Ideia central
 

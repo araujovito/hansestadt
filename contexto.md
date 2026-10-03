@@ -180,10 +180,8 @@ as de implementação, que o README não explica.
   a põe em déficit. O gargalo é a fazenda (colhe só em julho e agosto: 31
   sacos de centeio, 868 pães por ano; a padaria daria conta de 3.400). Medido
   em 2026-10-03, igual no ramo do Codex e na integração. O Vitor decidiu
-  medidas (ver plano, bloco 7b); ainda não implementadas.
-- **Morador sem casa morre de fome com o armazém cheio**: só come quem tem
-  despensa em casa. Pela decisão do Vitor (plano, bloco 7b), sem-teto passam a
-  comer no armazém ou na igreja; ainda não implementado.
+  medidas (ver plano, bloco 7b); crianças agora consomem meia porção, mas as
+  melhorias de produtividade ainda não foram definidas nem implementadas.
 - **Faixa de floresta na borda esquerda do mapa** é coincidência da semente
   1150, não defeito do ruído (média do hash por coluna conferida). Some
   quando o mapa da campanha for desenhado à mão.
@@ -246,6 +244,15 @@ documentos não voltarem a divergir.
 ---
 
 ## Histórico
+
+### 2026-10-03
+
+- **Alimentação infantil e dos sem-teto**: crianças consomem uma porção em
+  dias alternados, equivalente a meia porção diária. Moradores sem casa comem
+  diretamente em edifícios marcados com `alimenta_sem_teto`; o armazém e a
+  igreja têm essa função, e a igreja ganhou despensa abastecida pela logística.
+  Os dias de autonomia da barra, dos alertas e do relatório usam o consumo
+  reduzido das crianças. A prioridade quando faltar comida segue em aberto.
 
 ### 2026-10-03
 

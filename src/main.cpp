@@ -74,7 +74,7 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     if (sim.populacao.total() == 0) {
         escrever(TextFormat("comida %d", comida), LIGHTGRAY);
     } else {
-        const int dias = comida / sim.populacao.total();
+        const int dias = 2 * comida / sim.populacao.consumo_diario_x2();
         const Color cor_comida = dias < 30 ? Color{ 240, 110, 90, 255 }
                                : dias < 90 ? GOLD
                                           : LIGHTGRAY;

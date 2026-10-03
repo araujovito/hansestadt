@@ -87,7 +87,7 @@ Decisões tomadas para o primeiro marco jogável:
   (camponeses, artesãos, mercadores, clero) muda as necessidades e a
   economia, e entra como um passo próprio depois do primeiro marco.
 
-Os moradores já existem como entidades da simulação. Eles ocupam as vagas
+Os moradores existem como entidades da simulação. Eles ocupam as vagas
 das casas em ordem de construção e ficam sem teto se a moradia for demolida;
 a barra superior mostra a população total, os sem-casa e os desempregados.
 Só moradores alojados trabalham. Os empregos são preenchidos na ordem de
@@ -97,7 +97,11 @@ pelo mesmo sistema de transporte das oficinas e consomem uma unidade por
 morador a cada dia. Após 30 dias consecutivos sem comer, o morador morre e
 libera sua vaga na casa e no trabalho.
 
-A segunda linha da barra superior resume população, sem-casa, desempregados,
+Cada morador tem idade e sexo. Crianças consomem comida, mas só entram no
+mercado de trabalho aos 16 anos. No primeiro dia de cada ano, uma casa com
+um casal adulto, comida na despensa e vaga disponível recebe uma criança.
+
+A segunda linha da barra superior resume população, crianças, sem-casa, desempregados,
 mortes, estoque total de comida e autonomia em dias. A autonomia fica
 amarela abaixo de 90 dias e vermelha abaixo de 30.
 

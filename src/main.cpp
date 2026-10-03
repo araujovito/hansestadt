@@ -43,8 +43,9 @@ void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& m
     DrawText(ritmo, 300, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
     int ocupados = 0;
     for (const Carregador& c : sim.transporte.carregadores()) ocupados += c.livre() ? 0 : 1;
-    DrawText(TextFormat("população %d | sem casa %d | sem trabalho %d | mortos %d", sim.populacao.total(),
-                        sim.populacao.sem_casa(), sim.populacao.desempregados(), sim.populacao.mortos_de_fome()),
+    DrawText(TextFormat("população %d (%d crianças) | sem casa %d | sem trabalho %d | mortos %d",
+                        sim.populacao.total(), sim.populacao.criancas(), sim.populacao.sem_casa(),
+                        sim.populacao.desempregados(), sim.populacao.mortos_de_fome()),
              12, 40, 16, LIGHTGRAY);
 
     const int comida = sim.cidade.estoque_total(TipoItem::Comida);

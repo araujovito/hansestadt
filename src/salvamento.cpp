@@ -7,7 +7,7 @@
 
 namespace {
 
-constexpr char MAGIA[] = "HANSESTADT\1";
+constexpr char MAGIA[] = "HANSESTADT\2";
 constexpr std::uint64_t MAXIMO_VETOR = 10'000'000;
 
 template <class T>
@@ -64,7 +64,8 @@ void escrever_estado(std::ostream& out, const Simulacao& sim) {
 
     escrever(out, static_cast<std::uint64_t>(sim.populacao.moradores().size()));
     for (const Morador& m : sim.populacao.moradores()) {
-        escrever(out, m.casa); escrever(out, m.trabalho); escrever(out, m.dias_sem_comida); escrever(out, m.vivo);
+        escrever(out, m.casa); escrever(out, m.trabalho); escrever(out, m.dias_sem_comida);
+        escrever(out, m.idade_dias); escrever(out, m.mulher); escrever(out, m.vivo);
     }
     escrever(out, sim.populacao.mortos_de_fome()); escrever(out, sim.populacao.refeicoes_perdidas());
 
@@ -115,7 +116,8 @@ Simulacao ler_estado(std::istream& in, const Conteudo& conteudo) {
     std::vector<Morador> moradores;
     for (std::uint64_t i = 0; i < n_moradores; ++i) {
         Morador m; m.casa = ler<IdEdificio>(in); m.trabalho = ler<IdEdificio>(in);
-        m.dias_sem_comida = ler<int>(in); m.vivo = ler<bool>(in); moradores.push_back(m);
+        m.dias_sem_comida = ler<int>(in); m.idade_dias = ler<int>(in); m.mulher = ler<bool>(in);
+        m.vivo = ler<bool>(in); moradores.push_back(m);
     }
     const int mortos = ler<int>(in);
     const int refeicoes_perdidas = ler<int>(in);

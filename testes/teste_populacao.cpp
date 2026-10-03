@@ -144,3 +144,31 @@ TESTE("população: restaurada do arquivo mantém a contagem de trabalhadores") 
     VERIFICAR(r.total() == 0);
     VERIFICAR(r.trabalhadores_em(serraria) == 0);
 }
+
+TESTE("população: casal com comida e vaga tem uma criança no ano novo") {
+    Cidade c = cidade_para_populacao();
+    const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+    Populacao p(2);
+    p.alojar(c);
+    c.adicionar(casa, item("pao"), 1);
+    p.avancar_dia(c, {1151, 1, 1});
+    VERIFICAR(p.total() == 3);
+    VERIFICAR(p.criancas() == 1);
+    VERIFICAR(p.moradores_na_casa(casa) == 3);
+}
+
+TESTE("população: criança não trabalha antes dos dezesseis anos") {
+    Cidade c = cidade_para_populacao();
+    const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+    const IdEdificio trabalho = *c.construir_edificio(tipo("serraria"), { 5, 1 });
+    Populacao p(2);
+    p.alojar(c);
+    c.adicionar(casa, item("pao"), 1);
+    p.avancar_dia(c, {1151, 1, 1});
+    // Os dois adultos: um ocupa a única vaga, o outro fica desempregado.
+    p.empregar(c);
+    VERIFICAR(p.trabalhadores_em(trabalho) == 1);
+    VERIFICAR(p.criancas() == 1);
+    for (int dia = 0; dia < Morador::IDADE_ADULTA; ++dia) p.avancar_dia(c, {1151, 2, 1});
+    VERIFICAR(p.criancas() == 0);
+}

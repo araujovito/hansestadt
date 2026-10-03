@@ -3,7 +3,9 @@
 #include <algorithm>
 
 Populacao::Populacao(int quantidade_inicial)
-    : moradores_(static_cast<std::size_t>(std::max(0, quantidade_inicial))) {}
+    : moradores_(static_cast<std::size_t>(std::max(0, quantidade_inicial))) {
+    for (std::size_t i = 0; i < moradores_.size(); ++i) moradores_[i].mulher = i % 2 != 0;
+}
 
 Populacao Populacao::restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas) {
     Populacao p(0);
@@ -25,6 +27,11 @@ int Populacao::total() const {
                                           [](const Morador& m) { return m.vivo; }));
 }
 
+int Populacao::criancas() const {
+    return static_cast<int>(std::count_if(moradores_.begin(), moradores_.end(),
+                                          [](const Morador& m) { return m.vivo && !m.adulto(); }));
+}
+
 int Populacao::alojados() const {
     return static_cast<int>(std::count_if(moradores_.begin(), moradores_.end(),
                                           [](const Morador& m) { return m.vivo && m.casa != SEM_EDIFICIO; }));
@@ -41,7 +48,7 @@ int Populacao::trabalhadores_em(IdEdificio edificio) const {
 
 int Populacao::desempregados() const {
     return static_cast<int>(std::count_if(moradores_.begin(), moradores_.end(), [](const Morador& m) {
-        return m.vivo && m.casa != SEM_EDIFICIO && m.trabalho == SEM_EDIFICIO;
+        return m.vivo && m.adulto() && m.casa != SEM_EDIFICIO && m.trabalho == SEM_EDIFICIO;
     }));
 }
 
@@ -94,12 +101,42 @@ void Populacao::empregar(const Cidade& cidade) {
         int ocupadas = 0;
         for (; ocupadas < vagas && proximo < moradores_.size(); ++proximo) {
             Morador& m = moradores_[proximo];
-            if (m.vivo && m.casa != SEM_EDIFICIO) {
+            if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) {
                 m.trabalho = id;
                 ++ocupadas;
             }
         }
         trabalhadores_[id] = ocupadas;
+    }
+}
+
+void Populacao::avancar_dia(Cidade& cidade, Data data) {
+    for (Morador& m : moradores_) if (m.vivo) ++m.idade_dias;
+    if (data.mes != 1 || data.dia != 1) return;
+
+    std::vector<IdEdificio> nascimentos;
+    for (IdEdificio casa = 0; casa < cidade.edificios().size(); ++casa) {
+        if (!cidade.edificio(casa).ativo) continue;
+        const int capacidade = cidade.definicao(casa).moradores;
+        if (capacidade == 0 || moradores_na_casa(casa) >= capacidade) continue;
+        bool homem = false, mulher = false;
+        for (const Morador& m : moradores_) {
+            if (!m.vivo || !m.adulto() || m.casa != casa) continue;
+            mulher = mulher || m.mulher;
+            homem = homem || !m.mulher;
+        }
+        bool tem_comida = false;
+        for (IdItem item = 0; item < cidade.conteudo().itens.size(); ++item)
+            tem_comida = tem_comida || (cidade.conteudo().itens[item].tipo == TipoItem::Comida &&
+                                        cidade.edificio(casa).estoque[item] > 0);
+        if (homem && mulher && tem_comida) nascimentos.push_back(casa);
+    }
+    for (IdEdificio casa : nascimentos) {
+        Morador bebe;
+        bebe.casa = casa;
+        bebe.idade_dias = 0;
+        bebe.mulher = moradores_.size() % 2 != 0;
+        moradores_.push_back(bebe);
     }
 }
 

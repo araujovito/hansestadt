@@ -2,13 +2,20 @@
 
 #include <vector>
 
+#include "calendario.hpp"
 #include "cidade.hpp"
 
 struct Morador {
+    static constexpr int DIAS_POR_ANO = 365;
+    static constexpr int IDADE_ADULTA = 16 * DIAS_POR_ANO;
     IdEdificio casa = SEM_EDIFICIO;
     IdEdificio trabalho = SEM_EDIFICIO;
     int dias_sem_comida = 0;
+    int idade_dias = 20 * DIAS_POR_ANO;
+    bool mulher = false;
     bool vivo = true;
+
+    bool adulto() const { return idade_dias >= IDADE_ADULTA; }
 };
 
 // Moradores pertencem à simulação, não aos edifícios: assim continuam
@@ -21,6 +28,7 @@ public:
     void alojar(Cidade& cidade);
     void empregar(const Cidade& cidade);
     void consumir_comida(Cidade& cidade);
+    void avancar_dia(Cidade& cidade, Data data);
 
     int total() const;
     int alojados() const;
@@ -30,6 +38,7 @@ public:
     int desempregados() const;
     int mortos_de_fome() const { return mortos_de_fome_; }
     int refeicoes_perdidas() const { return refeicoes_perdidas_; }
+    int criancas() const;
     const std::vector<Morador>& moradores() const { return moradores_; }
     static Populacao restaurar(std::vector<Morador> moradores, int mortos_de_fome, int refeicoes_perdidas);
 

@@ -193,8 +193,8 @@ agora, estamentos depois):
    certa e passa fome sem a fazenda.~~ Concluído.
 
 **Primeiro marco concluído.** Salvar/carregar também está pronto. Próxima
-ordem: crescimento populacional, carregadores vindos da
-população, eventos históricos, evolução de fase, custos de construção, arte,
+ordem: carregadores vindos da população, custos de construção, eventos
+históricos, evolução de fase, arte,
 estamentos e mapa histórico.
 
 ## Como trabalhamos
@@ -214,6 +214,9 @@ estamentos e mapa histórico.
 
 ### 2026-10-03
 
+- **Crescimento populacional**: moradores têm idade e sexo, tornam-se aptos
+  ao trabalho aos 16 anos e casais alojados com comida e vaga têm uma criança
+  no primeiro dia do ano. O salvamento passou para a versão 2.
 - **Índices de busca** (`2792449`, `cd0d1bc`): `alojar` conta os moradores de
   cada casa uma vez (o pico de 5,7 s no primeiro passo com 160 blocos vinha
   daqui, e não do cenário construir tudo de uma vez) e o transporte mantém

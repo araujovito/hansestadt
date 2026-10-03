@@ -72,8 +72,6 @@ private:
     IdEdificio deposito_mais_proximo(const Cidade& cidade, IdItem item, Celula de);
     Carregador* carregador_mais_proximo(const Cidade& cidade, Celula alvo);
     void atribuir(Cidade& cidade, Carregador& c, IdEdificio origem, IdEdificio destino, IdItem item);
-    // Comprimento da rota entre duas células, ou nullopt se não há.
-    std::optional<std::size_t> distancia(const Cidade& cidade, Celula de, Celula para);
 
     void criar_carregadores(const Cidade& cidade);
     void mudar_de_casa(const Cidade& cidade, Carregador& c);
@@ -94,6 +92,13 @@ private:
     // Por IdEdificio: se os carregadores daquele depósito já foram criados.
     std::vector<std::uint8_t> ja_criou_;
     CacheDeRotas rotas_;
+    // Para escolher o mais perto: uma busca em largura a partir do alvo
+    // mede todos os candidatos de uma vez (ver DistanciasPelaEstrada). São
+    // duas porque o planejamento alterna entre medir até o destino (qual
+    // origem) e até a origem (qual carregador, qual depósito); com uma só,
+    // cada pedido refaria as duas buscas.
+    DistanciasPelaEstrada perto_do_destino_;
+    DistanciasPelaEstrada perto_da_origem_;
     std::uint64_t tick_ = 0;
     std::uint64_t entregas_ = 0;
     std::uint64_t perdidos_ = 0;

@@ -53,15 +53,12 @@ bool Transporte::enviar(const Cidade& cidade, Carregador& c, Celula alvo) {
     return true;
 }
 
-std::optional<std::size_t> Transporte::distancia(const Cidade& cidade, Celula de, Celula para) {
-    const auto& r = rotas_.rota(cidade, de, para);
-    if (!r) return std::nullopt;
-    return r->size();
-}
-
 IdEdificio Transporte::origem_mais_proxima(const Cidade& cidade, IdItem item, IdEdificio destino) {
     IdEdificio melhor = SEM_EDIFICIO;
     std::size_t menor = std::numeric_limits<std::size_t>::max();
+    // A busca só é feita quando aparece o primeiro candidato: a maior parte
+    // das vagas pede um item que ninguém tem, e aí não há o que medir.
+    bool mediu = false;
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (id == destino || !cidade.tem_acesso(id) || cidade.disponivel(id, item) <= 0) continue;
         const DefinicaoEdificio& def = cidade.definicao(id);
@@ -70,9 +67,13 @@ IdEdificio Transporte::origem_mais_proxima(const Cidade& cidade, IdItem item, Id
         for (const Receita& r : def.receitas)
             for (const Quantidade& q : r.saidas) oferece = oferece || q.item == item;
         if (!oferece) continue;
-        const auto d = distancia(cidade, cidade.porta(id), cidade.porta(destino));
-        if (d && *d < menor) {
-            menor = *d;
+        if (!mediu) {
+            perto_do_destino_.calcular(cidade, cidade.porta(destino));
+            mediu = true;
+        }
+        const int d = perto_do_destino_.ate(cidade.porta(id));
+        if (d != DistanciasPelaEstrada::SEM_LIGACAO && static_cast<std::size_t>(d) < menor) {
+            menor = static_cast<std::size_t>(d);
             melhor = id;
         }
     }
@@ -82,11 +83,16 @@ IdEdificio Transporte::origem_mais_proxima(const Cidade& cidade, IdItem item, Id
 IdEdificio Transporte::deposito_mais_proximo(const Cidade& cidade, IdItem item, Celula de) {
     IdEdificio melhor = SEM_EDIFICIO;
     std::size_t menor = std::numeric_limits<std::size_t>::max();
+    bool mediu = false;
     for (IdEdificio id = 0; id < cidade.edificios().size(); ++id) {
         if (!cidade.definicao(id).deposito || !cidade.tem_acesso(id) || cidade.espaco_livre(id, item) <= 0) continue;
-        const auto d = distancia(cidade, de, cidade.porta(id));
-        if (d && *d < menor) {
-            menor = *d;
+        if (!mediu) {
+            perto_da_origem_.calcular(cidade, de);
+            mediu = true;
+        }
+        const int d = perto_da_origem_.ate(cidade.porta(id));
+        if (d != DistanciasPelaEstrada::SEM_LIGACAO && static_cast<std::size_t>(d) < menor) {
+            menor = static_cast<std::size_t>(d);
             melhor = id;
         }
     }
@@ -96,11 +102,16 @@ IdEdificio Transporte::deposito_mais_proximo(const Cidade& cidade, IdItem item, 
 Carregador* Transporte::carregador_mais_proximo(const Cidade& cidade, Celula alvo) {
     Carregador* melhor = nullptr;
     std::size_t menor = std::numeric_limits<std::size_t>::max();
+    bool mediu = false;
     for (Carregador& c : carregadores_) {
         if (!c.livre()) continue;
-        const auto d = distancia(cidade, c.posicao, alvo);
-        if (d && *d < menor) {
-            menor = *d;
+        if (!mediu) {
+            perto_da_origem_.calcular(cidade, alvo);
+            mediu = true;
+        }
+        const int d = perto_da_origem_.ate(c.posicao);
+        if (d != DistanciasPelaEstrada::SEM_LIGACAO && static_cast<std::size_t>(d) < menor) {
+            menor = static_cast<std::size_t>(d);
             melhor = &c;
         }
     }

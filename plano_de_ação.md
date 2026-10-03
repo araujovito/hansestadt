@@ -88,16 +88,40 @@ do README e do contexto e um ou mais commits pequenos.
      velocidade em campo/trilha/estrada; se carregadores também criam trilhas;
      e se trilhas atravessam floresta.
 
+7b. **Comida para a vila crescer** — decisões do Vitor de 2026-10-03; a
+     implementar na `codex/simulacao`
+   - Motivo: a vila inicial produz no máximo 2.303 porções por ano (6,3
+     pessoas) e passa fome no primeiro ano; e morador sem casa morre de fome
+     com o armazém cheio (ver contexto.md, Problemas conhecidos).
+   - Moradores sem casa comem no armazém ou na igreja (hoje a igreja não
+     guarda comida).
+   - Criança (menos de 16 anos) come meia porção.
+   - Edifícios podem receber melhorias de tecnologia que aumentam a
+     produtividade, para a comida acompanhar o crescimento da vila.
+   - Falta decidir: melhoria por edifício ou para todos do mesmo tipo; quanto
+     cada nível aumenta e quantos níveis existem; custo (material, tempo,
+     trabalhadores) e se depende da fase; quais edifícios podem melhorar;
+     quando a comida é pouca, quem tem preferência (com ou sem casa).
+
 8. **Agricultura, clima e recursos**
    - Plantio e colheita mais visíveis.
    - Esgotamento ou regeneração de recursos.
    - Efeitos sazonais e climáticos detalhados.
 
-9. **Interface e experiência do jogador**
-   - Menus de pausa, salvamento e carregamento.
-   - Alertas clicáveis e histórico de acontecimentos.
-   - Visões de emprego, fome, produção e logística.
-   - Explicar por que uma construção, produção ou entrega está bloqueada.
+9. **Interface e experiência do jogador** — em andamento na `claude/interface`
+   - ~~Menus de pausa, salvamento e carregamento~~ — concluído: menu pelo Esc
+     ou botão, quatro vagas de partida com resumo, confirmações.
+   - ~~Alertas clicáveis~~ — concluído: comida, sem casa, sem estrada, sem
+     trabalhadores, sem insumo e saída cheia; o clique leva ao edifício.
+   - ~~Visões de emprego, fome, produção e logística~~ — concluído: janela de
+     relatório (tecla V) com quatro abas e gráfico da comida.
+   - Histórico de acontecimentos: a API de eventos já está integrada
+     (`sim.eventos.ativos/ocorridos`); falta a tela.
+   - Painel das instituições com nível, custo e botão de melhoria (hoje só a
+     tecla U provisória).
+   - Explicar por que uma construção, produção ou entrega está bloqueada:
+     os alertas e o painel do edifício já explicam a produção; faltam
+     construção e entrega.
 
 10. **Arte e áudio**
     - Em andamento na `claude/interface`: o mundo já é desenhado em pixel art
@@ -138,7 +162,7 @@ do README e do contexto e um ou mais commits pequenos.
 ## Decisões ainda abertas
 
 - Regras operacionais de carregadores e trilhas listadas no item 7a.
-- Momento de substituir a arte provisória pelos sprites.
+- Detalhes das melhorias de tecnologia e da comida dos sem-teto (item 7b).
 - Escopo exato dos estamentos sociais após a economia básica estar completa.
 - Formato definitivo dos eventos depois do primeiro conjunto em TOML.
 
@@ -192,6 +216,13 @@ compartilhados e alterações simultâneas poderiam se misturar.
   `cidade.melhorar_edificio(id, sim.fase)`. A tecla U é apenas um acesso
   provisório enquanto o painel não oferece o botão de melhoria.
 
+**Próximo bloco do Claude** (registrado em 2026-10-03, passo 1 do protocolo):
+histórico de acontecimentos e painel das instituições, do item 9.
+- Ramo: `claude/interface`, worktree `hansestadt-claude`.
+- Arquivos: `src/main.cpp`, `src/painel.*`, um arquivo novo para o histórico
+  (lógica sem raylib, com testes) e a tela dele. Só lê a simulação, pelas
+  APIs já listadas acima; nenhuma mudança em cabeçalhos da simulação.
+
 ### Vitor — direção e integração
 
 - Abrir os dois worktrees, um para cada branch, e iniciar as tarefas
@@ -223,3 +254,9 @@ compartilhados e alterações simultâneas poderiam se misturar.
 - Crescimento populacional e maioridade.
 - Carregadores integrados à população.
 - Custos de construção e provisões iniciais.
+- Eventos históricos em TOML (Grande Fome, inverno de 1322–23, Peste Negra
+  com mortalidade), fases por ano e instituições, cadeias de cerveja,
+  pecuária, tecidos, couro e arenque salgado.
+- Menu de pausa com vagas de partida, alertas clicáveis e relatório.
+- Visual em pixel art no jogo, com o cenário guardado em pedaços.
+- Primeira integração dos dois ramos no `main` (032695e).

@@ -10,10 +10,15 @@ clima e dos acontecimentos históricos.
 > O roteiro único do trabalho futuro fica em
 > [`plano_de_ação.md`](plano_de_ação.md).
 
-> Status: primeiro marco jogável com o primeiro corte do sistema de eventos.
-> A Grande Fome (1315–17) reduz a produção agrícola e pesqueira; a Peste
-> Negra (1347–51) reduz a produção geral. Os eventos ficam em
-> `dados/eventos.toml` e ainda não alteram diretamente a população.
+> Status: a simulação vai da fundação da vila (1150) até 1370, em pixel art. A vila
+> cresce por nascimentos, as cadeias de produção das cinco fases existem, as
+> instituições evoluem por nível e as fases avançam por ano e instituições.
+> Eventos históricos em `dados/eventos.toml`: Grande Fome (1315–17) e inverno
+> rigoroso de 1322–23 reduzem a produção; a Peste Negra (1347–51) também mata.
+> Há menu de pausa com quatro vagas de partida, alertas clicáveis e relatório
+> de emprego, comida, produção e transporte. O equilíbrio da comida ainda está
+> em ajuste: sem expandir a produção, a vila inicial passa fome no primeiro
+> ano (ver `contexto.md`).
 
 ## Ideia central
 
@@ -78,7 +83,7 @@ O tijolo fica para a fase de cidade porque, historicamente, o gótico de
 tijolo começa no Báltico a partir da década de 1160 (catedral de Lübeck,
 1173). Uma vila recém-fundada era de madeira.
 
-## População (planejado)
+## População
 
 Decisões tomadas para o primeiro marco jogável:
 

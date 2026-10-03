@@ -174,8 +174,16 @@ as de implementação, que o README não explica.
   precisaria descartar os pedaços fora da tela.
 - **A prévia de construção ainda é o retângulo antigo**, por cima da arte nova.
 
-- **Os 6 moradores iniciais ainda não nascem nem envelhecem**; nesta etapa
-  apenas procuram vagas nas casas.
+- **A vila do teste do marco morre de fome em abril de 1151**, um mês depois
+  do fim do teste (que confere 1º de março). Produção máxima da vila inteira:
+  2.303 porções por ano, o bastante para 6,3 pessoas, e o primeiro nascimento
+  a põe em déficit. O gargalo é a fazenda (colhe só em julho e agosto: 31
+  sacos de centeio, 868 pães por ano; a padaria daria conta de 3.400). Medido
+  em 2026-10-03, igual no ramo do Codex e na integração. O Vitor decidiu
+  medidas (ver plano, bloco 7b); ainda não implementadas.
+- **Morador sem casa morre de fome com o armazém cheio**: só come quem tem
+  despensa em casa. Pela decisão do Vitor (plano, bloco 7b), sem-teto passam a
+  comer no armazém ou na igreja; ainda não implementado.
 - **Faixa de floresta na borda esquerda do mapa** é coincidência da semente
   1150, não defeito do ruído (média do hash por coluna conferida). Some
   quando o mapa da campanha for desenhado à mão.
@@ -207,8 +215,9 @@ as de implementação, que o README não explica.
   disponível no momento, guardar as distâncias por porta, ou planejar uma
   fatia dos pedidos por tick.
 
-  O desenho não é gargalo: 40 blocos no zoom mínimo levam 6,8 ms por quadro
-  (Radeon 680M).
+  O desenho não é gargalo: com o visual em pixel art e o cenário em pedaços,
+  um quadro leva de 0,5 a 1,3 ms (vila e 40 blocos, do zoom 1 ao mínimo,
+  Radeon 680M).
 
 ## Em aberto
 
@@ -240,6 +249,9 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Documentos em dia com o jogo**: status do README, limitações do
+  contexto (achados de equilíbrio da comida, desenho) e plano (decisões do
+  Vitor sobre comida, andamento da interface e do visual).
 - **Visual em pixel art no jogo** (`b48f711`..`6480cf2`): arte da Kenney por
   script, peças próprias por script, assinatura e cache do cenário em pedaços,
   edifícios e pessoas por cima. Quadro de 0,5 a 1,3 ms, contra 0,7 a 3,0 ms

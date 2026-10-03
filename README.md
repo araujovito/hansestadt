@@ -97,6 +97,11 @@ pelo mesmo sistema de transporte das oficinas e consomem uma unidade por
 morador a cada dia. Após 30 dias consecutivos sem comer, o morador morre e
 libera sua vaga na casa e no trabalho.
 
+A partida começa pausada no tempo, com apenas o armazém disponível. Ao
+posicioná-lo, os colonos descarregam 120 unidades provisórias de pão e o
+restante da barra de construção é liberado. Essa quantidade será revista
+pelo balanceamento econômico.
+
 ## Tecnologia
 
 | Parte | Escolha | Motivo |

@@ -31,6 +31,8 @@ struct EstadoFerramenta {
 
 // Monta a barra com estrada, os edifícios liberados até `fase` e demolir.
 EstadoFerramenta criar_ferramentas(const Conteudo& conteudo, Fase fase);
+// Antes da fundação, a barra contém somente o primeiro armazém.
+EstadoFerramenta criar_ferramentas_fundacao(const Conteudo& conteudo);
 
 // Atalhos de teclado: R estrada, X demolir, Esc solta a ferramenta (ou, sem
 // ferramenta, fecha o painel do edifício).

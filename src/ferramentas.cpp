@@ -67,6 +67,17 @@ EstadoFerramenta criar_ferramentas(const Conteudo& conteudo, Fase fase) {
     return estado;
 }
 
+EstadoFerramenta criar_ferramentas_fundacao(const Conteudo& conteudo) {
+    EstadoFerramenta estado;
+    const auto armazem = conteudo.buscar_edificio("armazem");
+    if (armazem) {
+        estado.botoes.push_back({ "fundar vila: armazém", Ferramenta::Edificio, *armazem });
+        estado.ativa = Ferramenta::Edificio;
+        estado.tipo = *armazem;
+    }
+    return estado;
+}
+
 void ler_atalhos(EstadoFerramenta& estado) {
     if (IsKeyPressed(KEY_R)) estado.ativa = Ferramenta::Estrada;
     if (IsKeyPressed(KEY_X)) estado.ativa = Ferramenta::Demolir;

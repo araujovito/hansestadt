@@ -9,6 +9,7 @@
 #include "conteudo.hpp"
 #include "desenho.hpp"
 #include "ferramentas.hpp"
+#include "fundacao.hpp"
 #include "mapa.hpp"
 #include "painel.hpp"
 #include "relogio.hpp"
@@ -82,7 +83,8 @@ int main() {
     const Mapa& mapa = cidade.mapa();
     // A campanha começa na vila; a troca de fase vem com a evolução dos
     // edifícios principais.
-    EstadoFerramenta ferramenta = criar_ferramentas(conteudo, Fase::Vila);
+    Fundacao fundacao(conteudo);
+    EstadoFerramenta ferramenta = criar_ferramentas_fundacao(conteudo);
     CameraJogo camera(static_cast<float>(LARGURA_MAPA * TAMANHO_CELULA),
                       static_cast<float>(ALTURA_MAPA * TAMANHO_CELULA));
     Relogio relogio(1.0 / Simulacao::TICKS_POR_SEGUNDO);
@@ -98,9 +100,12 @@ int main() {
         camera.atualizar(GetFrameTime());
         const Celula sob_cursor = celula_em(camera.mouse_no_mundo());
         if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
+        if (fundacao.concluir_se_possivel(cidade)) ferramenta = criar_ferramentas(conteudo, Fase::Vila);
 
         const int passos = relogio.passos_para(GetFrameTime());
-        for (int i = 0; i < passos; ++i) sim.passo();
+        if (fundacao.concluida()) {
+            for (int i = 0; i < passos; ++i) sim.passo();
+        }
 
         BeginDrawing();
         ClearBackground(Color{ 20, 26, 34, 255 });
@@ -115,8 +120,9 @@ int main() {
         }
         EndMode2D();
 
-        desenhar_painel(sim, relogio, mapa, sob_cursor,
-                        mouse_na_barra ? std::string{} : dica_da_ferramenta(ferramenta, cidade, sob_cursor));
+        std::string dica = mouse_na_barra ? std::string{} : dica_da_ferramenta(ferramenta, cidade, sob_cursor);
+        if (!fundacao.concluida() && dica.empty()) dica = "escolha onde fundar a vila";
+        desenhar_painel(sim, relogio, mapa, sob_cursor, dica);
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
             desenhar_painel_edificio(cidade, sim.populacao, *ferramenta.selecionado, sim.data.mes,

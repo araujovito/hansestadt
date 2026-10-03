@@ -95,6 +95,54 @@ do README e do contexto e um ou mais commits pequenos.
 - Escopo exato dos estamentos sociais após a economia básica estar completa.
 - Formato definitivo dos eventos depois do primeiro conjunto em TOML.
 
+## Divisão de trabalho em paralelo
+
+Para avançar com Codex e Claude ao mesmo tempo, cada um trabalha em seu
+próprio *worktree* e branch. Não executar os dois na mesma pasta de trabalho:
+os arquivos são compartilhados e alterações simultâneas poderiam se misturar.
+
+### Codex — simulação e regras do jogo
+
+- Implementar o modelo de eventos históricos e climáticos em TOML, incluindo
+  efeitos na simulação e testes de regras.
+- Depois, implementar progressão de fases, requisitos e edifícios
+  institucionais.
+- Completar cadeias econômicas e ajustar custos, trabalho e transporte.
+- Atualizar testes, README e contexto para cada bloco.
+
+### Claude — interface, apresentação e conteúdo visual
+
+- Implementar menus de pausa e telas de salvar/carregar usando as funções
+  existentes de salvamento.
+- Melhorar alertas, histórico visível de acontecimentos e painéis de
+  emprego, fome, produção e logística.
+- Integrar sprites e animações, avaliando primeiro os recursos Kenney CC0;
+  acrescentar áudio quando o fluxo visual estiver estável.
+- Trabalhar em `src/main.cpp`, `src/painel.*`, `src/desenho.*` e novos
+  arquivos de interface/recursos. Combinar previamente qualquer mudança em
+  cabeçalhos centrais da simulação.
+
+### Vitor — direção e integração
+
+- Abrir os dois worktrees, um para cada branch, e iniciar as tarefas
+  independentes em paralelo.
+- Definir dúvidas de produto que mudem regras históricas ou balanceamento e
+  testar as mudanças no jogo.
+- Integrar um branch por vez: revisar commits, executar testes e build, e
+  resolver conflitos antes de pedir o próximo bloco.
+
+### Protocolo de integração
+
+1. Antes de cada bloco, registrar o escopo e os arquivos principais atribuídos.
+2. Não editar o mesmo arquivo nos dois worktrees. Se surgir dependência,
+   combinar uma interface primeiro e integrar a mudança central em um só
+   branch.
+3. Fazer commits pequenos e deixar cada branch compilável e testada.
+4. Atualizar este plano para marcar progresso; `contexto.md` guarda decisões
+   e histórico, e o README explica o estado atual do jogo.
+5. Mesclar primeiro a parte de simulação/API; depois, adaptar a interface à
+   API já integrada.
+
 ## Concluído recentemente
 
 - Primeiro marco jogável e inverno de 1150–51.

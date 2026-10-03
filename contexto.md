@@ -142,8 +142,9 @@ agora, estamentos depois):
 1. ~~Moradores nas casas e população na barra do topo.~~ Concluído.
 2. ~~Trabalhadores limitam a produção.~~ Concluído.
 3. ~~Casas pedem comida pelo sistema de pedidos; consumo diário.~~ Concluído.
-4. **Agora:** fome mata.
-5. Início da partida: jogador posiciona o primeiro armazém; estoque inicial.
+4. ~~Fome mata.~~ Concluído: 30 dias consecutivos sem comida.
+5. **Agora:** início da partida: jogador posiciona o primeiro armazém;
+   estoque inicial.
 6. Ferramenta de balanceamento em Python (simula anos sem janela, plota
    produção × consumo por mês) e ajuste do TOML.
 7. Interface de acompanhamento: estoque total, "comida para N dias", avisos.
@@ -170,6 +171,8 @@ de fase, arte, estamentos.
 
 ### 2026-10-03
 
+- **Morte por fome**: cada morador acumula dias sem alimentação e morre ao
+  completar 30; a morte libera casa e emprego e aparece na barra. 88 testes.
 - **Alimentação das casas**: despensa compartilhada entre os tipos de comida,
   pedidos atendidos pelos carregadores e consumo diário por morador. A falta
   já é contada individualmente, preparando as mortes por fome. 87 testes.

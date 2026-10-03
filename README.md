@@ -11,7 +11,8 @@ clima e dos acontecimentos históricos.
 > Status: protótipo. Dá para construir a vila, e os edifícios produzem
 > e trocam mercadorias por carregadores. A vila começa com 3 casais, que
 > ocupam as casas, trabalham e recebem comida por carregadores; ainda não há
-> mortes, crescimento da população nem eventos.
+> crescimento da população nem eventos. Trinta dias seguidos sem comida
+> matam um morador.
 
 ## Ideia central
 
@@ -93,7 +94,8 @@ Só moradores alojados trabalham. Os empregos são preenchidos na ordem de
 construção dos edifícios, e uma oficina só produz com a equipe completa.
 As casas têm uma despensa compartilhada, pedem qualquer alimento disponível
 pelo mesmo sistema de transporte das oficinas e consomem uma unidade por
-morador a cada dia.
+morador a cada dia. Após 30 dias consecutivos sem comer, o morador morre e
+libera sua vaga na casa e no trabalho.
 
 ## Tecnologia
 

@@ -8,26 +8,30 @@ struct Morador {
     IdEdificio casa = SEM_EDIFICIO;
     IdEdificio trabalho = SEM_EDIFICIO;
     int dias_sem_comida = 0;
+    bool vivo = true;
 };
 
 // Moradores pertencem à simulação, não aos edifícios: assim continuam
 // existindo quando uma casa é demolida e podem procurar outra vaga.
 class Populacao {
 public:
+    static constexpr int DIAS_ATE_MORRER_DE_FOME = 30;
     explicit Populacao(int quantidade_inicial = 6);
 
     void alojar(Cidade& cidade);
     void empregar(const Cidade& cidade);
     void consumir_comida(Cidade& cidade);
 
-    int total() const { return static_cast<int>(moradores_.size()); }
+    int total() const;
     int alojados() const;
     int sem_casa() const { return total() - alojados(); }
     int moradores_na_casa(IdEdificio casa) const;
     int trabalhadores_em(IdEdificio edificio) const;
     int desempregados() const;
+    int mortos_de_fome() const { return mortos_de_fome_; }
     const std::vector<Morador>& moradores() const { return moradores_; }
 
 private:
     std::vector<Morador> moradores_;
+    int mortos_de_fome_ = 0;
 };

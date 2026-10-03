@@ -274,11 +274,18 @@ void Populacao::consumir_comida(Cidade& cidade) {
     };
 
     // Em escassez, a ordem social é explícita e independente da ordem em
-    // que os moradores foram criados: crianças, adultos alojados e adultos
-    // sem casa. Dentro de cada grupo, o id do morador desempata.
-    for (Morador& m : moradores_) if (m.vivo && !m.adulto()) alimentar(m);
-    for (Morador& m : moradores_)
-        if (m.vivo && m.adulto() && m.casa != SEM_EDIFICIO) alimentar(m);
-    for (Morador& m : moradores_)
-        if (m.vivo && m.adulto() && m.casa == SEM_EDIFICIO) alimentar(m);
+    // que os moradores foram criados (decisão do Vitor): primeiro quem
+    // trabalha, do produto final à matéria-prima; depois as crianças que não
+    // trabalham; por último os adultos sem trabalho, o que inclui todos os
+    // sem-teto. Criança que trabalha come com a sua profissão. Dentro de cada
+    // grupo, o id do morador desempata.
+    constexpr int OCIOSOS = 4;
+    const auto grupo = [&](const Morador& m) {
+        if (m.trabalho != SEM_EDIFICIO)
+            return 2 - static_cast<int>(cidade.definicao(m.trabalho).elo);  // 0, 1 ou 2
+        return m.adulto() ? OCIOSOS : 3;
+    };
+    for (int g = 0; g <= OCIOSOS; ++g)
+        for (Morador& m : moradores_)
+            if (m.vivo && grupo(m) == g) alimentar(m);
 }

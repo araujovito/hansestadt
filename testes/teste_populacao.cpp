@@ -1,4 +1,5 @@
 #include "populacao.hpp"
+#include <string>
 #include "conteudo_de_teste.hpp"
 #include "verificar.hpp"
 
@@ -306,4 +307,34 @@ TESTE("população: com a lei, criança de 10 anos ocupa vaga de produção que 
     VERIFICAR(p.trabalhadores_em(colheita) == 0);
     VERIFICAR(p.criancas_trabalhando() == 1);
     VERIFICAR(p.produtividade_em(serraria) == 500);
+}
+
+TESTE("população: na fome comem primeiro as profissões do fim da cadeia") {
+    const auto quem_ficou_sem_comer = [](int paes) {
+        Cidade c = cidade_para_populacao();
+        const IdEdificio casa = *c.construir_edificio(tipo("casa"), { 1, 1 });
+        const IdEdificio serraria = *c.construir_edificio(tipo("serraria"), { 5, 1 });
+        const IdEdificio colheita = *c.construir_edificio(tipo("colheita"), { 7, 1 });
+        Morador ocioso;
+        Morador crianca;
+        crianca.idade_dias = 0;
+        Morador lavrador;
+        lavrador.trabalho = colheita;
+        Morador serrador;
+        serrador.trabalho = serraria;
+        // Ordem de id ao contrário da prioridade, para ela não decidir nada.
+        std::vector<Morador> moradores{ ocioso, crianca, lavrador, serrador };
+        for (Morador& m : moradores) m.casa = casa;
+        Populacao p = Populacao::restaurar(moradores, 0, 0);
+        c.adicionar(casa, item("pao"), paes);
+        p.consumir_comida(c);
+        std::string sem;
+        for (const Morador& m : p.moradores()) sem += m.dias_sem_comida ? '1' : '0';
+        return sem;
+    };
+    // A tábua da serraria não é consumida por nenhuma receita: produto
+    // final. A colheita não tem entrada: matéria-prima.
+    VERIFICAR(quem_ficou_sem_comer(1) == "1110");
+    VERIFICAR(quem_ficou_sem_comer(2) == "1100");
+    VERIFICAR(quem_ficou_sem_comer(3) == "1000");
 }

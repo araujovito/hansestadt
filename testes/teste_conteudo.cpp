@@ -294,3 +294,19 @@ bonus = 0.5
 )";
     VERIFICAR(tem_erro_com(carregar_conteudo_de_texto(ITENS, casa), "não produz nada"));
 }
+
+TESTE("conteúdo: elo da cadeia sai das receitas") {
+    const ResultadoCarga r = carregar_conteudo("dados");
+    VERIFICAR(r.conteudo.has_value());
+    if (!r.conteudo) return;
+    const Conteudo& c = *r.conteudo;
+    const auto elo = [&c](const char* id) { return c.edificio(*c.buscar_edificio(id)).elo; };
+    VERIFICAR(elo("fazenda") == EloDaCadeia::MateriaPrima);
+    VERIFICAR(elo("lenhador") == EloDaCadeia::MateriaPrima);
+    VERIFICAR(elo("armazem") == EloDaCadeia::MateriaPrima);
+    VERIFICAR(elo("moinho") == EloDaCadeia::Insumo);
+    VERIFICAR(elo("malteria") == EloDaCadeia::Insumo);
+    VERIFICAR(elo("padaria") == EloDaCadeia::ProdutoFinal);
+    VERIFICAR(elo("cervejaria") == EloDaCadeia::ProdutoFinal);
+    VERIFICAR(elo("olaria") == EloDaCadeia::ProdutoFinal);
+}

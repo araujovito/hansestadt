@@ -347,6 +347,25 @@ void ler_edificios(const toml::table& raiz, Conteudo& c, Erros& erros) {
     }
 }
 
+// Precisa de todos os edifícios: um item só é insumo se alguma receita, de
+// qualquer edifício, o consome.
+void classificar_elos(Conteudo& c) {
+    std::vector<bool> consumido(c.itens.size(), false);
+    for (const DefinicaoEdificio& d : c.edificios)
+        for (const Receita& r : d.receitas)
+            for (const Quantidade& q : r.entradas) consumido[q.item] = true;
+    for (DefinicaoEdificio& d : c.edificios) {
+        bool tem_entrada = false, produz_final = false;
+        for (const Receita& r : d.receitas) {
+            tem_entrada = tem_entrada || !r.entradas.empty();
+            for (const Quantidade& q : r.saidas) produz_final = produz_final || !consumido[q.item];
+        }
+        d.elo = !tem_entrada ? EloDaCadeia::MateriaPrima
+                : produz_final ? EloDaCadeia::ProdutoFinal
+                               : EloDaCadeia::Insumo;
+    }
+}
+
 // Depois dos edifícios, que as técnicas referenciam. A lista é opcional.
 void ler_tecnicas(const toml::table& raiz, Conteudo& c, Erros& erros) {
     const toml::node_view<const toml::node> no = raiz["tecnica"];
@@ -439,6 +458,7 @@ ResultadoCarga carregar_conteudo_de_texto(std::string_view itens_toml, std::stri
     if (auto raiz = analisar(itens_toml, "itens.toml", erros)) ler_itens(*raiz, c, erros);
     if (auto raiz = analisar(edificios_toml, "edificios.toml", erros)) {
         ler_edificios(*raiz, c, erros);
+        classificar_elos(c);
         ler_tecnicas(*raiz, c, erros);
     }
 

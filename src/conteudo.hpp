@@ -45,6 +45,14 @@ struct Receita {
     std::array<float, 12> sazonalidade;
 };
 
+// Onde o edifício fica na cadeia de produção, calculado das receitas ao
+// carregar o conteúdo. Decide quem come primeiro quando falta comida.
+enum class EloDaCadeia : std::uint8_t {
+    MateriaPrima,  // receitas sem entradas (fazenda, lenhador), ou sem receita
+    Insumo,        // tudo o que produz é entrada de outra receita (moinho)
+    ProdutoFinal,  // produz algo que nenhuma receita consome (padaria)
+};
+
 // Pelo menos uma célula de `terreno` a até `distancia` células da borda.
 struct Requisito {
     Terreno terreno;
@@ -78,6 +86,7 @@ struct DefinicaoEdificio {
     std::vector<MelhoriaEdificio> melhorias;
     std::vector<Receita> receitas;
     std::vector<Quantidade> custo;
+    EloDaCadeia elo = EloDaCadeia::MateriaPrima;
 
     bool usa_item(IdItem item) const;
 

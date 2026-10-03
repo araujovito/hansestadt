@@ -126,3 +126,52 @@ TESTE("cache: construir edifício não invalida as rotas") {
     cache.rota(c, { 1, 1 }, { 5, 1 });
     VERIFICAR(cache.buscas_feitas() == 1);
 }
+
+TESTE("distâncias: dá o mesmo comprimento que o A* para toda célula") {
+    Cidade c = campo_aberto();
+    // Pente com desvios: várias rotas de comprimentos diferentes e um trecho
+    // solto, sem ligação com o resto.
+    estrada(c, { 0, 0 }, { 9, 0 });
+    for (int x = 0; x <= 8; x += 2) estrada(c, { x, 0 }, { x, 6 });
+    estrada(c, { 2, 6 }, { 8, 6 });
+    estrada(c, { 0, 9 }, { 3, 9 });
+    const Celula de{ 4, 6 };
+    DistanciasPelaEstrada d;
+    d.calcular(c, de);
+    bool iguais = true;
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 10; ++x) {
+            const auto r = buscar_rota(c, de, { x, y });
+            const int esperado = r ? static_cast<int>(r->size()) - 1 : DistanciasPelaEstrada::SEM_LIGACAO;
+            iguais = iguais && d.ate({ x, y }) == esperado;
+        }
+    }
+    VERIFICAR(iguais);
+    VERIFICAR(d.ate({ 4, 6 }) == 0);
+    VERIFICAR(d.ate({ 1, 9 }) == DistanciasPelaEstrada::SEM_LIGACAO);
+    VERIFICAR(d.ate({ -1, 0 }) == DistanciasPelaEstrada::SEM_LIGACAO);
+}
+
+TESTE("distâncias: origem sem estrada não alcança nada") {
+    Cidade c = campo_aberto();
+    estrada(c, { 1, 1 }, { 5, 1 });
+    DistanciasPelaEstrada d;
+    d.calcular(c, { 1, 2 });
+    VERIFICAR(d.ate({ 1, 1 }) == DistanciasPelaEstrada::SEM_LIGACAO);
+    VERIFICAR(d.ate({ 1, 2 }) == DistanciasPelaEstrada::SEM_LIGACAO);
+}
+
+TESTE("distâncias: repete a busca só quando a origem ou as estradas mudam") {
+    Cidade c = campo_aberto();
+    estrada(c, { 1, 1 }, { 5, 1 });
+    DistanciasPelaEstrada d;
+    d.calcular(c, { 1, 1 });
+    d.calcular(c, { 1, 1 });
+    VERIFICAR(d.buscas_feitas() == 1);
+    d.calcular(c, { 5, 1 });
+    VERIFICAR(d.buscas_feitas() == 2);
+    c.construir_estrada({ 6, 1 });
+    d.calcular(c, { 5, 1 });
+    VERIFICAR(d.buscas_feitas() == 3);
+    VERIFICAR(d.ate({ 6, 1 }) == 1);
+}

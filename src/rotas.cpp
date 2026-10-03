@@ -72,6 +72,45 @@ std::optional<std::vector<Celula>> buscar_rota(const Cidade& cidade, Celula de, 
     return rota;
 }
 
+void DistanciasPelaEstrada::calcular(const Cidade& cidade, Celula de) {
+    if (cidade_ == &cidade && de_ == de && versao_ == cidade.versao_estradas()) return;
+    cidade_ = &cidade;
+    de_ = de;
+    versao_ = cidade.versao_estradas();
+    ++buscas_;
+
+    largura_ = cidade.mapa().largura();
+    altura_ = cidade.mapa().altura();
+    passos_.assign(static_cast<std::size_t>(largura_) * static_cast<std::size_t>(altura_), SEM_LIGACAO);
+    if (!cidade.tem_estrada(de)) return;
+
+    auto indice = [this](Celula c) { return static_cast<std::size_t>(c.y * largura_ + c.x); };
+    constexpr Celula VIZINHOS[] = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } };
+
+    // A fila é um vetor percorrido por índice: cada célula entra uma vez só,
+    // então não precisa remover da frente.
+    fila_.clear();
+    fila_.push_back(indice(de));
+    passos_[indice(de)] = 0;
+    for (std::size_t i = 0; i < fila_.size(); ++i) {
+        const std::size_t atual = fila_[i];
+        const Celula c{ static_cast<int>(atual) % largura_, static_cast<int>(atual) / largura_ };
+        for (const Celula d : VIZINHOS) {
+            const Celula v{ c.x + d.x, c.y + d.y };
+            if (!cidade.tem_estrada(v)) continue;
+            const std::size_t iv = indice(v);
+            if (passos_[iv] != SEM_LIGACAO) continue;
+            passos_[iv] = passos_[atual] + 1;
+            fila_.push_back(iv);
+        }
+    }
+}
+
+int DistanciasPelaEstrada::ate(Celula c) const {
+    if (c.x < 0 || c.y < 0 || c.x >= largura_ || c.y >= altura_) return SEM_LIGACAO;
+    return passos_[static_cast<std::size_t>(c.y * largura_ + c.x)];
+}
+
 const std::optional<std::vector<Celula>>& CacheDeRotas::rota(const Cidade& cidade, Celula de, Celula para) {
     if (versao_ != cidade.versao_estradas() || rotas_.size() >= MAXIMO) {
         rotas_.clear();

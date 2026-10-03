@@ -13,6 +13,36 @@
 // Devolve nullopt se uma das pontas não tem estrada ou se não há ligação.
 std::optional<std::vector<Celula>> buscar_rota(const Cidade& cidade, Celula de, Celula para);
 
+// Quantos passos pela estrada separam uma célula de todas as outras, numa
+// busca só. Escolher o mais perto entre muitos candidatos (o carregador
+// livre, o depósito com vaga) com buscar_rota custa um A* por candidato;
+// com isto custa uma busca em largura a partir do alvo. Como todo passo
+// custa 1 e as estradas valem nos dois sentidos, `ate(c)` é sempre
+// buscar_rota(de, c)->size() - 1.
+class DistanciasPelaEstrada {
+public:
+    static constexpr int SEM_LIGACAO = -1;
+
+    // Refaz a busca a partir de `de`, a menos que já seja a última feita
+    // para a mesma cidade, a mesma origem e a mesma versão das estradas.
+    // Sem estrada em `de`, nada é alcançável.
+    void calcular(const Cidade& cidade, Celula de);
+    // SEM_LIGACAO fora do mapa ou sem caminho até `c`.
+    int ate(Celula c) const;
+
+    std::uint64_t buscas_feitas() const { return buscas_; }
+
+private:
+    const Cidade* cidade_ = nullptr;
+    Celula de_{ -1, -1 };
+    std::uint64_t versao_ = UINT64_MAX;
+    std::uint64_t buscas_ = 0;
+    int largura_ = 0;
+    int altura_ = 0;
+    std::vector<int> passos_;
+    std::vector<std::size_t> fila_;
+};
+
 // Guarda as rotas já calculadas. Uma vila repete as mesmas viagens (fazenda
 // para moinho, moinho para padaria) milhares de vezes, e cada A* percorre o
 // mapa inteiro no pior caso. Qualquer mudança nas estradas descarta tudo: é

@@ -70,8 +70,9 @@ do README e do contexto e um ou mais commits pequenos.
      → arenque salgado (alimento).
    - O combustível/argila/tijolo já tem cadeia de carvoaria/turfa → olaria.
    - Primeiro ajuste de produtividade: carne de gado/ovelha e arenque
-     aproximados às taxas de comida existentes por trabalhador; rebalanceamento
-     integrado de mão de obra, transporte e custos ainda pendente.
+     aproximados às taxas de comida existentes por trabalhador; `make balance`
+     estima 1,50; 1,50; e 1,47 porções por trabalhador/dia, respectivamente.
+     Rebalanceamento integrado de mão de obra, transporte e custos ainda pendente.
    - Cadeia completa de argila, combustível e tijolos.
    - Rebalancear mão de obra, transporte e custos após cada ramo.
 

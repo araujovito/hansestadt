@@ -133,6 +133,12 @@ e limites físicos também são cobertos pelo teste integrado do marco. Com a
 cadeia completa, os seis moradores atravessam o inverno de 1150–51; sem a
 fazenda, há refeições perdidas.
 
+O balanceador também compara a capacidade bruta de receitas que produzem
+comida sem insumos, em porções por trabalhador/dia. No catálogo atual, peixe
+de rio rende 2,94; porco, 0,99; gado, 1,50; ovelha, 1,50; arenque, 1,47.
+Essa conta usa as sazonalidades e não limita transporte, estoque nem entradas
+de outras cadeias; serve para achar discrepâncias, não substitui a simulação.
+
 ## Tecnologia
 
 | Parte | Escolha | Motivo |

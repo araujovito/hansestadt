@@ -228,8 +228,11 @@ documentos não voltarem a divergir.
   ainda não distingue água doce de mar, e o sal ainda não usa recurso do mapa.
 - **Primeiro ajuste de produtividade**: rendimentos de carne do curral e do
   ovelheiro e de arenque foram aproximados aos alimentos existentes por
-  trabalhador. Não é o rebalanceamento final: a mão de obra e o transporte
-  serão recalculados quando as regras de carregadores forem fechadas.
+  trabalhador. A ferramenta estima 1,50; 1,50; e 1,47 porções por
+  trabalhador/dia, ante 2,94 no peixe de rio e 0,99 no porco. É capacidade
+  bruta das receitas sem insumos, transporte ou limite de estoque, não o
+  resultado de uma cidade. A mão de obra e o transporte serão recalculados
+  quando as regras de carregadores forem fechadas.
 
 ### 2026-10-03
 

@@ -29,6 +29,33 @@ def carregar() -> tuple[dict[str, dict], set[str]]:
     return {e["id"]: e for e in edificios}, {i["id"] for i in itens if i["tipo"] == "comida"}
 
 
+def rendimento_comida_por_trabalhador() -> list[tuple[str, float]]:
+    """Capacidade bruta das receitas autônomas, sem insumos/transporte/estoque."""
+    edificios, comidas = carregar()
+    resultados: list[tuple[str, float]] = []
+    ano = 1300  # calendário do jogo: ano juliano bissexto, inclusive nos séculos.
+    for identificador, edificio in edificios.items():
+        trabalhadores = edificio.get("trabalhadores", 0)
+        if trabalhadores <= 0:
+            continue
+        for receita in edificio.get("receita", []):
+            if receita.get("entradas"):
+                continue
+            saidas_comida = sum(q for item, q in receita.get("saidas", {}).items() if item in comidas)
+            if saidas_comida == 0:
+                continue
+            sazonalidade = receita.get("sazonalidade", [1] * 12)
+            dias_ativos = sum(
+                (28 if mes == 2 else 30 if mes in (4, 6, 9, 11) else 31) * fator
+                for mes, fator in enumerate(sazonalidade, start=1)
+            )
+            dias_ativos += sazonalidade[1] if ano % 4 == 0 else 0
+            dias_ano = 366 if ano % 4 == 0 else 365
+            por_dia_trabalhador = saidas_comida * (dias_ativos / receita["dias"]) / trabalhadores / dias_ano
+            resultados.append((identificador, por_dia_trabalhador))
+    return resultados
+
+
 def simular(anos: int) -> list[dict[str, int]]:
     edificios, comidas = carregar()
     estoque: dict[str, int] = {"pao": COMIDA_INICIAL}
@@ -119,6 +146,9 @@ def main() -> None:
     fim = linhas[-1]
     print(f"{args.anos} ano(s): produzido={fim['produzido']}, consumido={fim['consumido']}, "
           f"falta={fim['falta']}, estoque={fim['estoque_comida']}")
+    print("Capacidade bruta de comida por trabalhador/dia (sem limitar insumos, transporte ou estoque):")
+    for edificio, taxa in rendimento_comida_por_trabalhador():
+        print(f"  {edificio}: {taxa:.2f}")
     print(args.saida / "economia.csv")
     print(args.saida / "economia.svg")
 

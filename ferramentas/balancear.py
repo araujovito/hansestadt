@@ -29,9 +29,29 @@ def carregar() -> tuple[dict[str, dict], set[str]]:
     return {e["id"]: e for e in edificios}, {i["id"] for i in itens if i["tipo"] == "comida"}
 
 
-def rendimento_comida_por_trabalhador() -> list[tuple[str, float]]:
+def ritmo_das_tecnicas(nivel: int) -> dict[str, float]:
+    """Multiplicador de ritmo por edifício com as técnicas até `nivel`.
+
+    O nível de uma técnica é 1 sem `requer` e um a mais que a técnica que
+    ela requer. Os bônus somam, como em Cidade::produtividade_tecnica.
+    """
+    with (RAIZ / "dados/edificios.toml").open("rb") as arquivo:
+        tecnicas = tomllib.load(arquivo).get("tecnica", [])
+    nivel_de: dict[str, int] = {}
+    ritmo: dict[str, float] = {}
+    for tecnica in tecnicas:  # requisitos vêm sempre antes
+        nivel_de[tecnica["id"]] = nivel_de[tecnica["requer"]] + 1 if "requer" in tecnica else 1
+        if nivel_de[tecnica["id"]] > nivel:
+            continue
+        for edificio in tecnica["edificios"]:
+            ritmo[edificio] = ritmo.get(edificio, 1.0) + tecnica["bonus"]
+    return ritmo
+
+
+def rendimento_comida_por_trabalhador(nivel: int = 0) -> list[tuple[str, float]]:
     """Capacidade bruta das receitas autônomas, sem insumos/transporte/estoque."""
     edificios, comidas = carregar()
+    ritmo = ritmo_das_tecnicas(nivel)
     resultados: list[tuple[str, float]] = []
     ano = 1300  # calendário do jogo: ano juliano bissexto, inclusive nos séculos.
     for identificador, edificio in edificios.items():
@@ -51,13 +71,15 @@ def rendimento_comida_por_trabalhador() -> list[tuple[str, float]]:
             )
             dias_ativos += sazonalidade[1] if ano % 4 == 0 else 0
             dias_ano = 366 if ano % 4 == 0 else 365
-            por_dia_trabalhador = saidas_comida * (dias_ativos / receita["dias"]) / trabalhadores / dias_ano
+            ciclos = dias_ativos * ritmo.get(identificador, 1.0) / receita["dias"]
+            por_dia_trabalhador = saidas_comida * ciclos / trabalhadores / dias_ano
             resultados.append((identificador, por_dia_trabalhador))
     return resultados
 
 
-def simular(anos: int) -> list[dict[str, int]]:
+def simular(anos: int, nivel: int = 0) -> list[dict[str, int]]:
     edificios, comidas = carregar()
+    ritmo = ritmo_das_tecnicas(nivel)
     estoque: dict[str, int] = {"pao": COMIDA_INICIAL}
     progresso: dict[tuple[str, int], float] = {}
     produzido = 0
@@ -74,6 +96,7 @@ def simular(anos: int) -> list[dict[str, int]]:
                         for indice, receita in enumerate(edificio.get("receita", [])):
                             fator = receita.get("sazonalidade", [1] * 12)[mes - 1]
                             chave = (edificio_id, unidade * 100 + indice)
+                            fator *= ritmo.get(edificio_id, 1.0)
                             progresso[chave] = progresso.get(chave, 0.0) + fator / receita["dias"]
                             while progresso[chave] >= 1:
                                 entradas = receita.get("entradas", {})
@@ -139,15 +162,19 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--anos", type=int, default=1)
     parser.add_argument("--saida", type=Path, default=RAIZ / "build/balanceamento")
+    parser.add_argument("--nivel", type=int, default=0,
+                        help="pesquisa as técnicas até este nível (0 = nenhuma)")
     args = parser.parse_args()
-    linhas = simular(args.anos)
+    linhas = simular(args.anos, args.nivel)
     salvar_csv(linhas, args.saida / "economia.csv")
     salvar_svg(linhas, args.saida / "economia.svg")
     fim = linhas[-1]
     print(f"{args.anos} ano(s): produzido={fim['produzido']}, consumido={fim['consumido']}, "
           f"falta={fim['falta']}, estoque={fim['estoque_comida']}")
+    print(f"Técnicas até o nível {args.nivel}; ritmo:",
+          ", ".join(f"{e} {r:.2f}x" for e, r in ritmo_das_tecnicas(args.nivel).items()) or "nenhuma")
     print("Capacidade bruta de comida por trabalhador/dia (sem limitar insumos, transporte ou estoque):")
-    for edificio, taxa in rendimento_comida_por_trabalhador():
+    for edificio, taxa in rendimento_comida_por_trabalhador(args.nivel):
         print(f"  {edificio}: {taxa:.2f}")
     print(args.saida / "economia.csv")
     print(args.saida / "economia.svg")

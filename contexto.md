@@ -193,6 +193,14 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Primeiro corte de eventos históricos**: `dados/eventos.toml` define
+  intervalos julianos inclusivos e multiplicadores combináveis por edifício
+  ou gerais. A Grande Fome reduz colheitas e pesca; a Peste Negra reduz a
+  produção em geral. O efeito incide diariamente na produção e é reaplicado
+  ao carregar uma partida, sem mudar o formato do salvamento. Ainda não há
+  mortalidade nem registro visual; a interface/histórico fica com a tarefa
+  paralela, e efeitos demográficos ficam para uma extensão posterior.
+
 - **Custos de construção**: edifícios declaram materiais no TOML; a cidade
   valida e consome estoques disponíveis sem violar reservas do transporte.
   A fundação traz 40 toras e a interface mostra custo ou material ausente.

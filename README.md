@@ -10,11 +10,10 @@ clima e dos acontecimentos históricos.
 > O roteiro único do trabalho futuro fica em
 > [`plano_de_ação.md`](plano_de_ação.md).
 
-> Status: primeiro marco jogável. Dá para fundar e construir a vila; os edifícios produzem
-> e trocam mercadorias por carregadores. A vila começa com 3 casais, que
-> ocupam as casas, trabalham e recebem comida por carregadores; ainda não há
-> crescimento da população nem eventos. Trinta dias seguidos sem comida
-> matam um morador.
+> Status: primeiro marco jogável com o primeiro corte do sistema de eventos.
+> A Grande Fome (1315–17) reduz a produção agrícola e pesqueira; a Peste
+> Negra (1347–51) reduz a produção geral. Os eventos ficam em
+> `dados/eventos.toml` e ainda não alteram diretamente a população.
 
 ## Ideia central
 
@@ -131,8 +130,15 @@ fazenda, há refeições perdidas.
 |---|---|---|
 | Simulação e visual | C++20 + [raylib](https://www.raylib.com/) 5.5 | O custo do jogo está na simulação (milhares de carregadores, pedidos e rotas por tick), não no visual 2D em grade; C++ dá controle de memória sem coletor de lixo, e a raylib cobre janela, sprites e entrada sem trazer um motor inteiro |
 | Conteúdo (edifícios, receitas, eventos) | TOML, lido com [toml++](https://github.com/marzer/tomlplusplus) 3.4 | Balancear sem recompilar, com o histórico de ajustes visível no git |
-| Scripts de eventos | Lua (planejado) | Regras históricas fora do código C++ |
+| Scripts de eventos | Lua (avaliar depois) | Só adicionar se um evento exigir regras que o TOML não expresse |
 | Ferramentas | Python | Simular e plotar a economia fora do jogo |
+
+Os eventos estão em `dados/eventos.toml`: cada `[[evento]]` tem `id`,
+`nome`, `descricao`, datas julianas inclusivas (`[ano, mês, dia]`) e
+multiplicadores opcionais. `multiplicador_geral` afeta toda produção;
+`producao` permite ajustar edifícios por id. Fatores de eventos ativos se
+combinam multiplicativamente. A primeira versão não muda população nem
+salvamentos; o histórico visual está em andamento na branch de interface.
 
 Alternativas consideradas: **Godot**, que dá o protótipo mais rápido, mas
 o GDScript limita a simulação com muitos agentes; **Rust**, que tem memória

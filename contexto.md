@@ -196,16 +196,11 @@ documentos não voltarem a divergir.
 - **Núcleo da progressão histórica**: `campanha.cpp` define os anos-limite
   1150, 1200, 1250, 1300 e 1370 e permite avançar uma etapa quando todas as
   instituições disponíveis informadas estão no nível máximo. O calendário
-  não é alterado. Falta integrar a lista aos níveis institucionais da cidade
-  e persistir a fase alcançada; isso depende do sistema de instituições.
-- **Progressão da campanha**: o jogo usa um único mapa contínuo. A passagem
-  de fase exige simultaneamente chegar ao ano histórico correspondente e
-  elevar as instituições exigidas ao último nível disponível; o calendário
-  não para esperando os objetivos. Contam todas as instituições disponíveis
-  naquela etapa, não os edifícios econômicos. Os marcos confirmados são Vila
-  (1150), Mercado (1200), Cidade (1250), Hansa (1300) e Auge (1370). A
-  implementação depende do sistema de níveis institucionais, ainda pendente.
-
+  não é alterado. A condição está ligada às instituições da cidade, com
+  níveis e custos definidos em `dados/edificios.toml`; a fase e os níveis
+  são preservados no salvamento v4, que também aceita arquivos v3 iniciando
+  a fase em Vila. A melhoria provisória pode ser acionada com U sobre uma
+  instituição selecionada; a apresentação no painel ainda precisa evoluir.
 - **Primeiro corte de eventos históricos**: `dados/eventos.toml` define
   intervalos julianos inclusivos e multiplicadores combináveis por edifício
   ou gerais. A Grande Fome reduz colheitas e pesca; a Peste Negra reduz a

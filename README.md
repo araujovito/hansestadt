@@ -45,8 +45,11 @@ tijolo), diferente da pedreira dos jogos medievais mais comuns.
 
 As fases ocorrem no mesmo mapa. Cada marco requer alcançar o ano indicado e
 ter todas as instituições disponíveis na etapa no nível máximo; o calendário
-segue avançando enquanto esses requisitos não forem cumpridos. (Progressão e
-níveis institucionais ainda estão planejados.)
+segue avançando enquanto esses requisitos não forem cumpridos. As instituições
+são únicas: igreja e governo começam na Vila, mercado abre no Mercado e porto
+na Hansa. Selecione uma instituição e pressione **U** para melhorá-la; os
+custos e níveis disponíveis por fase estão em `dados/edificios.toml`. A
+apresentação dos níveis no painel ainda é provisória.
 
 ## Economia
 

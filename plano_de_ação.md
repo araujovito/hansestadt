@@ -40,9 +40,9 @@ do README e do contexto e um ou mais commits pequenos.
    - Registrar acontecimentos e seus efeitos para o jogador.
 
 5. **Evolução das fases**
-   - Núcleo em andamento na `codex/simulacao`: `tentar_avancar_fase` aplica
-     os cinco anos fixos e só avança se todas as instituições informadas
-     estiverem no máximo; ainda falta ligar aos níveis reais da cidade.
+   - Implementado na `codex/simulacao`: os cinco anos fixos e a condição de
+     todas as instituições disponíveis no nível máximo; a fase alcançada é
+     persistida.
    - A campanha acontece em um único mapa contínuo, sem reiniciar a cidade
      ao trocar de fase.
    - Cada fase tem um ano-limite histórico e só é alcançada quando o
@@ -56,10 +56,10 @@ do README e do contexto e um ou mais commits pequenos.
      (1300) e Auge (1370).
 
 6. **Edifícios institucionais**
-   - Igreja, governo, mercado e porto.
-   - Evolução dos edifícios ligada à progressão histórica.
-   - Implementar níveis e disponibilidade de modo que a fase possa conferir
-     se todas as instituições disponíveis atingiram o nível máximo da etapa.
+   - Primeiro corte implementado: igreja, governo, mercado e porto são
+     únicos; níveis, disponibilidade por fase e custos ficam no TOML.
+   - A UI provisória usa U para evoluir a instituição selecionada; painel com
+     nível e custo explicados permanece na tarefa de interface.
 
 7. **Completar as cadeias econômicas**
    - Cerveja, gado, ovelhas, tecidos, couro, arenque, barris e salga.
@@ -158,6 +158,12 @@ compartilhados e alterações simultâneas poderiam se misturar.
 - Trabalhar em `src/main.cpp`, `src/painel.*`, `src/desenho.*` e novos
   arquivos de interface/recursos. Combinar previamente qualquer mudança em
   cabeçalhos centrais da simulação.
+- Para os painéis institucionais, a API da simulação expõe
+  `sim.fase`, `cidade.edificio(id).nivel`,
+  `nivel_maximo_disponivel(cidade.definicao(id), sim.fase)`,
+  `cidade.validar_melhoria(id, sim.fase)` e
+  `cidade.melhorar_edificio(id, sim.fase)`. A tecla U é apenas um acesso
+  provisório enquanto o painel não oferece o botão de melhoria.
 
 ### Vitor — direção e integração
 

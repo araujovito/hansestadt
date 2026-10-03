@@ -111,6 +111,22 @@ as de implementação, que o README não explica.
   Uma assinatura do estado final (população, cargas perdidas, soma dos
   estoques, entregas) confere que uma otimização não mudou o resultado.
 
+### Interface
+- **O histórico de acontecimentos só mostra o que já começou.** A lista sai
+  de `Eventos::ocorridos`, e não de `definicoes`: anunciar a Peste Negra em
+  1150 tiraria a surpresa da campanha. É escolha de apresentação, provisória
+  até o Vitor decidir se quer prenúncios (um aviso meses antes, por exemplo).
+- **Efeitos em palavras, agrupados por fator.** "fazenda e fazenda de cevada
+  a 25%" em vez de uma linha por edifício: a Grande Fome e o inverno de 1322
+  mexem em pares de edifícios com o mesmo fator.
+- **Início de evento por intervalo de datas** (`comecaram_entre`), e não por
+  igualdade com o dia de hoje: a 4× vários dias passam num quadro.
+- **O painel das instituições não tem regra própria.** `src/melhorias.*`
+  lê `validar_melhoria`, `nivel_maximo_disponivel` e `ano_de_abertura`; um
+  teste confere que "ano chegou e instituições prontas" dá o mesmo que
+  `tentar_avancar_fase`. Se a regra de progressão mudar no ramo da
+  simulação, esse teste avisa.
+
 ### Visual
 - **Estilo pixel art de vila aconchegante** (pedido do Vitor: "algo como
   Stardew Valley", não um jogo de console). Avaliados em protótipo fora do
@@ -272,6 +288,26 @@ documentos não voltarem a divergir.
   crianças comem primeiro, depois adultos alojados e por fim adultos sem casa.
   O editor visual também entrou no plano oficial. As regras numéricas de
   trilhas e movimento estão registradas na seção Construção e rotas.
+- **Aba Fase no relatório**: fase atual, a próxima e o ano em que abre, e
+  cada instituição exigida com nível e o que falta (construir, ou os
+  materiais da melhoria). A janela passou de 640 para 720 px de largura
+  para caberem seis abas.
+- **Botão de melhoria no painel da instituição**: o painel mostra nível,
+  quando o próximo nível libera, os materiais (pedido/disponível, em
+  vermelho se faltar) e um botão no pé do painel, com o motivo em versão
+  curta quando está bloqueado. A tecla U continua como atalho.
+- **Lógica do painel das instituições** (`src/melhorias.*`, item 9): ficha
+  de cada instituição (nível, nível liberado na fase, próxima melhoria com
+  materiais pedidos e disponíveis, resultado de `validar_melhoria`) e o que
+  falta para a próxima fase. Sem raylib, com 5 testes.
+- **Lógica do histórico de acontecimentos** (`src/historico.*`, item 9 do
+  plano): monta a lista de eventos já iniciados, com período por extenso,
+  dias restantes e efeitos em palavras, e detecta eventos que começaram entre
+  duas datas. Sem raylib, com 7 testes; a tela vem no commit seguinte.
+- **Aba História no relatório e aviso de evento**: quinta aba da janela da
+  tecla V, com quebra de linha da descrição e resumo do que não couber; a
+  barra de cima avisa "começou: <evento>" por 5 s. O aviso compara a data de
+  antes e depois dos passos do quadro, para carregar partida não disparar.
 - **Alimentação infantil e dos sem-teto**: crianças consomem uma porção em
   dias alternados, equivalente a meia porção diária. Moradores sem casa comem
   diretamente em edifícios marcados com `alimenta_sem_teto`; o armazém e a

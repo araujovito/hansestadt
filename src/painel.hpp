@@ -9,10 +9,14 @@
 #include "populacao.hpp"
 
 // Painel lateral com o estado do edifício selecionado: o que produz, por que
-// parou e o que tem no estoque.
+// parou e o que tem no estoque. Instituições mostram o nível, o custo da
+// próxima melhoria e o botão de melhorar.
 Rectangle area_do_painel_edificio();
 void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, IdEdificio id, int mes,
-                              int ticks_por_dia);
+                              int ticks_por_dia, Fase fase);
+// Se o clique deste quadro foi no botão de melhorar, liberado ou não; quem
+// chama tenta a melhoria e mostra o resultado. Fora de instituição é falso.
+bool clicou_em_melhorar(const Cidade& cidade, IdEdificio id);
 
 // Lista de alertas no canto esquerdo, abaixo da barra de cima. Mostra no
 // máximo MAXIMO_ALERTAS_NA_TELA; os demais são resumidos numa última linha.

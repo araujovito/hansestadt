@@ -13,6 +13,7 @@
 #include "desenho.hpp"
 #include "ferramentas.hpp"
 #include "fundacao.hpp"
+#include "historico.hpp"
 #include "mapa.hpp"
 #include "menu.hpp"
 #include "painel.hpp"
@@ -293,7 +294,9 @@ int main() {
             camera.atualizar(GetFrameTime());
             sob_cursor = celula_em(camera.mouse_no_mundo());
             if (!mouse_na_barra) aplicar_ferramenta(ferramenta, cidade, sob_cursor);
-            if (IsKeyPressed(KEY_U) && ferramenta.selecionado) {
+            // Botão do painel ou tecla U, que fica como atalho.
+            if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo &&
+                (IsKeyPressed(KEY_U) || clicou_em_melhorar(cidade, *ferramenta.selecionado))) {
                 const ResultadoMelhoria r = cidade.melhorar_edificio(*ferramenta.selecionado, sim.fase);
                 aviso = r == ResultadoMelhoria::Ok
                             ? "instituição evoluiu para o nível " +
@@ -308,7 +311,14 @@ int main() {
 
             const int passos = relogio.passos_para(GetFrameTime());
             if (fundacao.concluida()) {
+                const Data antes_dos_passos = sim.data;
                 for (int i = 0; i < passos; ++i) sim.passo();
+                // A data de antes é deste quadro, então carregar uma partida
+                // de outro ano não anuncia eventos que já tinham passado.
+                for (const EventoHistorico* e : comecaram_entre(sim.eventos, antes_dos_passos, sim.data)) {
+                    aviso = "começou: " + e->nome + " (Relatório > História)";
+                    aviso_quadros = 300;
+                }
             }
         }
         // Antes da fundação não há vila para ter problema.
@@ -355,7 +365,7 @@ int main() {
         desenhar_barra(ferramenta);
         if (ferramenta.selecionado && cidade.edificio(*ferramenta.selecionado).ativo) {
             desenhar_painel_edificio(cidade, sim.populacao, *ferramenta.selecionado, sim.data.mes,
-                                     Simulacao::TICKS_POR_DIA);
+                                     Simulacao::TICKS_POR_DIA, sim.fase);
         }
         menu.desenhar();
         EndDrawing();

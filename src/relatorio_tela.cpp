@@ -1,13 +1,14 @@
 #include "relatorio_tela.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 
 #include "alertas.hpp"
 
 namespace {
 
-constexpr float LARGURA = 640.0f;
+constexpr float LARGURA = 720.0f;
 constexpr float ALTURA = 440.0f;
 constexpr float TOPO = 80.0f;
 constexpr float MARGEM = 16.0f;
@@ -27,10 +28,11 @@ constexpr Color VERDE{ 150, 210, 120, 255 };
 constexpr Color AMARELO{ 230, 196, 100, 255 };
 constexpr Color VERMELHO{ 235, 110, 90, 255 };
 
-constexpr const char* NOMES_DAS_ABAS[] = { "Emprego", "Comida", "Produção", "Transporte" };
+constexpr const char* NOMES_DAS_ABAS[] = { "Emprego", "Comida", "Produção", "Transporte", "Fase", "História" };
+constexpr int N_ABAS = static_cast<int>(std::size(NOMES_DAS_ABAS));
 
 Rectangle area_da_aba(const Rectangle& janela, int i) {
-    const float largura = (LARGURA - 2.0f * MARGEM - 40.0f) / 4.0f;
+    const float largura = (LARGURA - 2.0f * MARGEM - 40.0f) / static_cast<float>(N_ABAS);
     return { janela.x + MARGEM + static_cast<float>(i) * largura, janela.y + MARGEM, largura - 4.0f, ALTURA_ABA };
 }
 
@@ -49,6 +51,27 @@ void barra(float x, float y, float largura, int valor, int total) {
     const float f = std::clamp(static_cast<float>(valor) / static_cast<float>(total), 0.0f, 1.0f);
     DrawRectangle(static_cast<int>(x), static_cast<int>(y + 5), static_cast<int>(largura * f), 10,
                   valor < total ? AMARELO : VERDE);
+}
+
+// Quebra o texto em linhas que caibam na largura, sem cortar palavras.
+std::vector<std::string> quebrar_linhas(const std::string& t, float largura, int tamanho) {
+    std::vector<std::string> linhas;
+    std::string linha;
+    std::size_t i = 0;
+    while (i < t.size()) {
+        const std::size_t fim = std::min(t.find(' ', i), t.size());
+        const std::string palavra = t.substr(i, fim - i);
+        const std::string tentativa = linha.empty() ? palavra : linha + " " + palavra;
+        if (!linha.empty() && static_cast<float>(MeasureText(tentativa.c_str(), tamanho)) > largura) {
+            linhas.push_back(linha);
+            linha = palavra;
+        } else {
+            linha = tentativa;
+        }
+        i = fim + 1;
+    }
+    if (!linha.empty()) linhas.push_back(linha);
+    return linhas;
 }
 
 Color cor_dos_dias(int dias) {
@@ -76,7 +99,7 @@ void JanelaDeRelatorio::atualizar() {
         fechar();
         return;
     }
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < N_ABAS; ++i)
         if (CheckCollisionPointRec(mouse, area_da_aba(janela, i))) aba_ = static_cast<Aba>(i);
 }
 
@@ -87,7 +110,7 @@ void JanelaDeRelatorio::desenhar(const Relatorio& r) const {
     DrawRectangleLinesEx(janela, 2.0f, BORDA);
 
     const Vector2 mouse = GetMousePosition();
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < N_ABAS; ++i) {
         const Rectangle a = area_da_aba(janela, i);
         const bool ativa = static_cast<int>(aba_) == i;
         DrawRectangleRec(a, ativa ? ABA_ATIVA : CheckCollisionPointRec(mouse, a) ? Color{ 80, 64, 48, 255 } : ABA);
@@ -105,6 +128,8 @@ void JanelaDeRelatorio::desenhar(const Relatorio& r) const {
         case Aba::Comida: desenhar_comida(r.comida, cx, cy); break;
         case Aba::Producao: desenhar_producao(r.producao, cx, cy); break;
         case Aba::Transporte: desenhar_transporte(r.transporte, cx, cy); break;
+        case Aba::Fase: desenhar_fase(r.fase, r.rumo, cx, cy); break;
+        case Aba::Historia: desenhar_historia(r.historico, cx, cy); break;
     }
     texto("V ou X fecha. O jogo continua andando.", cx, janela.y + janela.height - MARGEM - 14.0f, APAGADO, 14);
 }
@@ -213,5 +238,97 @@ void JanelaDeRelatorio::desenhar_transporte(const RelatorioTransporte& t, float 
         texto("Sem carregadores nada se move: cada armazém precisa de um adulto com casa.", x, y, AMARELO, 14);
     } else if (t.ocupados == t.carregadores) {
         texto("Todos os carregadores estão ocupados: entregas podem atrasar.", x, y, AMARELO, 14);
+    }
+}
+
+void JanelaDeRelatorio::desenhar_historia(const std::vector<EntradaDoHistorico>& h, float x, float y) const {
+    if (h.empty()) {
+        texto("Nenhum acontecimento marcante ainda.", x, y, APAGADO);
+        texto("Fomes, invernos e pestes aparecem aqui quando chegam.", x, y + LINHA, APAGADO, 14);
+        return;
+    }
+    const float largura = LARGURA - 2.0f * MARGEM;
+    // Acima do rodapé; o que não couber vira uma linha de resumo no fim.
+    const float limite = area().y + ALTURA - MARGEM - 44.0f;
+    std::size_t mostrados = 0;
+    for (const EntradaDoHistorico& e : h) {
+        const std::vector<std::string> descricao = quebrar_linhas(e.descricao, largura, 14);
+        std::string efeitos;
+        for (const std::string& ef : e.efeitos) efeitos += (efeitos.empty() ? "" : "  |  ") + ef;
+        const std::vector<std::string> linhas_efeitos = quebrar_linhas(efeitos, largura, 14);
+        const float altura = static_cast<float>(LINHA) +
+                             18.0f * static_cast<float>(1 + descricao.size() + linhas_efeitos.size());
+        if (mostrados > 0 && y + altura > limite) break;
+
+        texto(e.nome, x, y, e.em_andamento ? AMARELO : CLARO);
+        if (e.em_andamento) {
+            const char* resta = e.dias_restantes == 1 ? "último dia" : TextFormat("faltam %d dias", e.dias_restantes);
+            texto(resta, x + static_cast<float>(MeasureText(e.nome.c_str(), TEXTO)) + 12.0f, y + 2.0f, AMARELO, 14);
+        } else {
+            texto("encerrado", x + static_cast<float>(MeasureText(e.nome.c_str(), TEXTO)) + 12.0f, y + 2.0f,
+                  APAGADO, 14);
+        }
+        y += LINHA;
+        texto(e.periodo, x, y, APAGADO, 14);
+        y += 18.0f;
+        for (const std::string& l : descricao) {
+            texto(l, x, y, CLARO, 14);
+            y += 18.0f;
+        }
+        for (const std::string& l : linhas_efeitos) {
+            texto(l, x, y, e.em_andamento ? VERMELHO : APAGADO, 14);
+            y += 18.0f;
+        }
+        y += 8.0f;
+        ++mostrados;
+    }
+    if (mostrados < h.size()) {
+        texto(TextFormat("e mais %d acontecimentos antigos", static_cast<int>(h.size() - mostrados)), x, y,
+              APAGADO, 14);
+    }
+}
+
+void JanelaDeRelatorio::desenhar_fase(Fase fase, const std::optional<RumoAProximaFase>& rumo, float x,
+                                      float y) const {
+    texto(TextFormat("fase atual: %s", nome_da_fase(fase)), x, y);
+    y += LINHA;
+    if (!rumo) {
+        texto("Última fase da campanha.", x, y, APAGADO);
+        return;
+    }
+    texto(TextFormat("próxima: %s, a partir de %d", nome_da_fase(rumo->fase), rumo->ano), x, y);
+    texto(rumo->ano_chegou ? "o ano já chegou" : "o ano ainda não chegou", x + 330, y,
+          rumo->ano_chegou ? VERDE : APAGADO);
+    y += LINHA + 8;
+    texto("Cada instituição precisa estar construída e no maior nível desta fase:", x, y, APAGADO, 14);
+    y += LINHA;
+    texto("instituição", x, y, APAGADO);
+    texto("nível", x + 200, y, APAGADO);
+    texto("situação", x + 290, y, APAGADO);
+    y += LINHA;
+    for (const FichaDaInstituicao& f : rumo->instituicoes) {
+        texto(f.nome, x, y);
+        texto(TextFormat("%d de %d", f.nivel, f.nivel_da_fase), x + 200, y, f.pronta_para_a_fase() ? CLARO : AMARELO);
+        std::string situacao;
+        Color cor = AMARELO;
+        if (!f.edificio) {
+            situacao = "falta construir";
+        } else if (f.pronta_para_a_fase()) {
+            situacao = "pronta";
+            cor = VERDE;
+        } else {
+            // Abaixo do nível da fase, a próxima melhoria já está liberada.
+            situacao = "melhorar:";
+            for (const MaterialDaMelhoria& m : f.materiais)
+                situacao += TextFormat(" %s %d/%d", m.nome.c_str(), m.tem, m.precisa);
+        }
+        texto(situacao, x + 290, y, cor);
+        y += LINHA;
+    }
+    y += 8;
+    if (rumo->ano_chegou && rumo->instituicoes_prontas()) {
+        texto("Tudo pronto: a fase avança na virada do dia.", x, y, VERDE, 14);
+    } else if (rumo->instituicoes_prontas()) {
+        texto(TextFormat("Instituições prontas; falta chegar %d.", rumo->ano), x, y, APAGADO, 14);
     }
 }

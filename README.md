@@ -16,7 +16,8 @@ clima e dos acontecimentos históricos.
 > Eventos históricos em `dados/eventos.toml`: Grande Fome (1315–17) e inverno
 > rigoroso de 1322–23 reduzem a produção; a Peste Negra (1347–51) também mata.
 > Há menu de pausa com quatro vagas de partida, alertas clicáveis e relatório
-> de emprego, comida, produção e transporte. O equilíbrio da comida ainda está
+> de emprego, comida, produção, transporte, fase e história (os acontecimentos
+> já vividos, com aviso quando um começa). O equilíbrio da comida ainda está
 > em ajuste: sem expandir a produção, a vila inicial passa fome no primeiro
 > ano; crianças já consomem meia porção e sem-teto comem no armazém ou na
 > igreja (ver `contexto.md`).
@@ -53,9 +54,10 @@ As fases ocorrem no mesmo mapa. Cada marco requer alcançar o ano indicado e
 ter todas as instituições disponíveis na etapa no nível máximo; o calendário
 segue avançando enquanto esses requisitos não forem cumpridos. As instituições
 são únicas: igreja e governo começam na Vila, mercado abre no Mercado e porto
-na Hansa. Selecione uma instituição e pressione **U** para melhorá-la; os
-custos e níveis disponíveis por fase estão em `dados/edificios.toml`. A
-apresentação dos níveis no painel ainda é provisória.
+na Hansa. Selecione uma instituição para ver o nível, os materiais da
+próxima melhoria e o botão de melhorar (atalho **U**); a aba **Fase** do
+relatório mostra o que falta para a próxima fase. Os custos e níveis
+disponíveis por fase estão em `dados/edificios.toml`.
 
 ## Economia
 
@@ -314,8 +316,8 @@ Controles:
 | Demolir | `X`, depois clicar ou arrastar |
 | Ver o nome de um edifício | apontar com o mouse (sem ferramenta ativa) |
 | Ver produção, estoque e acesso | clicar num edifício (sem ferramenta ativa) |
-| Evoluir a instituição selecionada (provisório) | `U` |
-| Relatório de emprego, comida, produção e transporte | `V` ou o botão `Relatório` no canto de cima (o jogo continua andando) |
+| Evoluir a instituição selecionada | botão no painel, ou `U` |
+| Relatório de emprego, comida, produção, transporte, fase e história | `V` ou o botão `Relatório` no canto de cima (o jogo continua andando) |
 | Ir até um edifício com problema | clicar em `ver >` no alerta, no canto esquerdo (cliques seguidos percorrem os edifícios do alerta) |
 | Salvar / carregar rápido | `F5` / `F9` (`partida.hanse`) |
 | Menu de pausa (continuar, salvar e carregar em 4 vagas, sair) | `Esc` sem ferramenta nem painel aberto, ou o botão `Menu` no canto de cima |

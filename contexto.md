@@ -116,6 +116,11 @@ as de implementação, que o README não explica.
   mexem em pares de edifícios com o mesmo fator.
 - **Início de evento por intervalo de datas** (`comecaram_entre`), e não por
   igualdade com o dia de hoje: a 4× vários dias passam num quadro.
+- **O painel das instituições não tem regra própria.** `src/melhorias.*`
+  lê `validar_melhoria`, `nivel_maximo_disponivel` e `ano_de_abertura`; um
+  teste confere que "ano chegou e instituições prontas" dá o mesmo que
+  `tentar_avancar_fase`. Se a regra de progressão mudar no ramo da
+  simulação, esse teste avisa.
 
 ### Visual
 - **Estilo pixel art de vila aconchegante** (pedido do Vitor: "algo como
@@ -260,6 +265,10 @@ documentos não voltarem a divergir.
 
 ### 2026-10-03
 
+- **Lógica do painel das instituições** (`src/melhorias.*`, item 9): ficha
+  de cada instituição (nível, nível liberado na fase, próxima melhoria com
+  materiais pedidos e disponíveis, resultado de `validar_melhoria`) e o que
+  falta para a próxima fase. Sem raylib, com 5 testes.
 - **Lógica do histórico de acontecimentos** (`src/historico.*`, item 9 do
   plano): monta a lista de eventos já iniciados, com período por extenso,
   dias restantes e efeitos em palavras, e detecta eventos que começaram entre

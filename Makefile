@@ -31,7 +31,7 @@ BINARIO := $(SAIDA)/hansestadt
 # Testes: só a lógica do jogo, sem raylib nem janela, sempre com sanitizers.
 # Estes arquivos não podem incluir raylib.h; é isso que mantém a simulação
 # testável.
-LOGICA        := alertas assinatura_desenho campanha calendario cidade conteudo eventos fundacao historico mapa partidas populacao producao relatorio rotas ruido salvamento simulacao transporte
+LOGICA        := alertas assinatura_desenho campanha calendario cidade conteudo eventos fundacao historico mapa melhorias partidas populacao producao relatorio rotas ruido salvamento simulacao transporte
 TESTE_FLAGS   := -std=c++20 -Wall -Wextra -Wpedantic -Wshadow -Isrc -Itestes -isystem $(TOMLPP) -O1 -g \
                  -fsanitize=address,undefined -fno-omit-frame-pointer
 TESTE_FONTES  := $(wildcard testes/*.cpp) $(LOGICA:%=src/%.cpp)

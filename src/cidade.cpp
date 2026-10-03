@@ -17,6 +17,17 @@ const char* descrever(Validacao v) {
     return "?";
 }
 
+const char* descrever(ResultadoTecnica r) {
+    switch (r) {
+        case ResultadoTecnica::Ok: return "ok";
+        case ResultadoTecnica::JaPesquisada: return "técnica já pesquisada";
+        case ResultadoTecnica::FaseBloqueada: return "técnica ainda não disponível nesta fase";
+        case ResultadoTecnica::FaltaRequisito: return "falta pesquisar a técnica anterior";
+        case ResultadoTecnica::SemRecursos: return "faltam materiais";
+    }
+    return "?";
+}
+
 const char* descrever(ResultadoMelhoria r) {
     switch (r) {
         case ResultadoMelhoria::Ok: return "ok";
@@ -35,7 +46,9 @@ Cidade::Cidade(Mapa mapa, const Conteudo& conteudo)
       ocupacao_(static_cast<std::size_t>(mapa_.largura()) * static_cast<std::size_t>(mapa_.altura()),
                 SEM_EDIFICIO),
       estradas_(ocupacao_.size(), 0),
-      portas_(ocupacao_.size(), 0) {}
+      portas_(ocupacao_.size(), 0),
+      tecnicas_(conteudo.tecnicas.size(), 0),
+      produtividade_por_tipo_(conteudo.edificios.size(), PRODUTIVIDADE_NORMAL) {}
 
 Cidade Cidade::restaurar(Mapa mapa, const Conteudo& conteudo, std::vector<Edificio> edificios,
                          std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas) {
@@ -272,6 +285,61 @@ int Cidade::estoque_total(TipoItem tipo) const {
         if (conteudo_->itens[item].tipo == tipo) total += estoque_total(item);
     }
     return total;
+}
+
+ResultadoTecnica Cidade::validar_tecnica(IdTecnica tecnica, Fase fase_atual) const {
+    const Tecnica& t = conteudo_->tecnicas[tecnica];
+    if (tecnica_pesquisada(tecnica)) return ResultadoTecnica::JaPesquisada;
+    if (t.fase > fase_atual) return ResultadoTecnica::FaseBloqueada;
+    if (t.requer && !tecnica_pesquisada(*t.requer)) return ResultadoTecnica::FaltaRequisito;
+    if (!tem_materiais(t.custo)) return ResultadoTecnica::SemRecursos;
+    return ResultadoTecnica::Ok;
+}
+
+ResultadoTecnica Cidade::pesquisar_tecnica(IdTecnica tecnica, Fase fase_atual) {
+    const ResultadoTecnica resultado = validar_tecnica(tecnica, fase_atual);
+    if (resultado != ResultadoTecnica::Ok) return resultado;
+    retirar_materiais(conteudo_->tecnicas[tecnica].custo);
+    tecnicas_[tecnica] = 1;
+    recalcular_produtividade();
+    return ResultadoTecnica::Ok;
+}
+
+void Cidade::restaurar_tecnicas(std::vector<std::uint8_t> pesquisadas) {
+    pesquisadas.resize(conteudo_->tecnicas.size(), 0);
+    tecnicas_ = std::move(pesquisadas);
+    recalcular_produtividade();
+}
+
+void Cidade::recalcular_produtividade() {
+    produtividade_por_tipo_.assign(conteudo_->edificios.size(), PRODUTIVIDADE_NORMAL);
+    for (IdTecnica t = 0; t < tecnicas_.size(); ++t) {
+        if (!tecnicas_[t]) continue;
+        for (IdTipoEdificio tipo : conteudo_->tecnicas[t].edificios)
+            produtividade_por_tipo_[tipo] += conteudo_->tecnicas[t].bonus;
+    }
+}
+
+bool Cidade::tem_materiais(const std::vector<Quantidade>& materiais) const {
+    for (const Quantidade& q : materiais) {
+        int total = 0;
+        for (IdEdificio id = 0; id < edificios_.size(); ++id) total += disponivel(id, q.item);
+        if (total < q.quantidade) return false;
+    }
+    return true;
+}
+
+void Cidade::retirar_materiais(const std::vector<Quantidade>& materiais) {
+    for (const Quantidade& q : materiais) {
+        int restante = q.quantidade;
+        for (IdEdificio id = 0; id < edificios_.size() && restante > 0; ++id) {
+            Edificio& e = edificios_[id];
+            if (!e.ativo) continue;
+            const int retirado = std::min(restante, disponivel(id, q.item));
+            e.estoque[q.item] -= retirado;
+            restante -= retirado;
+        }
+    }
 }
 
 bool Cidade::tem_recursos_para(IdTipoEdificio tipo) const {

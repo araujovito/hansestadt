@@ -54,6 +54,19 @@ enum class ResultadoMelhoria : std::uint8_t {
 
 const char* descrever(ResultadoMelhoria resultado);
 
+enum class ResultadoTecnica : std::uint8_t {
+    Ok,
+    JaPesquisada,
+    FaseBloqueada,
+    FaltaRequisito,  // a técnica anterior ainda não foi pesquisada
+    SemRecursos,
+};
+
+const char* descrever(ResultadoTecnica resultado);
+
+// Produtividade em milésimos: 1000 = ritmo normal da receita.
+inline constexpr int PRODUTIVIDADE_NORMAL = 1000;
+
 const char* descrever(Validacao v);
 
 // Entrada do edifício: a célula logo abaixo do meio da borda inferior da área
@@ -76,6 +89,15 @@ public:
     std::optional<IdEdificio> construir_edificio(IdTipoEdificio tipo, Celula origem);
     ResultadoMelhoria melhorar_edificio(IdEdificio id, Fase fase_atual);
     ResultadoMelhoria validar_melhoria(IdEdificio id, Fase fase_atual) const;
+
+    // Técnicas valem para a vila inteira, não para um edifício: ficam aqui
+    // porque o custo sai dos mesmos estoques que pagam as construções.
+    bool tecnica_pesquisada(IdTecnica tecnica) const { return tecnicas_[tecnica] != 0; }
+    ResultadoTecnica validar_tecnica(IdTecnica tecnica, Fase fase_atual) const;
+    ResultadoTecnica pesquisar_tecnica(IdTecnica tecnica, Fase fase_atual);
+    // Ritmo do tipo de edifício com as técnicas já pesquisadas: 1000 mais
+    // o bônus de cada uma (1750 com uma técnica de +75%).
+    int produtividade_tecnica(IdTipoEdificio tipo) const { return produtividade_por_tipo_[tipo]; }
 
     Validacao validar_estrada(Celula c) const;
     bool construir_estrada(Celula c);
@@ -122,9 +144,16 @@ public:
     const std::vector<std::uint8_t>& estradas() const { return estradas_; }
     static Cidade restaurar(Mapa mapa, const Conteudo& conteudo, std::vector<Edificio> edificios,
                             std::vector<std::uint8_t> estradas, std::uint64_t versao_estradas);
+    // Uma marca por técnica do conteúdo, na mesma ordem. Arquivo antigo, com
+    // menos técnicas, completa com "não pesquisada".
+    const std::vector<std::uint8_t>& tecnicas() const { return tecnicas_; }
+    void restaurar_tecnicas(std::vector<std::uint8_t> pesquisadas);
 
 private:
     void consumir_custo(const DefinicaoEdificio& def);
+    bool tem_materiais(const std::vector<Quantidade>& materiais) const;
+    void retirar_materiais(const std::vector<Quantidade>& materiais);
+    void recalcular_produtividade();
     bool atende_requisito(const Requisito& r, Celula origem, int largura, int altura) const;
 
     std::size_t indice(Celula c) const {
@@ -143,6 +172,10 @@ private:
     // sempre do próprio edifício.
     std::vector<std::uint8_t> portas_;
     std::uint64_t versao_estradas_ = 0;
+    std::vector<std::uint8_t> tecnicas_;
+    // Derivado de tecnicas_, por IdTipoEdificio: a produção consulta a cada
+    // tick e não precisa somar os bônus de novo.
+    std::vector<int> produtividade_por_tipo_;
 };
 
 // Caminho que a ferramenta de estrada desenha ao arrastar: primeiro na

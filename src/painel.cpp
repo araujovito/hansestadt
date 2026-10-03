@@ -47,7 +47,7 @@ std::string descrever_receita(const Conteudo& conteudo, const Receita& r) {
 }  // namespace
 
 Rectangle area_do_painel_edificio() {
-    return { static_cast<float>(GetScreenWidth()) - LARGURA - 8.0f, 48.0f, LARGURA, ALTURA };
+    return { static_cast<float>(GetScreenWidth()) - LARGURA - 8.0f, 72.0f, LARGURA, ALTURA };
 }
 
 void desenhar_painel_edificio(const Cidade& cidade, const Populacao& populacao, IdEdificio id, int mes,

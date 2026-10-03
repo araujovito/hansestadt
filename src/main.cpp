@@ -32,25 +32,33 @@ constexpr unsigned SEMENTE_MAPA = 1150;
 void desenhar_painel(const Simulacao& sim, const Relogio& relogio, const Mapa& mapa, Celula sob_cursor,
                      const std::string& dica) {
     const Data& d = sim.data;
-    DrawRectangle(0, 0, GetScreenWidth(), 40, Color{ 30, 24, 18, 220 });
+    DrawRectangle(0, 0, GetScreenWidth(), 64, Color{ 30, 24, 18, 230 });
     DrawText(TextFormat("%d de %s de %d", d.dia, nome_do_mes(d.mes), d.ano),
              12, 10, 20, RAYWHITE);
 
     const char* ritmo = relogio.pausado() ? "PAUSADO"
                                           : TextFormat("%dx", relogio.velocidade());
-    DrawText(ritmo, 340, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
+    DrawText(ritmo, 300, 10, 20, relogio.pausado() ? GOLD : RAYWHITE);
     int ocupados = 0;
     for (const Carregador& c : sim.transporte.carregadores()) ocupados += c.livre() ? 0 : 1;
-    DrawText(TextFormat("população %d (%d sem casa, %d sem trabalho, %d mortos) | carregadores %d/%d | %d fps",
-                        sim.populacao.total(), sim.populacao.sem_casa(), sim.populacao.desempregados(),
-                        sim.populacao.mortos_de_fome(), ocupados, static_cast<int>(sim.transporte.carregadores().size()),
-                        GetFPS()),
-             GetScreenWidth() - 690, 12, 16, LIGHTGRAY);
+    DrawText(TextFormat("população %d | sem casa %d | sem trabalho %d | mortos %d", sim.populacao.total(),
+                        sim.populacao.sem_casa(), sim.populacao.desempregados(), sim.populacao.mortos_de_fome()),
+             12, 40, 16, LIGHTGRAY);
+
+    const int comida = sim.cidade.estoque_total(TipoItem::Comida);
+    const int dias = sim.populacao.total() > 0 ? comida / sim.populacao.total() : 0;
+    const Color cor_comida = dias < 30 ? Color{ 240, 110, 90, 255 }
+                           : dias < 90 ? GOLD
+                                      : LIGHTGRAY;
+    DrawText(TextFormat("comida %d (%d dias)", comida, dias), 455, 40, 16, cor_comida);
+    DrawText(TextFormat("carregadores %d/%d | %d fps", ocupados,
+                        static_cast<int>(sim.transporte.carregadores().size()), GetFPS()),
+             GetScreenWidth() - 250, 40, 16, LIGHTGRAY);
 
     if (mapa.dentro(sob_cursor.x, sob_cursor.y)) {
         DrawText(TextFormat("(%d, %d) %s", sob_cursor.x, sob_cursor.y,
                             nome_do_terreno(mapa.terreno(sob_cursor.x, sob_cursor.y))),
-                 460, 12, 16, RAYWHITE);
+                 390, 12, 16, RAYWHITE);
     }
     if (!dica.empty()) DrawText(dica.c_str(), 680, 12, 16, Color{ 255, 220, 160, 255 });
 }

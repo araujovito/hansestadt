@@ -96,6 +96,8 @@ public:
     // Falham sem mudar nada se não houver espaço ou quantidade suficiente.
     bool adicionar(IdEdificio id, IdItem item, int quantidade);
     bool retirar(IdEdificio id, IdItem item, int quantidade);
+    int estoque_total(IdItem item) const;
+    int estoque_total(TipoItem tipo) const;
 
 private:
     bool atende_requisito(const Requisito& r, Celula origem, int largura, int altura) const;

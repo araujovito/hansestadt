@@ -97,6 +97,10 @@ pelo mesmo sistema de transporte das oficinas e consomem uma unidade por
 morador a cada dia. Após 30 dias consecutivos sem comer, o morador morre e
 libera sua vaga na casa e no trabalho.
 
+A segunda linha da barra superior resume população, sem-casa, desempregados,
+mortes, estoque total de comida e autonomia em dias. A autonomia fica
+amarela abaixo de 90 dias e vermelha abaixo de 30.
+
 A partida começa pausada no tempo, com apenas o armazém disponível. Ao
 posicioná-lo, os colonos descarregam 480 porções de pão e o restante da barra
 de construção é liberado.

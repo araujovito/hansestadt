@@ -182,6 +182,22 @@ bool Cidade::retirar(IdEdificio id, IdItem item, int quantidade) {
     return true;
 }
 
+int Cidade::estoque_total(IdItem item) const {
+    int total = 0;
+    for (const Edificio& e : edificios_) {
+        if (e.ativo) total += e.estoque[item];
+    }
+    return total;
+}
+
+int Cidade::estoque_total(TipoItem tipo) const {
+    int total = 0;
+    for (IdItem item = 0; item < conteudo_->itens.size(); ++item) {
+        if (conteudo_->itens[item].tipo == tipo) total += estoque_total(item);
+    }
+    return total;
+}
+
 bool Cidade::tem_estrada(Celula c) const {
     return mapa_.dentro(c.x, c.y) && estradas_[indice(c)] != 0;
 }

@@ -56,6 +56,19 @@ TESTE("estoque: retirar não deixa ficar negativo") {
     VERIFICAR(c.edificio(d).estoque[item("tora")] == 0);
 }
 
+TESTE("estoque: soma itens e toda a comida da cidade") {
+    Cidade c = cidade_vazia();
+    const IdEdificio a = *c.construir_edificio(tipo("deposito"), { 1, 1 });
+    const IdEdificio b = *c.construir_edificio(tipo("deposito"), { 4, 1 });
+    c.adicionar(a, item("pao"), 3);
+    c.adicionar(b, item("pao"), 2);
+    c.adicionar(b, item("tora"), 1);
+    VERIFICAR(c.estoque_total(item("pao")) == 5);
+    VERIFICAR(c.estoque_total(TipoItem::Comida) == 5);
+    c.demolir({ 4, 1 });
+    VERIFICAR(c.estoque_total(TipoItem::Comida) == 3);
+}
+
 TESTE("estoque: edifício demolido não recebe nada") {
     Cidade c = cidade_vazia();
     const IdEdificio d = *c.construir_edificio(tipo("deposito"), { 1, 1 });

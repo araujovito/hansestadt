@@ -147,9 +147,9 @@ agora, estamentos depois):
    inicial.~~ Concluído, com 480 porções de pão após o balanceamento.
 6. ~~Ferramenta de balanceamento em Python (simula anos sem janela, plota
    produção × consumo por mês) e ajuste do TOML.~~ Concluído.
-7. **Agora:** interface de acompanhamento: estoque total, "comida para N
-   dias", avisos.
-8. Teste do marco: a vila atravessa o inverno 1150–51 com a configuração
+7. ~~Interface de acompanhamento: estoque total, "comida para N dias",
+   avisos.~~ Concluído.
+8. **Agora:** teste do marco: a vila atravessa o inverno 1150–51 com a configuração
    certa e passa fome sem a fazenda.
 
 Depois: salvar/carregar, lenhador desmatando, eventos históricos, evolução
@@ -172,6 +172,9 @@ de fase, arte, estamentos.
 
 ### 2026-10-03
 
+- **Indicadores da vila**: a barra ganhou uma segunda linha para população,
+  moradia, emprego, mortes, comida total e autonomia; a cor avisa abaixo de
+  90 e 30 dias. 90 testes.
 - **Balanceamento agregado**: `make balance` lê os TOMLs, simula a economia
   diária e gera CSV e SVG mensais. O cenário-base de três anos produz 6.804
   porções para 6.222 consumidas, sem falta; padaria, pesca, pocilga, estoques

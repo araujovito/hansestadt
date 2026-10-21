@@ -315,6 +315,14 @@ documentos não voltarem a divergir.
 
 ## Histórico
 
+### 2026-10-21
+
+- **Repositório público e licença MIT.** O projeto continua pausado. O
+  `LICENSE` cobre o código e o conteúdo deste repositório. Os assets da
+  Kenney (CC0), a raylib (zlib) e o toml++ (MIT) não estão versionados:
+  os scripts em `scripts/` baixam esses arquivos, e cada um segue a
+  própria licença.
+
 ### 2026-10-03 (noite)
 
 - **Técnicas, gerações, trabalho infantil e fome por profissão**, a pedido
